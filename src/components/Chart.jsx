@@ -8,6 +8,7 @@
 import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import useResizeObserver from "../hooks/useResizeObserver";
+import csvUrl from "../assets/banana-production.csv?url";
 
 export default function Chart({ target, others = [], guesses = [] }) {
     /* ----- refs & state ----- */
@@ -22,8 +23,8 @@ export default function Chart({ target, others = [], guesses = [] }) {
 
     /* load data once */
     useEffect(() => {
-        d3.csv("/banana-production.csv", d3.autoType).then(setData);
-    }, []);
+        d3.csv(csvUrl, d3.autoType).then(setData);
+        }, []);
 
     /* redraw on data / size / props change */
     useEffect(() => {
