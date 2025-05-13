@@ -61,7 +61,7 @@ export default function Guesses({
 
             /* Alphabetical fallback */
             return a.localeCompare(b);
-        });
+        }).reverse();
 
     /* — Submit guess — */
     const submit = (e) => {
@@ -99,13 +99,9 @@ export default function Guesses({
                 Guesses: <span className="font-semibold">{guesses.length}</span> / {max}
             </p>
 
-            <form onSubmit={submit} className="w-6/7 mx-auto relative">
-                <label htmlFor="guess-input" className="sr-only">
-                    Enter Guess
-                </label>
-
-                {/* ─────────── Input + button ─────────── */}
+            <form onSubmit={submit} className="w-6/7 mx-auto">
                 <div className="relative">
+                    {/* ─────────── Input + button ─────────── */}
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg
                             className="w-4 h-4 text-gray-500"
@@ -134,13 +130,12 @@ export default function Guesses({
                             setError("");
                         }}
                         onKeyDown={(e) => {
-                            /* Enter picks best suggestion if current text isn't valid */
                             if (e.key === "Enter" && !isValidCountry && filtered.length) {
                                 e.preventDefault();
-                                selectSuggestion(filtered[0]);
+                                selectSuggestion(filtered[filtered.length - 1]);   // <── last one
                             }
                         }}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 100)} // delay for click
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
                         className={`block w-full p-4 pl-10 text-sm rounded-lg bg-gray-50 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 outline-none ${
                             trimmed && !isValidCountry ? "border border-red-500" : "border border-gray-300"
                         }`}
@@ -158,24 +153,27 @@ export default function Guesses({
                     >
                         Guess
                     </button>
-                </div>
 
-                {/* ─────────── Suggestions ─────────── */}
-                {showSuggestions && filtered.length > 0 && (
-                    <ul className="absolute z-50 w-full max-h-60 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto">
-                        {filtered.map((country, idx) => (
-                            <li
-                                key={country}
-                                className={`cursor-pointer py-4 px-4 text-sm hover:bg-gray-100 ${
-                                    idx === 0 ? "bg-emerald-50 font-semibold" : "text-gray-800"
-                                }`}
-                                onMouseDown={() => selectSuggestion(country)}
-                            >
-                                {country}
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                    {/* ─────────── Suggestions ─────────── */}
+                    {showSuggestions && filtered.length > 0 && (
+                        <ul className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
+                                       bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto">
+                            {filtered.map((country, idx) => (
+                                <li
+                                    key={country}
+                                    className={`cursor-pointer py-4 px-4 text-sm hover:bg-gray-100 ${
+                                        idx === filtered.length - 1        // <── last one
+                                            ? "bg-emerald-50 font-semibold"
+                                            : "text-gray-800"
+                                    }`}
+                                    onMouseDown={() => selectSuggestion(country)}
+                                >
+                                    {country}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </form>
 
             {/* ─────────── Error ─────────── */}

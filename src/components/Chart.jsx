@@ -67,7 +67,7 @@ export default function Chart({ target, others = [], guesses = [], guessColours 
         const grouped  = d3.group(data.filter(d => wanted.includes(d.Country)), d => d.Country);
 
         /* ----- layout ----- */
-        const m = { top: 120, right: 60, bottom: 40, left: 30 };
+        const m = { top: 120, right: 30, bottom: 40, left: 30 };
         const innerW = width  - m.left - m.right;
         const innerH = height - m.top  - m.bottom;
 
@@ -189,59 +189,6 @@ export default function Chart({ target, others = [], guesses = [], guessColours 
                 .transition().duration(1500)
                 .attr("stroke-dashoffset", 0);
         });
-
-        /* ----- labels & leader ticks for guesses ----- */
-        const labelPad = 6;
-        const guessRows = guesses
-            .map(c => [c, grouped.get(c)])
-            .filter(([, v]) => v)
-            .sort(([, a], [, b]) => d3.ascending(a.at(-1).Production, b.at(-1).Production));
-
-        const labels = g.selectAll("text.guess-label").data(guessRows, d => d[0]);
-
-        labels.exit().remove();
-
-        labels
-            .attr("x", innerW + labelPad)
-            .attr("y", ([, r]) => y(r.at(-1).Production / meta.scale))
-            .text(([c]) => c);
-
-        labels.enter()
-            .append("text")
-            .attr("class", "guess-label")
-            .attr("fill", ([c]) => colourOf(c))
-            .attr("font-size", 14)
-            .attr("font-weight", 700)
-            .attr("text-anchor", "start")
-            .attr("x", innerW + labelPad)
-            .attr("y", ([, r]) => y(r.at(-1).Production / meta.scale))
-            .attr("dy", "0.32em")
-            .attr("opacity", 0)
-            .text(([c]) => c)
-            .transition().duration(1500)
-            .attr("opacity", 1);
-
-        const ticks = g.selectAll("line.leader-tick").data(guessRows, d => d[0]);
-
-        ticks.exit().remove();
-
-        ticks
-            .attr("x1", ([, r]) => x(r.at(-1).Year))
-            .attr("x2", innerW + labelPad - 2)
-            .attr("y1", ([, r]) => y(r.at(-1).Production / meta.scale))
-            .attr("y2", ([, r]) => y(r.at(-1).Production / meta.scale));
-
-        ticks.enter()
-            .append("line")
-            .attr("class", "leader-tick")
-            .attr("stroke", "#2E74BA")
-            .attr("stroke-width", 1)
-            .attr("x1", ([, r]) => x(r.at(-1).Year))
-            .attr("x2", ([, r]) => x(r.at(-1).Year))
-            .attr("y1", ([, r]) => y(r.at(-1).Production / meta.scale))
-            .attr("y2", ([, r]) => y(r.at(-1).Production / meta.scale))
-            .transition().duration(1500)
-            .attr("x2", innerW + labelPad - 2);
 
         /* ----- heading & subtitle ----- */
         const heading = svg.selectAll("g.chart-heading").data([null]);
