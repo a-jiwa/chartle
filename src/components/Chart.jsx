@@ -112,7 +112,7 @@ export default function Chart({ target, others = [], guesses = [], guessColours 
             .call(
                 d3.axisBottom(x)
                     .ticks(5)
-                    .tickFormat(d => String(d).slice(-2))
+                    .tickFormat(d => String(d))
             )
             .selectAll(".tick text")
             .attr("font-size", 18)
@@ -147,10 +147,10 @@ export default function Chart({ target, others = [], guesses = [], guessColours 
 
         /* ----- styling helpers ----- */
         const colourOf = country => {
-            if (country === target) return "#b8261a";      // red target
-            const idx = guesses.indexOf(country);          // 0,1,2,…
+            if (country === target) return "#c43333";
+            const idx = guesses.indexOf(country);
             if (idx !== -1) return guessColours[idx] ?? "#2A74B3";
-            return "#757575";                              // background grey
+            return "#757575";
         };
 
         const widthOf  = c =>
