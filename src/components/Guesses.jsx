@@ -95,7 +95,11 @@ export default function Guesses({
 
     return (
         <div className="h-full flex flex-col items-center justify-center gap-4 p-4">
-            <p className="text-lg text-gray-700">
+            <p className="text-m font-medium text-gray-800 pt-0.5">
+                Guess the country in{" "}
+                <span className="text-red-600 font-semibold">red</span>
+            </p>
+            <p className="text-m text-gray-700">
                 Guesses: <span className="font-semibold">{guesses.length}</span> / {max}
             </p>
 
