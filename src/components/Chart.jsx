@@ -79,7 +79,7 @@ export default function Chart({ target, others = [], guesses = [] }) {
             .call(
                 d3.axisBottom(x)
                     .ticks(5)
-                    .tickFormat(d => String(d).slice(-2))
+                    .tickFormat(d => String(d))
             )
             .selectAll(".tick text")
             .attr("font-size", 18)
@@ -114,7 +114,7 @@ export default function Chart({ target, others = [], guesses = [] }) {
 
         /* ----- styling helpers ----- */
         const colourOf = c =>
-            c === target          ? "#b8261a" :
+            c === target          ? "#c43333" :
                 guesses.includes(c)   ? "#2A74B3" :
                     "#757575";
 
