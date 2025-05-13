@@ -1,18 +1,34 @@
 /* ─── src/App.jsx ─────────────────────────────────────────── */
 
-import { useState } from "react";
-import Header   from "./components/Header";
+import { useState, useEffect } from "react";
 import Chart    from "./components/Chart";
 import Guesses  from "./components/Guesses";
 import WinModal from "./components/WinModal";
 
-const TARGET       = "India";
-const TARGET_KEY   = TARGET.toLowerCase();   // canonical form
-const MAX_GUESSES  = 5;
+import { COUNTRIES } from "./data/countries";
+
+const metaUrl    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/test.json";
+const MAX_GUESSES = 5;
 
 export default function App() {
-    const [guesses, setGuesses] = useState([]);
-    const [status,  setStatus]  = useState("playing"); // 'playing' | 'won' | 'lost' | 'done'
+    const [meta,     setMeta]     = useState(null);
+    const [guesses,  setGuesses]  = useState([]);
+    const [status,   setStatus]   = useState("playing"); // 'playing' | 'won' | 'lost' | 'done'
+
+    /* pull the config once */
+    useEffect(() => {
+        fetch(metaUrl)
+            .then(r => r.json())
+            .then(setMeta);
+    }, []);
+
+    /* show nothing until config arrives */
+    if (!meta) return null;
+
+    const guessColours     = meta.guessColours;
+
+    const target     = meta.target;        // e.g. "India"
+    const targetKey  = target.toLowerCase();
 
     /** add a guess (case-insensitive, max 5, ignore dups) */
     const handleAddGuess = (raw) => {
@@ -21,17 +37,20 @@ export default function App() {
         const text = raw.trim();
         if (!text) return;
 
-        const key   = text.toLowerCase();                       // normalised key
-        const title = text.replace(/\b\w/g, c => c.toUpperCase()); // simple Title-Case
+        const key   = text.toLowerCase();
+        const title = text.replace(/\b\w/g, c => c.toUpperCase());
+
+        const isValid = COUNTRIES.some(c => c.toLowerCase() === key);
+        if (!isValid) return; // ignore invalid guesses
 
         setGuesses(prev => {
             if (prev.some(g => g.toLowerCase() === key) || prev.length >= MAX_GUESSES) {
-                return prev;                                        // duplicate or out of turns
+                return prev;
             }
 
             const next = [...prev, title];
 
-            if (key === TARGET_KEY)          setStatus("won");
+            if (key === targetKey)          setStatus("won");
             else if (next.length >= MAX_GUESSES) setStatus("lost");
 
             return next;
@@ -40,15 +59,14 @@ export default function App() {
 
     return (
         <div className="h-full flex flex-col items-center">
-            {/*<Header />*/}
-
             <div className="flex flex-col w-full max-w-[1000px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
                     <Chart
-                        target={TARGET}
-                        others={["Indonesia", "Ecuador", "Nigeria", "Philippines", "Angola"]}
+                        target={target}
+                        others={meta.others ?? []}
                         guesses={guesses}
+                        guessColours={guessColours}
                     />
                 </div>
 
@@ -59,6 +77,7 @@ export default function App() {
                         onAddGuess={handleAddGuess}
                         status={status}
                         max={MAX_GUESSES}
+                        guessColours={guessColours}
                     />
                 </div>
             </div>

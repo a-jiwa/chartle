@@ -8,30 +8,62 @@
 import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import useResizeObserver from "../hooks/useResizeObserver";
-import csvUrl from "../assets/banana-production.csv?url";
 
-export default function Chart({ target, others = [], guesses = [] }) {
+const csvUrl  = "https://raw.githubusercontent.com/a-jiwa/chartle-data/main/data/cleaned_banana_production.csv";
+const metaUrl = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/test.json";
+
+export default function Chart({ target, others = [], guesses = [], guessColours = [] }) {
     /* ----- refs & state ----- */
     const wrapperRef = useRef(null);
     const svgRef     = useRef(null);
     const { width, height } = useResizeObserver(wrapperRef);
     const [data, setData]   = useState(null);
+    const [meta, setMeta]   = useState(null)
     const prevMaxRef        = useRef(null);   // last y‑axis max
 
-    /* scale raw tonnes → millions */
-    const SCALE = 1e6;
+    /*
+     Pivots each year-row into {Country, Year, Production} objects, then draws as before. Nothing else in the
+     rendering logic changes.
 
-    /* load data once */
+     This should be simplified.
+    */
+
     useEffect(() => {
-        d3.csv(csvUrl, d3.autoType).then(setData);
-        }, []);
+        Promise.all([d3.csv(csvUrl, d3.autoType), d3.json(metaUrl)]).then(
+            ([wideRows, json]) => {
+                const longRows = wideRows.flatMap(row =>
+                    Object.entries(row)
+                        .filter(([k, v]) => k !== "Year" && v !== "" && v != null)
+                        .map(([country, value]) => ({
+                            Country:     country,
+                            Year:        +row.Year,
+                            Production:  +value
+                        }))
+                );
+                setData(longRows);
+                setMeta(json);
+            }
+        );
+    }, []);
+
+    // pick the 8 biggest producers in the most recent year, ignoring the target
+    const autoOthers = (rows) => {
+        const latestYear = d3.max(rows, d => d.Year);
+        return rows
+            .filter(d => d.Year === latestYear)
+            .sort((a, b) => d3.descending(a.Production, b.Production))
+            .map(d => d.Country)
+            .filter(c => c !== target)      // don’t duplicate the red line
+            .slice(0, 8);                   // keep the top 8
+    };
 
     /* redraw on data / size / props change */
     useEffect(() => {
-        if (!data || !target || width === 0 || height === 0) return;
+        if (!data || !meta || !target || width === 0 || height === 0) return;
 
         /* ----- filter & group required countries ----- */
-        const wanted   = [target, ...others, ...guesses];
+        const baseOthers = others.length ? others : autoOthers(data);
+        const wanted     = [target, ...baseOthers, ...guesses];
         const grouped  = d3.group(data.filter(d => wanted.includes(d.Country)), d => d.Country);
 
         /* ----- layout ----- */
@@ -44,7 +76,7 @@ export default function Chart({ target, others = [], guesses = [] }) {
             .domain(d3.extent(data, d => d.Year))
             .range([0, innerW]);
 
-        const yMax = d3.max(grouped, ([, rows]) => d3.max(rows, d => d.Production / SCALE));
+        const yMax = d3.max(grouped, ([, rows]) => d3.max(rows, d => d.Production / meta.scale));
         const y    = d3.scaleLinear()
             .domain([0, yMax]).nice()
             .range([innerH, 0]);
@@ -56,7 +88,7 @@ export default function Chart({ target, others = [], guesses = [] }) {
         const lineGen = d3.line()
             .curve(d3.curveCatmullRom.alpha(0.5))
             .x(d => x(d.Year))
-            .y(d => y(d.Production / SCALE));
+            .y(d => y(d.Production / meta.scale));
 
         /* ----- SVG root & main group ----- */
         const svg = d3.select(svgRef.current)
@@ -114,10 +146,12 @@ export default function Chart({ target, others = [], guesses = [] }) {
         }
 
         /* ----- styling helpers ----- */
-        const colourOf = c =>
-            c === target          ? "#b8261a" :
-                guesses.includes(c)   ? "#2A74B3" :
-                    "#757575";
+        const colourOf = country => {
+            if (country === target) return "#b8261a";      // red target
+            const idx = guesses.indexOf(country);          // 0,1,2,…
+            if (idx !== -1) return guessColours[idx] ?? "#2A74B3";
+            return "#757575";                              // background grey
+        };
 
         const widthOf  = c =>
             c === target          ? 4 :
@@ -169,18 +203,18 @@ export default function Chart({ target, others = [], guesses = [] }) {
 
         labels
             .attr("x", innerW + labelPad)
-            .attr("y", ([, r]) => y(r.at(-1).Production / SCALE))
+            .attr("y", ([, r]) => y(r.at(-1).Production / meta.scale))
             .text(([c]) => c);
 
         labels.enter()
             .append("text")
             .attr("class", "guess-label")
-            .attr("fill", "#2A74B3")
+            .attr("fill", ([c]) => colourOf(c))
             .attr("font-size", 14)
             .attr("font-weight", 700)
             .attr("text-anchor", "start")
             .attr("x", innerW + labelPad)
-            .attr("y", ([, r]) => y(r.at(-1).Production / SCALE))
+            .attr("y", ([, r]) => y(r.at(-1).Production / meta.scale))
             .attr("dy", "0.32em")
             .attr("opacity", 0)
             .text(([c]) => c)
@@ -194,8 +228,8 @@ export default function Chart({ target, others = [], guesses = [] }) {
         ticks
             .attr("x1", ([, r]) => x(r.at(-1).Year))
             .attr("x2", innerW + labelPad - 2)
-            .attr("y1", ([, r]) => y(r.at(-1).Production / SCALE))
-            .attr("y2", ([, r]) => y(r.at(-1).Production / SCALE));
+            .attr("y1", ([, r]) => y(r.at(-1).Production / meta.scale))
+            .attr("y2", ([, r]) => y(r.at(-1).Production / meta.scale));
 
         ticks.enter()
             .append("line")
@@ -204,8 +238,8 @@ export default function Chart({ target, others = [], guesses = [] }) {
             .attr("stroke-width", 1)
             .attr("x1", ([, r]) => x(r.at(-1).Year))
             .attr("x2", ([, r]) => x(r.at(-1).Year))
-            .attr("y1", ([, r]) => y(r.at(-1).Production / SCALE))
-            .attr("y2", ([, r]) => y(r.at(-1).Production / SCALE))
+            .attr("y1", ([, r]) => y(r.at(-1).Production / meta.scale))
+            .attr("y2", ([, r]) => y(r.at(-1).Production / meta.scale))
             .transition().duration(1500)
             .attr("x2", innerW + labelPad - 2);
 
@@ -223,7 +257,7 @@ export default function Chart({ target, others = [], guesses = [] }) {
             .attr("font-size", 24)
             .attr("font-weight", 700)
             .attr("fill", "#111827")
-            .text("Banana production");
+            .text(meta.title);
 
         hEnter.append("text")
             .attr("class", "subtitle")
@@ -231,7 +265,7 @@ export default function Chart({ target, others = [], guesses = [] }) {
             .attr("font-size", 16)
             .attr("fill", "#374151")
             .attr("text-anchor", "start")
-            .text("In million tonnes per year");
+            .text(meta.subtitle);
 
         /* ----- source note ----- */
         const source = svg.selectAll("text.chart-source").data([null]);
@@ -245,8 +279,8 @@ export default function Chart({ target, others = [], guesses = [] }) {
             .merge(source)
             .attr("x", m.left)
             .attr("y", height - 6)
-            .text("Source: FAO");
-    }, [data, width, height, target, others, guesses]);
+            .text(meta.source);
+    }, [data, meta, width, height, target, others, guesses]);
 
     return (
         <div ref={wrapperRef} className="w-full h-full p-4">
