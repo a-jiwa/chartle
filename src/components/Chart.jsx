@@ -158,6 +158,12 @@ export default function Chart({ target, others = [], guesses = [], guessColours 
                 guesses.includes(c)   ? 3 :
                     2.5;
 
+        const opacityOf = c =>
+            c === target      ? 1 :
+                guesses.includes(c) ? 1 :
+                    0.4;
+
+
         /* ----- draw / update lines ----- */
         const paths = g.selectAll("path.country-line")
             .data(Array.from(grouped), d => d[0]);
@@ -176,7 +182,7 @@ export default function Chart({ target, others = [], guesses = [], guessColours 
             .attr("fill", "none")
             .attr("stroke", ([c]) => colourOf(c))
             .attr("stroke-width", ([c]) => widthOf(c))
-            .attr("opacity", ([c]) => (c === target ? 1 : 0.7))
+            .attr("opacity", ([c]) => opacityOf(c))
             .attr("d", ([, rows]) => lineGen(rows));
 
         // animated reveal for fresh guesses
@@ -186,9 +192,15 @@ export default function Chart({ target, others = [], guesses = [], guessColours 
             d3.select(this)
                 .attr("stroke-dasharray", `${length} ${length}`)
                 .attr("stroke-dashoffset", length)
-                .transition().duration(1500)
+                .transition().duration(2000)
                 .attr("stroke-dashoffset", 0);
         });
+
+        /* ─── keep guess lines above everything else ─── */
+        const allPaths = paths.merge(entered);
+        allPaths
+            .filter(function ([c]) { return guesses.includes(c); })
+            .raise();
 
         /* ----- heading & subtitle ----- */
         const heading = svg.selectAll("g.chart-heading").data([null]);
