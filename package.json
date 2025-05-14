@@ -12,11 +12,11 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-
   "dependencies": {
+    "d3": "^7.9.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "d3": "^7.9.0"
+    "react-ga4": "^2.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

@@ -6,14 +6,21 @@ import Guesses  from "./components/Guesses";
 import WinModal from "./components/WinModal";
 
 import { COUNTRIES } from "./data/countries";
+import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
 const metaUrl    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/test.json";
 const MAX_GUESSES = 5;
+
 
 export default function App() {
     const [meta,     setMeta]     = useState(null);
     const [guesses,  setGuesses]  = useState([]);
     const [status,   setStatus]   = useState("playing"); // 'playing' | 'won' | 'lost' | 'done'
+
+    useEffect(() => {
+        initGA();
+        trackPageView();
+    }, []);
 
     /* pull the config once */
     useEffect(() => {
@@ -50,8 +57,16 @@ export default function App() {
 
             const next = [...prev, title];
 
-            if (key === targetKey)          setStatus("won");
-            else if (next.length >= MAX_GUESSES) setStatus("lost");
+            // Track the guess
+            trackGuess(title, next.length);
+
+            if (key === targetKey) {
+                setStatus("won");
+                trackGameEnd("won", next.length, target);
+            } else if (next.length >= MAX_GUESSES) {
+                setStatus("lost");
+                trackGameEnd("lost", next.length, target);
+            }
 
             return next;
         });
