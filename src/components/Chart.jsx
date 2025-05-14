@@ -156,10 +156,10 @@ export default function Chart({
             .attr("transform", `translate(0,${innerH})`)
             .call(d3.axisBottom(x).ticks(5).tickFormat((d) => String(d)))
             .selectAll(".tick text")
-            .attr("font-size", 16)
+            .attr("font-size", 18)
             .attr("font-weight", 500)
             .attr("fill", "#111827")
-            .attr("dy", "1em"); // increased vertical padding for x-axis labels
+            .attr("dy", "0.8em"); // increased vertical padding for x-axis labels
 
         const yAxis = (sel) => {
             sel.call(
@@ -171,7 +171,7 @@ export default function Chart({
                     .tickFormat((d) => d)
             );
             sel.selectAll(".tick text")
-                .attr("font-size", 16)
+                .attr("font-size", 18)
                 .attr("font-weight", 500)
                 .attr("fill", "#111827");
             sel.selectAll(".domain").attr("stroke-opacity", 0);
