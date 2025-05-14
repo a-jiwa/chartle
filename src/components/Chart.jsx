@@ -66,7 +66,7 @@ export default function Chart({
         );
 
         /* ----- layout ----- */
-        const m = { top: 90, right: 30, bottom: 50, left: 30 };
+        const m = { top: 90, right: 30, bottom: 60, left: 30 };
         const innerW = width - m.left - m.right;
         const innerH = height - m.top - m.bottom;
 
@@ -151,10 +151,11 @@ export default function Chart({
             .attr("transform", `translate(0,${innerH})`)
             .call(d3.axisBottom(x).ticks(5).tickFormat((d) => String(d)))
             .selectAll(".tick text")
-            .attr("font-size", 18)
+            .attr("font-size", 17)
             .attr("font-weight", 500)
             .attr("fill", "#111827")
-            .attr("dy", "0.8em"); // increased vertical padding for x-axis labels
+            .attr("dy", "0.95em") // increased vertical padding for x-axis labels
+            .style("font-family", "Open Sans, sans-serif");
 
         const yAxis = (sel) => {
             sel.call(
@@ -166,9 +167,10 @@ export default function Chart({
                     .tickFormat((d) => d)
             );
             sel.selectAll(".tick text")
-                .attr("font-size", 18)
+                .attr("font-size", 17)
                 .attr("font-weight", 500)
-                .attr("fill", "#111827");
+                .attr("fill", "#111827")
+                .style("font-family", "Open Sans, sans-serif");
             sel.selectAll(".domain").attr("stroke-opacity", 0);
             sel.selectAll(".tick line")
                 .attr("stroke", "#d1d5db")
