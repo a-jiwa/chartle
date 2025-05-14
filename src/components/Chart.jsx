@@ -46,9 +46,16 @@ export default function Chart({
     const autoOthers = (rows) => {
         const latestYear = d3.max(rows, (d) => d.Year);
         return rows
-            .filter((d) => d.Year === latestYear)
+            .filter(
+                (d) =>
+                    d.Year === latestYear &&
+                    d.Country !== target &&
+                    typeof d.Production === "number" &&
+                    !isNaN(d.Production)
+            )
             .sort((a, b) => d3.descending(a.Production, b.Production))
             .map((d) => d.Country)
+            .filter((c, i, arr) => arr.indexOf(c) === i) // remove duplicates
             .filter((c) => c !== target) // don’t duplicate the red line
             .slice(0, 8); // keep the top 8
     };
@@ -92,6 +99,7 @@ export default function Chart({
         /* ----- line generator ----- */
         const lineGen = d3
             .line()
+            .defined(d => typeof d.Production === "number" && !isNaN(d.Production))
             .curve(d3.curveCatmullRom.alpha(0.5))
             .x((d) => x(d.Year))
             .y((d) => y(d.Production / meta.scale));
