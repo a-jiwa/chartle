@@ -115,6 +115,7 @@ export const COUNTRIES = [
     "Polynesia",
     "Portugal",
     "Puerto Rico",
+    "Qatar",
     "Reunion",
     "Romania",
     "Rwanda",
