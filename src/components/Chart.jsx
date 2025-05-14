@@ -215,21 +215,34 @@ export default function Chart({
         bgPaths.exit().remove();
 
         /* ----- draw / update GUESSES (animated) ----- */
-        const guessData = lineData.filter((d) => d.id.endsWith("-guess"));
+       const guessData = lineData.filter((d) => d.id.endsWith("-guess"));
 
-        const guessPaths = gGuess.selectAll("path").data(guessData, (d) => d.id);
+        // Bind to groups instead of paths
+        const guessGroups = gGuess.selectAll("g.guess-line").data(guessData, d => d.id);
 
-        const guessEnter = guessPaths
-            .enter()
-            .append("path")
+        // ENTER — one group per guess line
+        const guessEnter = guessGroups.enter()
+            .append("g")
+            .attr("class", "guess-line");
+
+        // OUTLINE path
+        const outlinePath = guessEnter.append("path")
             .attr("fill", "none")
-            .attr("stroke", (d) => d.stroke)
-            .attr("stroke-width", (d) => d.width)
-            .attr("opacity", (d) => d.opacity)
-            .attr("d", (d) => lineGen(d.rows));
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", d => d.width + 2.5)
+            .attr("opacity", 1)
+            .attr("d", d => lineGen(d.rows));
 
-        // animated reveal for *new* guesses
-        guessEnter.each(function () {
+        // MAIN path
+        const mainPath = guessEnter.append("path")
+            .attr("fill", "none")
+            .attr("stroke", d => d.stroke)
+            .attr("stroke-width", d => d.width)
+            .attr("opacity", d => d.opacity)
+            .attr("d", d => lineGen(d.rows));
+
+        // ANIMATION: apply to both paths
+        guessEnter.selectAll("path").each(function () {
             const length = this.getTotalLength();
             d3.select(this)
                 .attr("stroke-dasharray", `${length} ${length}`)
@@ -239,14 +252,21 @@ export default function Chart({
                 .attr("stroke-dashoffset", 0);
         });
 
-        guessEnter
-            .merge(guessPaths)
-            .attr("stroke", (d) => d.stroke)
-            .attr("stroke-width", (d) => d.width)
-            .attr("opacity", (d) => d.opacity)
-            .attr("d", (d) => lineGen(d.rows));
+        // UPDATE — keep both paths in sync
+        guessGroups.select("path:nth-child(1)")
+            .attr("stroke-width", d => d.width + 1.5)
+            .attr("d", d => lineGen(d.rows));
 
-        guessPaths.exit().remove();
+        guessGroups.select("path:nth-child(2)")
+            .attr("stroke", d => d.stroke)
+            .attr("stroke-width", d => d.width)
+            .attr("opacity", d => d.opacity)
+            .attr("d", d => lineGen(d.rows));
+
+        // EXIT
+        guessGroups.exit().remove();
+
+
 
         /* ----- heading & subtitle ----- */
         const heading = svg.selectAll("g.chart-heading").data([null]);
