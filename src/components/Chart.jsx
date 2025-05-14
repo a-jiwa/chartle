@@ -9,12 +9,9 @@ import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import useResizeObserver from "../hooks/useResizeObserver";
 
-const csvUrl =
-    "https://raw.githubusercontent.com/a-jiwa/chartle-data/main/data/cleaned_banana_production.csv";
-const metaUrl =
-    "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/test.json";
-
 export default function Chart({
+                                  csvUrl,
+                                  meta,
                                   target,
                                   others = [],
                                   guesses = [],
@@ -25,27 +22,25 @@ export default function Chart({
     const svgRef = useRef(null);
     const { width, height } = useResizeObserver(wrapperRef);
     const [data, setData] = useState(null);
-    const [meta, setMeta] = useState(null);
     const prevMaxRef = useRef(null); // last y-axis max
 
     /* --- load data --- */
     useEffect(() => {
-        Promise.all([d3.csv(csvUrl, d3.autoType), d3.json(metaUrl)]).then(
-            ([wideRows, json]) => {
-                const longRows = wideRows.flatMap((row) =>
-                    Object.entries(row)
-                        .filter(([k, v]) => k !== "Year" && v !== "" && v != null)
-                        .map(([country, value]) => ({
-                            Country: country,
-                            Year: +row.Year,
-                            Production: +value,
-                        }))
-                );
-                setData(longRows);
-                setMeta(json);
-            }
-        );
-    }, []);
+        if (!csvUrl) return;
+
+        d3.csv(csvUrl, d3.autoType).then((wideRows) => {
+            const longRows = wideRows.flatMap((row) =>
+                Object.entries(row)
+                    .filter(([k, v]) => k !== "Year" && v !== "" && v != null)
+                    .map(([country, value]) => ({
+                        Country:   country,
+                        Year:      +row.Year,
+                        Production:+value,
+                    }))
+            );
+            setData(longRows);
+        });
+    }, [csvUrl]);
 
     // pick the 8 biggest producers in the most recent year, ignoring the target
     const autoOthers = (rows) => {

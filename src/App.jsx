@@ -8,14 +8,14 @@ import WinModal from "./components/WinModal";
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
-const metaUrl    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/test.json";
+const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/002_Fossil_fuel_consumption_per_capita.json";
+const CSV_URL  = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/data/cleaned_fossil-fuels-per-capita.csv";
 const MAX_GUESSES = 5;
 
-
 export default function App() {
-    const [meta,     setMeta]     = useState(null);
-    const [guesses,  setGuesses]  = useState([]);
-    const [status,   setStatus]   = useState("playing"); // 'playing' | 'won' | 'lost' | 'done'
+    const [meta,    setMeta]    = useState(null);
+    const [guesses, setGuesses] = useState([]);
+    const [status,  setStatus]  = useState("playing");   // 'playing' | 'won' | 'lost' | 'done'
 
     useEffect(() => {
         initGA();
@@ -24,7 +24,7 @@ export default function App() {
 
     /* pull the config once */
     useEffect(() => {
-        fetch(metaUrl)
+        fetch(META_URL)
             .then(r => r.json())
             .then(setMeta);
     }, []);
@@ -32,20 +32,19 @@ export default function App() {
     /* show nothing until config arrives */
     if (!meta) return null;
 
-    const guessColours     = meta.guessColours;
-
-    const target     = meta.target;        // e.g. "India"
-    const targetKey  = target.toLowerCase();
+    const guessColours = meta.guessColours;
+    const target       = meta.target;          // e.g. "India"
+    const targetKey    = target.toLowerCase();
 
     /** add a guess (case-insensitive, max 5, ignore dups) */
     const handleAddGuess = (raw) => {
         if (status !== "playing") return;
 
-        const text = raw.trim();
+        const text   = raw.trim();
         if (!text) return;
 
-        const key   = text.toLowerCase();
-        const title = text.replace(/\b\w/g, c => c.toUpperCase());
+        const key    = text.toLowerCase();
+        const title  = text.replace(/\b\w/g, c => c.toUpperCase());
 
         const isValid = COUNTRIES.some(c => c.toLowerCase() === key);
         if (!isValid) return; // ignore invalid guesses
@@ -58,15 +57,15 @@ export default function App() {
             const next = [...prev, title];
 
             // Track the guess
-            trackGuess(title, next.length);
+        trackGuess(title, next.length);
 
-            if (key === targetKey) {
-                setStatus("won");
-                trackGameEnd("won", next.length, target);
-            } else if (next.length >= MAX_GUESSES) {
-                setStatus("lost");
-                trackGameEnd("lost", next.length, target);
-            }
+        if (key === targetKey) {
+            setStatus("won");
+            trackGameEnd("won", next.length, target);
+        } else if (next.length >= MAX_GUESSES) {
+            setStatus("lost");
+            trackGameEnd("lost", next.length, target);
+        }
 
             return next;
         });
@@ -78,6 +77,8 @@ export default function App() {
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
                     <Chart
+                        csvUrl={CSV_URL}
+                        meta={meta}
                         target={target}
                         others={meta.others ?? []}
                         guesses={guesses}
