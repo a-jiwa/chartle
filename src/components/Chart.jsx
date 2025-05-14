@@ -196,23 +196,62 @@ export default function Chart({
             (d) => d.id.endsWith("-base") || d.id.endsWith("-target")
         );
 
-        const bgPaths = gBase.selectAll("path").data(bgData, (d) => d.id);
+        // Bind to groups instead of paths
+        const bgGroups = gBase.selectAll("g.bg-line").data(bgData, d => d.id);
 
-        bgPaths
-            .enter()
-            .append("path")
-            .attr("fill", "none")
-            .attr("stroke", (d) => d.stroke)
-            .attr("stroke-width", (d) => d.width)
-            .attr("opacity", (d) => d.opacity)
-            .attr("d", (d) => lineGen(d.rows))
-            .merge(bgPaths)
-            .attr("stroke", (d) => d.stroke)
-            .attr("stroke-width", (d) => d.width)
-            .attr("opacity", (d) => d.opacity)
-            .attr("d", (d) => lineGen(d.rows));
+        // ENTER — one group per line
+        const bgEnter = bgGroups.enter()
+            .append("g")
+            .attr("class", "bg-line");
 
-        bgPaths.exit().remove();
+        // Conditionally add outline only for "-target" lines
+        bgEnter.each(function (d) {
+            const g = d3.select(this);
+            if (d.id.endsWith("-target")) {
+                g.append("path")
+                    .attr("fill", "none")
+                    .attr("stroke", "#ffffff")
+                    .attr("stroke-width", d.width + 1.5)
+                    .attr("opacity", 1)
+                    .attr("d", lineGen(d.rows));
+            }
+            // Always add the main path
+            g.append("path")
+                .attr("fill", "none")
+                .attr("stroke", d.stroke)
+                .attr("stroke-width", d.width)
+                .attr("opacity", d.opacity)
+                .attr("d", lineGen(d.rows));
+        });
+
+        // UPDATE — handle both line types
+        bgGroups.each(function (d) {
+            const g = d3.select(this);
+            const paths = g.selectAll("path");
+
+            if (d.id.endsWith("-target") && paths.size() === 2) {
+                paths
+                    .filter((_, i) => i === 0) // outline path
+                    .attr("stroke-width", d.width + 2.5)
+                    .attr("d", lineGen(d.rows));
+                paths
+                    .filter((_, i) => i === 1) // main path
+                    .attr("stroke", d.stroke)
+                    .attr("stroke-width", d.width)
+                    .attr("opacity", d.opacity)
+                    .attr("d", lineGen(d.rows));
+            } else if (paths.size() === 1) {
+                paths
+                    .attr("stroke", d.stroke)
+                    .attr("stroke-width", d.width)
+                    .attr("opacity", d.opacity)
+                    .attr("d", lineGen(d.rows));
+            }
+        });
+
+        // EXIT — remove entire group
+        bgGroups.exit().remove();
+
 
         /* ----- draw / update GUESSES (animated) ----- */
        const guessData = lineData.filter((d) => d.id.endsWith("-guess"));
