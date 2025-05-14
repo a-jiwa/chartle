@@ -95,10 +95,15 @@ export default function Guesses({
 
     return (
         <div className="h-full flex flex-col items-center justify-center gap-4 p-4">
-            <p className="text-m font-medium text-gray-800 pt-0.5">
-                Guess the country in{" "}
-                <span className="text-red-600 font-semibold">red</span>
-            </p>
+            {/* ── instruction ── */}
+            {guesses.length === 0 && (
+                <p className="text-m font-medium text-gray-800 pt-0.5">
+                    Guess the country in{" "}
+                    <span className="font-semibold" style={{ color: "#c43333" }}>red</span>
+                </p>
+            )}
+
+
             <p className="text-m text-gray-700">
                 Guesses: <span className="font-semibold">{guesses.length}</span> / {max}
             </p>
@@ -187,17 +192,17 @@ export default function Guesses({
 
             {/* ─────────── Previous guesses ─────────── */}
             {guesses.length > 0 && (
-                <ul className="space-y-1">
+                <div className="flex flex-col items-center space-y-1">
                     {guesses.map((g, i) => (
-                        <li
+                        <div
                             key={g}
                             className="font-semibold"
                             style={{ color: guessColours[i] ?? "#2A74B3" }}
                         >
                             {g}
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
         </div>
     );
