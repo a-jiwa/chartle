@@ -71,7 +71,7 @@ export default function Chart({
         );
 
         /* ----- layout ----- */
-        const m = { top: 120, right: 30, bottom: 40, left: 30 };
+        const m = { top: 90, right: 30, bottom: 50, left: 30 };
         const innerW = width - m.left - m.right;
         const innerH = height - m.top - m.bottom;
 
@@ -87,7 +87,7 @@ export default function Chart({
 
         const y = d3
             .scaleLinear()
-            .domain([0, yMax]).nice()
+            .domain([0, yMax]) //.nice()
             .range([innerH, 0]);
 
         const domainChanged =
@@ -156,9 +156,10 @@ export default function Chart({
             .attr("transform", `translate(0,${innerH})`)
             .call(d3.axisBottom(x).ticks(5).tickFormat((d) => String(d)))
             .selectAll(".tick text")
-            .attr("font-size", 18)
+            .attr("font-size", 16)
             .attr("font-weight", 500)
-            .attr("fill", "#111827");
+            .attr("fill", "#111827")
+            .attr("dy", "1em"); // increased vertical padding for x-axis labels
 
         const yAxis = (sel) => {
             sel.call(
@@ -170,7 +171,7 @@ export default function Chart({
                     .tickFormat((d) => d)
             );
             sel.selectAll(".tick text")
-                .attr("font-size", 18)
+                .attr("font-size", 16)
                 .attr("font-weight", 500)
                 .attr("fill", "#111827");
             sel.selectAll(".domain").attr("stroke-opacity", 0);
@@ -287,7 +288,7 @@ export default function Chart({
             .append("text")
             .attr("class", "chart-source")
             .attr("text-anchor", "start")
-            .attr("font-size", 12)
+            .attr("font-size", 14)
             .attr("fill", "#6b7280") // gray-500
             .merge(source)
             .attr("x", m.left)
