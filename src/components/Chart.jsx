@@ -23,7 +23,7 @@ export default function Chart({
     const { width, height } = useResizeObserver(wrapperRef);
     const [data, setData] = useState(null);
     const prevMaxRef = useRef(null); // last y-axis max
-    const isPercentage = meta.unit === "Percentage";
+    const isPercentage = meta.unit === "%";
 
     /* --- load data --- */
     useEffect(() => {
@@ -74,7 +74,7 @@ export default function Chart({
         );
 
         /* ----- layout ----- */
-        const m = { top: 90, right: 30, bottom: 60, left: 30 };
+        const m = { top: 90, right: 50, bottom: 60, left: 50 };
         const innerW = width - m.left - m.right;
         const innerH = height - m.top - m.bottom;
 
