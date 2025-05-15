@@ -43,7 +43,7 @@ export default function Chart({
         });
     }, [csvUrl]);
 
-    // pick the 8 biggest producers in the most recent year, ignoring the target
+    // pick the 10 biggest producers in the most recent year, ignoring the target
     const autoOthers = (rows) => {
         const latestYear = d3.max(rows, (d) => d.Year);
         return rows
@@ -58,7 +58,7 @@ export default function Chart({
             .map((d) => d.Country)
             .filter((c, i, arr) => arr.indexOf(c) === i) // remove duplicates
             .filter((c) => c !== target) // don’t duplicate the red line
-            .slice(0, 8); // keep the top 8
+            .slice(0, 10); // keep the top 10
     };
 
     /* --- redraw on changes --- */
