@@ -192,105 +192,54 @@ export default function Chart({
             g.select(".y-axis").call(yAxis);
         }
 
-        /* ----- layers for lines ----- */
+        // Assuming these are declared earlier in your scope:
+        // let g, baseLines, guessLines, targetLine, guesses, lineGen
+
+        // Select or create base lines group
         let gBase = g.select("g.base-lines");
+        if (gBase.empty()) gBase = g.append("g").attr("class", "base-lines");
+
+        // Select or create guess lines group
         let gGuess = g.select("g.guess-lines");
+        if (gGuess.empty()) gGuess = g.append("g").attr("class", "guess-lines");
 
-        if (gBase.empty()) {
-            gBase = g.append("g").attr("class", "base-lines");
-            gGuess = g.append("g").attr("class", "guess-lines");
-        }
+        // === Base (grey) lines ===
+        const baseGroups = gBase.selectAll("g.base-line").data(baseLines, d => d.id);
+        const baseEnter = baseGroups.enter().append("g").attr("class", "base-line");
 
-        /* ----- draw / update BACKGROUND (grey + target) ----- */
-        const bgData = lineData.filter(
-            (d) => d.id.endsWith("-base") || d.id.endsWith("-target")
-        );
-
-        // Bind to groups instead of paths
-        const bgGroups = gBase.selectAll("g.bg-line").data(bgData, d => d.id);
-
-        // ENTER — one group per line
-        const bgEnter = bgGroups.enter()
-            .append("g")
-            .attr("class", "bg-line");
-
-        // Conditionally add outline only for "-target" lines
-        bgEnter.each(function (d) {
-            const g = d3.select(this);
-            if (d.id.endsWith("-target")) {
-                g.append("path")
-                    .attr("fill", "none")
-                    .attr("stroke", "#ffffff")
-                    .attr("stroke-width", d.width + 1.5)
-                    .attr("opacity", 1)
-                    .attr("d", lineGen(d.rows));
-            }
-            // Always add the main path
-            g.append("path")
-                .attr("fill", "none")
-                .attr("stroke", d.stroke)
-                .attr("stroke-width", d.width)
-                .attr("opacity", d.opacity)
-                .attr("d", lineGen(d.rows));
-        });
-
-        // UPDATE — handle both line types
-        bgGroups.each(function (d) {
-            const g = d3.select(this);
-            const paths = g.selectAll("path");
-
-            if (d.id.endsWith("-target") && paths.size() === 2) {
-                paths
-                    .filter((_, i) => i === 0) // outline path
-                    .attr("stroke-width", d.width + 2.5)
-                    .attr("d", lineGen(d.rows));
-                paths
-                    .filter((_, i) => i === 1) // main path
-                    .attr("stroke", d.stroke)
-                    .attr("stroke-width", d.width)
-                    .attr("opacity", d.opacity)
-                    .attr("d", lineGen(d.rows));
-            } else if (paths.size() === 1) {
-                paths
-                    .attr("stroke", d.stroke)
-                    .attr("stroke-width", d.width)
-                    .attr("opacity", d.opacity)
-                    .attr("d", lineGen(d.rows));
-            }
-        });
-
-        // EXIT — remove entire group
-        bgGroups.exit().remove();
-
-
-        /* ----- draw / update GUESSES (animated) ----- */
-       const guessData = lineData.filter((d) => d.id.endsWith("-guess"));
-
-        // Bind to groups instead of paths
-        const guessGroups = gGuess.selectAll("g.guess-line").data(guessData, d => d.id);
-
-        // ENTER — one group per guess line
-        const guessEnter = guessGroups.enter()
-            .append("g")
-            .attr("class", "guess-line");
-
-        // OUTLINE path
-        const outlinePath = guessEnter.append("path")
-            .attr("fill", "none")
-            .attr("stroke", "#ffffff")
-            .attr("stroke-width", d => d.width + 2.5)
-            .attr("opacity", 1)
-            .attr("d", d => lineGen(d.rows));
-
-        // MAIN path
-        const mainPath = guessEnter.append("path")
+        baseEnter.append("path")
             .attr("fill", "none")
             .attr("stroke", d => d.stroke)
             .attr("stroke-width", d => d.width)
             .attr("opacity", d => d.opacity)
             .attr("d", d => lineGen(d.rows));
 
-        // ANIMATION: apply to both paths
+        baseGroups.select("path")
+            .attr("stroke", d => d.stroke)
+            .attr("stroke-width", d => d.width)
+            .attr("opacity", d => d.opacity)
+            .attr("d", d => lineGen(d.rows));
+
+        baseGroups.exit().remove();
+
+        // === Guess lines (animated) ===
+        const guessGroups = gGuess.selectAll("g.guess-line").data(guessLines, d => d.id);
+        const guessEnter = guessGroups.enter().append("g").attr("class", "guess-line");
+
+        guessEnter.append("path")
+            .attr("fill", "none")
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", d => d.width + 2.5)
+            .attr("opacity", 1)
+            .attr("d", d => lineGen(d.rows));
+
+        guessEnter.append("path")
+            .attr("fill", "none")
+            .attr("stroke", d => d.stroke)
+            .attr("stroke-width", d => d.width)
+            .attr("opacity", d => d.opacity)
+            .attr("d", d => lineGen(d.rows));
+
         guessEnter.selectAll("path").each(function () {
             const length = this.getTotalLength();
             d3.select(this)
@@ -301,7 +250,6 @@ export default function Chart({
                 .attr("stroke-dashoffset", 0);
         });
 
-        // UPDATE — keep both paths in sync
         guessGroups.select("path:nth-child(1)")
             .attr("stroke-width", d => d.width + 1.5)
             .attr("d", d => lineGen(d.rows));
@@ -312,8 +260,99 @@ export default function Chart({
             .attr("opacity", d => d.opacity)
             .attr("d", d => lineGen(d.rows));
 
-        // EXIT
         guessGroups.exit().remove();
+
+        // === Red target line (static base) and overlay animation ===
+        const red = targetLine[0];
+
+        // Flag to track if static red line is drawn
+        if (typeof window.staticRedDrawn === "undefined") {
+            window.staticRedDrawn = false;
+        }
+
+        function drawStaticRedLine() {
+            let gStatic = g.select("g.target-static");
+            if (gStatic.empty()) {
+                gStatic = g.append("g").attr("class", "target-static");
+
+                // White outline static path
+                gStatic.append("path")
+                    .attr("fill", "none")
+                    .attr("stroke", "#ffffff")
+                    .attr("stroke-width", red.width + 2.5)
+                    .attr("opacity", 1)
+                    .attr("d", lineGen(red.rows));
+
+                // Red line static path
+                gStatic.append("path")
+                    .attr("fill", "none")
+                    .attr("stroke", red.stroke)
+                    .attr("stroke-width", red.width)
+                    .attr("opacity", red.opacity)
+                    .attr("d", lineGen(red.rows));
+            }
+        }
+
+        function animateRedOverlay(onEndCallback) {
+            let gOverlay = g.select("g.target-overlay");
+
+            if (!gOverlay.empty()) {
+                gOverlay.remove();
+            }
+
+            gOverlay = g.append("g").attr("class", "target-overlay");
+            const overlayGroup = gOverlay.append("g").attr("class", "red-animate");
+
+            const overlayOutline = overlayGroup.append("path")
+                .attr("fill", "none")
+                .attr("stroke", "#ffffff")
+                .attr("stroke-width", red.width + 2.5)
+                .attr("opacity", 1)
+                .attr("d", lineGen(red.rows));
+
+            const overlayMain = overlayGroup.append("path")
+                .attr("fill", "none")
+                .attr("stroke", red.stroke)
+                .attr("stroke-width", red.width)
+                .attr("opacity", red.opacity)
+                .attr("d", lineGen(red.rows));
+
+            let completed = 0;
+            function checkDone() {
+                completed++;
+                if (completed === 2) {
+                    // After animation ends, fade out overlay
+                    overlayGroup.transition()
+                        .duration(1000)
+                        .attr("opacity", 0)
+                        .remove();
+
+                    if (onEndCallback) onEndCallback();
+                }
+            }
+
+            [overlayOutline, overlayMain].forEach(path => {
+                const length = path.node().getTotalLength();
+                path
+                    .attr("stroke-dasharray", `${length} ${length}`)
+                    .attr("stroke-dashoffset", length)
+                    .transition()
+                    .duration(2000)
+                    .attr("stroke-dashoffset", 0)
+                    .on("end", checkDone);
+            });
+        }
+
+        // On initial render: animate red line overlay first, then draw static line
+        if (!window.staticRedDrawn) {
+            animateRedOverlay(() => {
+                drawStaticRedLine();
+                window.staticRedDrawn = true;
+            });
+        } else if (guesses.length > 0) {
+            // On guesses update, animate red overlay on top of static line without removing static
+            animateRedOverlay();
+        }
 
 
 
