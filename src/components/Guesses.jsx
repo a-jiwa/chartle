@@ -197,7 +197,10 @@ export default function Guesses({
                         <div
                             key={g}
                             className="font-semibold"
-                            style={{ color: guessColours[i] ?? "#2A74B3" }}
+                            style={{ 
+                                color: guessColours[i] ?? "#2A74B3",
+                                fontSize: "20px"
+                             }}
                         >
                             {g}
                         </div>
