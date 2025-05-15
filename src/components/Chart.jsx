@@ -228,7 +228,7 @@ export default function Chart({
 
         guessEnter.append("path")
             .attr("fill", "none")
-            .attr("stroke", "#ffffff")
+            .attr("stroke", "#f9f9f9")
             .attr("stroke-width", d => d.width + 2.5)
             .attr("opacity", 1)
             .attr("d", d => lineGen(d.rows));
@@ -278,7 +278,7 @@ export default function Chart({
                 // White outline static path
                 gStatic.append("path")
                     .attr("fill", "none")
-                    .attr("stroke", "#ffffff")
+                    .attr("stroke", "#f9f9f9")
                     .attr("stroke-width", red.width + 2.5)
                     .attr("opacity", 1)
                     .attr("d", lineGen(red.rows));
@@ -305,7 +305,7 @@ export default function Chart({
 
             const overlayOutline = overlayGroup.append("path")
                 .attr("fill", "none")
-                .attr("stroke", "#ffffff")
+                .attr("stroke", "#f9f9f9")
                 .attr("stroke-width", red.width + 2.5)
                 .attr("opacity", 1)
                 .attr("d", lineGen(red.rows));
