@@ -23,6 +23,7 @@ export default function Chart({
     const { width, height } = useResizeObserver(wrapperRef);
     const [data, setData] = useState(null);
     const prevMaxRef = useRef(null); // last y-axis max
+    const isPercentage = meta.unit === "Percentage";
 
     /* --- load data --- */
     useEffect(() => {
@@ -167,13 +168,13 @@ export default function Chart({
 
         const yAxis = (sel) => {
             sel.call(
-                d3
-                    .axisLeft(y)
-                    .ticks(4)
-                    .tickSize(-innerW)
-                    .tickSizeOuter(0)
-                    .tickFormat((d) => d)
+                d3.axisLeft(y)
+                .ticks(4)
+                .tickSize(-innerW)
+                .tickSizeOuter(0)
+                .tickFormat(isPercentage ? d => d + "%" : d => d)
             );
+        
             sel.selectAll(".tick text")
                 .attr("font-size", 17)
                 .attr("font-weight", 500)
