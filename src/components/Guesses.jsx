@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { COUNTRIES } from "../data/countries"; // adjust path as needed
+import { COUNTRIES } from "../data/countries";
 
 /* ─────────────────────────── Levenshtein helper ─────────────────────────── */
 function levenshtein(a = "", b = "") {
@@ -20,6 +20,8 @@ function levenshtein(a = "", b = "") {
     return d[rows - 1][cols - 1];
 }
 
+const compassSequence = ["⬆️", "↗️", "➡️", "↘️", "⬇️", "↙️", "⬅️", "↖️"];
+
 /* ─────────────────────────────── Component ──────────────────────────────── */
 export default function Guesses({
                                     guesses,
@@ -27,23 +29,26 @@ export default function Guesses({
                                     status,
                                     max,
                                     guessColours = [],
+                                    targetData,
+                                    countryToIso,
                                 }) {
     const [value, setValue] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [error, setError] = useState("");
+    const [spinningEmojis, setSpinningEmojis] = useState({});
+    const [distanceTicks, setDistanceTicks] = useState({}); // ── NEW
 
     const disabled = status !== "playing";
     const trimmed = value.trim();
     const lcTrimmed = trimmed.toLowerCase();
 
     /* — Valid country? — */
-    const isValidCountry = COUNTRIES.some(
-        (c) => c.toLowerCase() === lcTrimmed
-    );
+    const isValidCountry = COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed);
 
     /* — Ranked suggestions — */
-    const filtered = COUNTRIES
-        .filter((c) => c.toLowerCase().includes(lcTrimmed) && lcTrimmed)
+    const filtered = COUNTRIES.filter(
+        (c) => c.toLowerCase().includes(lcTrimmed) && lcTrimmed
+    )
         .sort((a, b) => {
             const aLc = a.toLowerCase();
             const bLc = b.toLowerCase();
@@ -61,7 +66,58 @@ export default function Guesses({
 
             /* Alphabetical fallback */
             return a.localeCompare(b);
-        }).reverse();
+        })
+        .reverse();
+
+    /* ───────────────── distance animation helper ─────────────────────
+       Variable STEP SIZE
+       • Far away  → big jumps  (fast)
+       • Near goal → 1-km steps (slow)                      */
+    function animateDistance(label, finalValue) {
+        if (finalValue == null || finalValue <= 0) {
+            setDistanceTicks((p) => ({ ...p, [label]: finalValue ?? 0 }));
+            return;
+        }
+
+        const SLOW_ZONE       = 50;   // once ≤150 km left; step = 1
+        const BASE_DELAY      = 8;    // ms between ticks while cruising
+        const EXTRA_SLOW_MAX  = 180;   // max additional delay for very last tick
+
+        let current = 0;
+
+        function tick() {
+            setDistanceTicks((p) => ({ ...p, [label]: current }));
+
+            if (current >= finalValue) return;
+
+            /* ───── determine step size ───── */
+            const remaining = finalValue - current;
+            const step =
+                remaining > SLOW_ZONE
+                    // Far away: chunk size scales with remaining distance
+                    ? Math.max(1, Math.round(remaining / 60))
+                    // Near goal: 1-by-1
+                    : 1;
+
+            current = Math.min(current + step, finalValue);
+
+            /* ───── determine delay ───── */
+            let delay = BASE_DELAY;
+
+            if (remaining <= SLOW_ZONE) {
+                // cubic slow-down for the final zone
+                const progress = 1 - (remaining - step) / SLOW_ZONE; // 0→1
+                delay += EXTRA_SLOW_MAX * Math.pow(progress, 3);
+            }
+
+            setTimeout(tick, delay);
+        }
+
+        tick();
+    }
+
+
+
 
     /* — Submit guess — */
     const submit = (e) => {
@@ -82,6 +138,37 @@ export default function Guesses({
 
         setError("");
         onAddGuess(trimmed);
+
+        const guess = trimmed;
+        const guessIso = countryToIso[guess];
+        const dataForGuess = targetData?.[guessIso];
+        const finalDirection = dataForGuess?.direction || "🎯";
+        const finalDistance = dataForGuess?.distance_km ?? 0;
+
+        /* ── start distance counter ── */
+        animateDistance(guess, finalDistance);
+
+        /* ── start compass spin ── */
+        const targetIndex = compassSequence.indexOf(finalDirection);
+        const totalSteps = compassSequence.length * 4 + targetIndex; // 3 spins + land
+
+        let currentStep = 0;
+        function spinStep() {
+            const delay = 50 + Math.pow(currentStep, 1.4); // exponential easing
+            const nextIndex = currentStep % compassSequence.length;
+            const nextEmoji = compassSequence[nextIndex];
+
+            setSpinningEmojis((prev) => ({
+                ...prev,
+                [guess]: nextEmoji,
+            }));
+
+            currentStep++;
+            if (currentStep <= totalSteps) setTimeout(spinStep, delay);
+        }
+        spinStep();
+
+        /* ── clear input ── */
         setValue("");
         setShowSuggestions(false);
     };
@@ -99,13 +186,15 @@ export default function Guesses({
             {guesses.length === 0 && (
                 <p className="text-m font-medium text-gray-800 pt-0.5">
                     Guess the country in{" "}
-                    <span className="font-semibold" style={{ color: "#c43333" }}>red</span>
+                    <span className="font-semibold" style={{ color: "#c43333" }}>
+                        red
+                    </span>
                 </p>
             )}
 
-
             <p className="text-m text-gray-700">
-                Guesses: <span className="font-semibold">{guesses.length}</span> / {max}
+                Guesses:{" "}
+                <span className="font-semibold">{guesses.length}</span> / {max}
             </p>
 
             <form onSubmit={submit} className="w-6/7 mx-auto">
@@ -141,12 +230,18 @@ export default function Guesses({
                         onKeyDown={(e) => {
                             if (e.key === "Enter" && !isValidCountry && filtered.length) {
                                 e.preventDefault();
-                                selectSuggestion(filtered[filtered.length - 1]);   // <── last one
+                                selectSuggestion(
+                                    filtered[filtered.length - 1]
+                                );
                             }
                         }}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
+                        onBlur={() =>
+                            setTimeout(() => setShowSuggestions(false), 100)
+                        }
                         className={`block w-full p-4 pl-10 text-sm rounded-lg bg-gray-50 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 outline-none ${
-                            trimmed && !isValidCountry ? "border border-red-500" : "border border-gray-300"
+                            trimmed && !isValidCountry
+                                ? "border border-red-500"
+                                : "border border-gray-300"
                         }`}
                         autoComplete="on"
                     />
@@ -165,13 +260,15 @@ export default function Guesses({
 
                     {/* ─────────── Suggestions ─────────── */}
                     {showSuggestions && filtered.length > 0 && (
-                        <ul className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
-                                       bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto">
+                        <ul
+                            className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
+                           bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto"
+                        >
                             {filtered.map((country, idx) => (
                                 <li
                                     key={country}
                                     className={`cursor-pointer py-4 px-4 text-sm hover:bg-gray-100 ${
-                                        idx === filtered.length - 1        // <── last one
+                                        idx === filtered.length - 1
                                             ? "bg-emerald-50 font-semibold"
                                             : "text-gray-800"
                                     }`}
@@ -193,18 +290,32 @@ export default function Guesses({
             {/* ─────────── Previous guesses ─────────── */}
             {guesses.length > 0 && (
                 <div className="flex flex-col items-center space-y-1">
-                    {guesses.map((g, i) => (
-                        <div
-                            key={g}
-                            className="font-semibold"
-                            style={{ 
-                                color: guessColours[i] ?? "#2A74B3",
-                                fontSize: "20px"
-                             }}
-                        >
-                            {g}
-                        </div>
-                    ))}
+                    {guesses.map((g, i) => {
+                        const guessIso = countryToIso[g];
+                        const match = targetData?.[guessIso];
+                        const direction = match?.direction;
+                        const emoji = spinningEmojis[g] || direction || "";
+                        const distance =
+                            distanceTicks[g] ?? match?.distance_km ?? 0;
+
+                        return (
+                            <div
+                                key={g}
+                                className="font-semibold flex items-center gap-2"
+                                style={{
+                                    color: guessColours[i] ?? "#2A74B3",
+                                    fontSize: "20px",
+                                }}
+                            >
+                                <span>{g}</span>
+                                {match && (
+                                    <span className="text-gray-700 text-sm">
+                                        {emoji} {distance} km
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>

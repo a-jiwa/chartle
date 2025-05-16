@@ -5,6 +5,9 @@ import Chart    from "./components/Chart";
 import Guesses  from "./components/Guesses";
 import WinModal from "./components/WinModal";
 
+import countryToIso from "./data/country_to_iso.json";
+import countryToRealCountry from "./data/country_to_real_country.json";
+
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
@@ -16,6 +19,7 @@ export default function App() {
     const [meta,    setMeta]    = useState(null);
     const [guesses, setGuesses] = useState([]);
     const [status,  setStatus]  = useState("playing");   // 'playing' | 'won' | 'lost' | 'done'
+    const [targetData, setTargetData] = useState(null);
 
     useEffect(() => {
         initGA();
@@ -33,8 +37,17 @@ export default function App() {
     if (!meta) return null;
 
     const guessColours = meta.guessColours;
-    const target       = meta.target;          // e.g. "India"
-    const targetKey    = target.toLowerCase();
+    const target = meta.target; // e.g. "India"
+    const targetIso = countryToRealCountry[target]; // Get real country ISO code
+
+    if (!targetIso) return;    const targetKey    = target.toLowerCase();
+
+    const dataUrl = `https://raw.githubusercontent.com/a-jiwa/chartle-data/main/countries/${targetIso}.json`;
+
+    fetch(dataUrl)
+        .then((res) => res.json())
+        .then((data) => setTargetData(data))
+        .catch((err) => console.error("Failed to fetch target country data:", err));
 
     /** add a guess (case-insensitive, max 5, ignore dups) */
     const handleAddGuess = (raw) => {
@@ -67,6 +80,13 @@ export default function App() {
             trackGameEnd("lost", next.length, target);
         }
 
+            // Get direction + distance for hint
+            const guessIso = countryToIso[title];
+            if (guessIso && targetData[guessIso]) {
+                const { direction, distance_km } = targetData[guessIso];
+                console.log(`Your guess is ${distance_km}km to the ${direction}`);
+            }
+
             return next;
         });
     };
@@ -94,6 +114,8 @@ export default function App() {
                         status={status}
                         max={MAX_GUESSES}
                         guessColours={guessColours}
+                        targetData={targetData}
+                        countryToIso={countryToIso}
                     />
                 </div>
             </div>
