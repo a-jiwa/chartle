@@ -23,7 +23,7 @@ export default function Chart({
     const { width, height } = useResizeObserver(wrapperRef);
     const [data, setData] = useState(null);
     const prevMaxRef = useRef(null); // last y-axis max
-    const isPercentage = meta.unit === "%";
+    const unitSuffix = meta.unitSuffix;
 
     /* --- load data --- */
     useEffect(() => {
@@ -172,7 +172,7 @@ export default function Chart({
                 .ticks(4)
                 .tickSize(-innerW)
                 .tickSizeOuter(0)
-                .tickFormat(isPercentage ? d => d + "%" : d => d)
+                .tickFormat(d => unitSuffix ? `${d}${unitSuffix}` : d)
             );
         
             sel.selectAll(".tick text")
