@@ -23,7 +23,6 @@ export default function Chart({
     const { width, height } = useResizeObserver(wrapperRef);
     const [data, setData] = useState(null);
     const prevMaxRef = useRef(null); // last y-axis max
-    const unitSuffix = meta.unitSuffix;
 
     /* --- load data --- */
     useEffect(() => {
@@ -64,6 +63,8 @@ export default function Chart({
     /* --- redraw on changes --- */
     useEffect(() => {
         if (!data || !meta || !target || width === 0 || height === 0) return;
+
+        const unitSuffix = meta.unitSuffix;
 
         /* ----- country sets & groups ----- */
         const latestOthers = others.length ? others : autoOthers(data);
