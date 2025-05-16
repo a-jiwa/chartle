@@ -8,8 +8,8 @@ import WinModal from "./components/WinModal";
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
-const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/003_electric_car_sales_share.json";
-const CSV_URL  = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/data/cleaned_electric_car_sales_share.csv";
+const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/004_share_women_parliament.json";
+const CSV_URL  = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/data/cleaned_share-of-women-in-parliament.csv";
 const MAX_GUESSES = 5;
 
 export default function App() {
