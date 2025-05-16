@@ -35,6 +35,7 @@ export default function App() {
     const guessColours = meta.guessColours;
     const target       = meta.target;          // e.g. "India"
     const targetKey    = target.toLowerCase();
+    const unitSuffix = meta.unitSuffix;
 
     /** add a guess (case-insensitive, max 5, ignore dups) */
     const handleAddGuess = (raw) => {
