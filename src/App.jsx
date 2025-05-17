@@ -11,8 +11,8 @@ import countryToRealCountry from "./data/country_to_real_country.json";
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
-const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/004_share_women_parliament.json";
-const CSV_URL  = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/data/cleaned_share-of-women-in-parliament.csv";
+const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/005_patents_per_million.json";
+const CSV_URL  = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/data/patents_per_million.csv";
 const MAX_GUESSES = 5;
 
 export default function App() {
