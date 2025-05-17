@@ -267,93 +267,49 @@ export default function Chart({
         // === Red target line (static base) and overlay animation ===
         const red = targetLine[0];
 
-        // Flag to track if static red line is drawn
-        if (typeof window.staticRedDrawn === "undefined") {
-            window.staticRedDrawn = false;
-        }
+        let gTarget = g.select("g.target-line");
+        if (gTarget.empty()) {
+            gTarget = g.append("g").attr("class", "target-line");
 
-        function drawStaticRedLine() {
-            let gStatic = g.select("g.target-static");
-            if (gStatic.empty()) {
-                gStatic = g.append("g").attr("class", "target-static");
+            const redPathData = lineGen(red.rows);
 
-                // White outline static path
-                gStatic.append("path")
-                    .attr("fill", "none")
-                    .attr("stroke", "#f9f9f9")
-                    .attr("stroke-width", red.width + 2.5)
-                    .attr("opacity", 1)
-                    .attr("d", lineGen(red.rows));
+        // White outline path
+        const outline = gTarget
+            .append("path")
+            .attr("fill", "none")
+            .attr("stroke", "#f9f9f9")
+            .attr("stroke-width", red.width + 2.5)
+            .attr("opacity", 1)
+            .attr("d", redPathData);
 
-                // Red line static path
-                gStatic.append("path")
-                    .attr("fill", "none")
-                    .attr("stroke", red.stroke)
-                    .attr("stroke-width", red.width)
-                    .attr("opacity", red.opacity)
-                    .attr("d", lineGen(red.rows));
-            }
-        }
+        // Red main path
+        const main = gTarget
+            .append("path")
+            .attr("fill", "none")
+            .attr("stroke", red.stroke)
+            .attr("stroke-width", red.width)
+            .attr("opacity", red.opacity)
+            .attr("d", redPathData);
 
-        function animateRedOverlay(onEndCallback) {
-            let gOverlay = g.select("g.target-overlay");
-
-            if (!gOverlay.empty()) {
-                gOverlay.remove();
-            }
-
-            gOverlay = g.append("g").attr("class", "target-overlay");
-            const overlayGroup = gOverlay.append("g").attr("class", "red-animate");
-
-            const overlayOutline = overlayGroup.append("path")
-                .attr("fill", "none")
-                .attr("stroke", "#f9f9f9")
-                .attr("stroke-width", red.width + 2.5)
-                .attr("opacity", 1)
-                .attr("d", lineGen(red.rows));
-
-            const overlayMain = overlayGroup.append("path")
-                .attr("fill", "none")
-                .attr("stroke", red.stroke)
-                .attr("stroke-width", red.width)
-                .attr("opacity", red.opacity)
-                .attr("d", lineGen(red.rows));
-
-            let completed = 0;
-            function checkDone() {
-                completed++;
-                if (completed === 2) {
-                    // After animation ends, fade out overlay
-                    overlayGroup.transition()
-                        .duration(1000)
-                        .attr("opacity", 0)
-                        .remove();
-
-                    if (onEndCallback) onEndCallback();
-                }
-            }
-
-            [overlayOutline, overlayMain].forEach(path => {
-                const length = path.node().getTotalLength();
-                path
-                    .attr("stroke-dasharray", `${length} ${length}`)
-                    .attr("stroke-dashoffset", length)
-                    .transition()
-                    .duration(2000)
-                    .attr("stroke-dashoffset", 0)
-                    .on("end", checkDone);
-            });
-        }
-
-        // On initial render: animate red line overlay first, then draw static line
-        if (!window.staticRedDrawn) {
-            animateRedOverlay(() => {
-                drawStaticRedLine();
-                window.staticRedDrawn = true;
-            });
-        } else if (guesses.length > 0) {
-            // On guesses update, animate red overlay on top of static line without removing static
-            animateRedOverlay();
+        // Animate both paths
+        [outline, main].forEach((path) => {
+            const length = path.node().getTotalLength();
+            path
+            .attr("stroke-dasharray", `${length} ${length}`)
+            .attr("stroke-dashoffset", length)
+            .transition()
+            .duration(2000)
+            .attr("stroke-dashoffset", 0);
+        });
+        } else {
+        // On resize or updates, just update paths without animation
+        const redPathData = lineGen(red.rows);
+        gTarget.selectAll("path").data([0, 1]).join("path")
+            .attr("fill", "none")
+            .attr("stroke", (_, i) => (i === 0 ? "#f9f9f9" : red.stroke))
+            .attr("stroke-width", (_, i) => (i === 0 ? red.width + 2.5 : red.width))
+            .attr("opacity", red.opacity)
+            .attr("d", redPathData);
         }
 
 
