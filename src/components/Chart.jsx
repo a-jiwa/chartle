@@ -142,7 +142,7 @@ export default function Chart({
         const lineGen = d3
             .line()
             .defined(d => typeof d.Production === "number" && !isNaN(d.Production))
-            .curve(d3.curveCatmullRom.alpha(0.5))
+            .curve(d3.curveMonotoneX)
             .x((d) => x(d.Year))
             .y((d) => y(d.Production / meta.scale));
 
