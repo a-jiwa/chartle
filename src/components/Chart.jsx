@@ -71,7 +71,8 @@ export default function Chart({
             const filtered = standardized.filter(row =>
                 row.Country &&
                 !excludeList.has(row.Country) &&
-                !parensRegex.test(row.Country)
+                !parensRegex.test(row.Country) &&
+                (meta.yearStart == null || row.Year >= meta.yearStart)
             );
 
             setData(filtered);
