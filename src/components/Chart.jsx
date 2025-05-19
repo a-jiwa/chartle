@@ -28,17 +28,24 @@ export default function Chart({
     useEffect(() => {
         if (!csvUrl) return;
 
-        d3.csv(csvUrl, d3.autoType).then((wideRows) => {
-            const longRows = wideRows.flatMap((row) =>
-                Object.entries(row)
-                    .filter(([k, v]) => k !== "Year" && v !== "" && v != null)
-                    .map(([country, value]) => ({
-                        Country:   country,
-                        Year:      +row.Year,
-                        Production:+value,
-                    }))
+        const excludeList = new Set([
+            "Africa", "Africa (BP)", "Africa (GCP)", "Americas (GCP)",
+            "Asia", "Asia Pacific", "Asia Pacific (GCP)", "Europe", "Europe (GCP)",
+            "European Union (27)", "European Union (27) (GCP)",
+            "High-income countries", "Low-income countries", "Lower-middle-income countries",
+            "Middle East", "Non-OECD", "North America", "Oceania", "OECD",
+            "Rest of World", "South America", "Upper-middle-income countries",
+            "World", "World (GCP)"
+        ]);
+
+        const parensRegex = /\(.+\)/; // matches anything with (…)
+
+        d3.csv(csvUrl, d3.autoType).then((rows) => {
+            const filtered = rows.filter(row =>
+                !excludeList.has(row.Country) &&
+                !parensRegex.test(row.Country)
             );
-            setData(longRows);
+            setData(filtered);
         });
     }, [csvUrl]);
 
