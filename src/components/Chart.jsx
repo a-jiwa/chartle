@@ -81,23 +81,26 @@ export default function Chart({
 
 
 
-    // pick the 10 biggest producers in the most recent year, ignoring the target
+    // pick the 10 biggest producers based on each country's max value, ignoring the target
     const autoOthers = (rows) => {
-        const latestYear = d3.max(rows, (d) => d.Year);
-        return rows
-            .filter(
-                (d) =>
-                    d.Year === latestYear &&
-                    d.Country !== target &&
-                    typeof d.Production === "number" &&
-                    !isNaN(d.Production)
-            )
-            .sort((a, b) => d3.descending(a.Production, b.Production))
-            .map((d) => d.Country)
-            .filter((c, i, arr) => arr.indexOf(c) === i) // remove duplicates
-            .filter((c) => c !== target) // don’t duplicate the red line
+        // Create a map to store each country's maximum production value
+        const maxByCountry = d3.rollup(
+            rows.filter(d => d.Country !== target && typeof d.Production === "number" && !isNaN(d.Production)),
+            v => d3.max(v, d => d.Production),
+            d => d.Country
+        );
+
+        // Convert the map to an array and sort by max production descending
+        const topCountries = Array.from(maxByCountry.entries())
+            .sort((a, b) => d3.descending(a[1], b[1]))
+            .map(([country]) => country)
+            .filter((c, i, arr) => arr.indexOf(c) === i) // just in case
+            .filter((c) => c !== target)
             .slice(0, 10); // keep the top 10
+
+        return topCountries;
     };
+
 
     /* --- redraw on changes --- */
     useEffect(() => {
@@ -206,15 +209,34 @@ export default function Chart({
             .attr("dy", "0.95em") // increased vertical padding for x-axis labels
             .style("font-family", "Open Sans, sans-serif");
 
+        const formatNumber = (d) => {
+            if (typeof d !== "number" || isNaN(d)) return "";
+
+            const abs = Math.abs(d);
+            let formatted;
+
+            if (abs >= 1e9) {
+                formatted = (d / 1e9).toFixed(1).replace(/\.0$/, "") + " B";
+            } else if (abs >= 1e6) {
+                formatted = (d / 1e6).toFixed(1).replace(/\.0$/, "") + " M";
+            } else if (abs >= 1e3) {
+                formatted = (d / 1e3).toFixed(1).replace(/\.0$/, "") + " K";
+            } else {
+                formatted = d.toString();
+            }
+
+            return unitSuffix ? `${formatted} ${unitSuffix}` : formatted;
+        };
+
         const yAxis = (sel) => {
             sel.call(
                 d3.axisLeft(y)
-                .ticks(4)
-                .tickSize(-innerW)
-                .tickSizeOuter(0)
-                .tickFormat(d => unitSuffix ? `${d}${unitSuffix}` : d)
+                    .ticks(4)
+                    .tickSize(-innerW)
+                    .tickSizeOuter(0)
+                    .tickFormat(formatNumber)
             );
-        
+
             sel.selectAll(".tick text")
                 .attr("font-size", 17)
                 .attr("font-weight", 500)
@@ -226,6 +248,7 @@ export default function Chart({
                 .attr("stroke-opacity", 0.6)
                 .attr("stroke-width", 1);
         };
+
 
         if (domainChanged) {
             g.select(".y-axis").transition().duration(1500).call(yAxis);

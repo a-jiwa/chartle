@@ -11,8 +11,8 @@ import countryToRealCountry from "./data/country_to_real_country.json";
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
-const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/005_patents_per_million.json";
-const CSV_URL  = "https://ourworldindata.org/grapher/patent-applications-per-million.csv?v=1&csvType=full&useColumnShortNames=true";
+const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/006_deaths_in_armed_conflicts.json";
+const CSV_URL  = "https://ourworldindata.org/grapher/deaths-in-armed-conflicts-by-country.csv?v=1&csvType=full&useColumnShortNames=true";
 const MAX_GUESSES = 5;
 
 export default function App() {
