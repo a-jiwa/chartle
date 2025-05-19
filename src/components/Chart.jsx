@@ -117,7 +117,7 @@ export default function Chart({
         );
 
         /* ----- layout ----- */
-        const m = { top: 90, right: 50, bottom: 60, left: 50 };
+        const m = { top: 90, right: 30, bottom: 60, left: 50 };
         const innerW = width - m.left - m.right;
         const innerH = height - m.top - m.bottom;
 
@@ -203,7 +203,7 @@ export default function Chart({
             .attr("transform", `translate(0,${innerH})`)
             .call(d3.axisBottom(x).ticks(5).tickFormat((d) => String(d)))
             .selectAll(".tick text")
-            .attr("font-size", 17)
+            .attr("font-size", 16)
             .attr("font-weight", 500)
             .attr("fill", "#111827")
             .attr("dy", "0.95em") // increased vertical padding for x-axis labels
@@ -238,7 +238,7 @@ export default function Chart({
             );
 
             sel.selectAll(".tick text")
-                .attr("font-size", 17)
+                .attr("font-size", 16)
                 .attr("font-weight", 500)
                 .attr("fill", "#111827")
                 .style("font-family", "Open Sans, sans-serif");
@@ -255,6 +255,17 @@ export default function Chart({
         } else {
             g.select(".y-axis").call(yAxis);
         }
+
+        // Get maximum tick label width
+        const maxTickLabelWidth = Math.max(
+            ...g.select(".y-axis").selectAll("text").nodes().map(node =>
+                node.getBBox().width
+            )
+        );
+
+        // Compute new left offset for title/subtitle alignment
+        const titleOffsetX = m.left - maxTickLabelWidth - 8; // 8px padding from tick label
+
 
         // Assuming these are declared earlier in your scope:
         // let g, baseLines, guessLines, targetLine, guesses, lineGen
@@ -383,7 +394,10 @@ export default function Chart({
             .enter()
             .append("g")
             .attr("class", "chart-heading")
-            .attr("transform", `translate(${m.left - 20},24)`);
+            .attr("transform", `translate(${titleOffsetX},24)`);
+
+        heading
+            .attr("transform", `translate(${titleOffsetX},24)`);
 
         hEnter
             .append("text")
