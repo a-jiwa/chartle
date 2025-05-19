@@ -28,32 +28,25 @@ export default function Chart({
     useEffect(() => {
         if (!csvUrl) return;
 
-        const excludeList = new Set([
-            "Africa", "Africa (BP)", "Africa (GCP)", "Americas (GCP)",
-            "Asia", "Asia Pacific", "Asia Pacific (GCP)", "Europe", "Europe (GCP)",
-            "European Union (27)", "European Union (27) (GCP)",
-            "High-income countries", "Low-income countries", "Lower-middle-income countries",
-            "Middle East", "Non-OECD", "North America", "Oceania", "OECD",
-            "Rest of World", "South America", "Upper-middle-income countries",
-            "World", "World (GCP)"
-        ]);
-
-        const parensRegex = /\(.+\)/;
-
         d3.csv(csvUrl, d3.autoType).then((rows) => {
             if (!rows.length) return;
 
             const columns = Object.keys(rows[0]);
 
-            // Try to detect the correct column names
             const yearKey = columns.find(c => c.toLowerCase().includes("year")) || "Year";
             const countryKey = columns.find(c => c.toLowerCase().includes("entity") || c.toLowerCase().includes("country")) || "Country";
+            const isoKey = columns.find(c => c === "Code"); // specifically "Code"
 
-            // Assume the value column is the first numeric one that’s not year
+            if (!yearKey || !countryKey || !isoKey) {
+                console.error("Missing required column(s):", { yearKey, countryKey, isoKey });
+                return;
+            }
+
             const valueKey = columns.find(
                 key =>
                     key !== yearKey &&
                     key !== countryKey &&
+                    key !== isoKey &&
                     typeof rows[0][key] === "number"
             );
 
@@ -62,22 +55,27 @@ export default function Chart({
                 return;
             }
 
-            const standardized = rows.map(row => ({
+            const filtered = rows.filter(row =>
+                row[isoKey] &&
+                typeof row[isoKey] === "string" &&
+                row[isoKey].trim() !== "" &&
+                !row[isoKey].startsWith("OWID") &&
+                (meta.yearStart == null || row[yearKey] >= meta.yearStart)
+            );
+
+            const standardized = filtered.map(row => ({
                 Year: row[yearKey],
                 Country: row[countryKey],
                 Production: row[valueKey]
             }));
 
-            const filtered = standardized.filter(row =>
-                row.Country &&
-                !excludeList.has(row.Country) &&
-                !parensRegex.test(row.Country) &&
-                (meta.yearStart == null || row.Year >= meta.yearStart)
-            );
-
-            setData(filtered);
+            console.log("Filtered and standardized data:", standardized);
+            setData(standardized);
         });
     }, [csvUrl]);
+
+
+
 
 
 
