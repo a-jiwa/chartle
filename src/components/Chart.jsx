@@ -38,16 +38,47 @@ export default function Chart({
             "World", "World (GCP)"
         ]);
 
-        const parensRegex = /\(.+\)/; // matches anything with (…)
+        const parensRegex = /\(.+\)/;
 
         d3.csv(csvUrl, d3.autoType).then((rows) => {
-            const filtered = rows.filter(row =>
+            if (!rows.length) return;
+
+            const columns = Object.keys(rows[0]);
+
+            // Try to detect the correct column names
+            const yearKey = columns.find(c => c.toLowerCase().includes("year")) || "Year";
+            const countryKey = columns.find(c => c.toLowerCase().includes("entity") || c.toLowerCase().includes("country")) || "Country";
+
+            // Assume the value column is the first numeric one that’s not year
+            const valueKey = columns.find(
+                key =>
+                    key !== yearKey &&
+                    key !== countryKey &&
+                    typeof rows[0][key] === "number"
+            );
+
+            if (!valueKey) {
+                console.error("No numeric value column found.");
+                return;
+            }
+
+            const standardized = rows.map(row => ({
+                Year: row[yearKey],
+                Country: row[countryKey],
+                Production: row[valueKey]
+            }));
+
+            const filtered = standardized.filter(row =>
+                row.Country &&
                 !excludeList.has(row.Country) &&
                 !parensRegex.test(row.Country)
             );
+
             setData(filtered);
         });
     }, [csvUrl]);
+
+
 
     // pick the 10 biggest producers in the most recent year, ignoring the target
     const autoOthers = (rows) => {
