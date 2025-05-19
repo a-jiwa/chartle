@@ -216,16 +216,16 @@ export default function Chart({
             let formatted;
 
             if (abs >= 1e9) {
-                formatted = (d / 1e9).toFixed(1).replace(/\.0$/, "") + " B";
+                formatted = (d / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
             } else if (abs >= 1e6) {
-                formatted = (d / 1e6).toFixed(1).replace(/\.0$/, "") + " M";
+                formatted = (d / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
             } else if (abs >= 1e3) {
-                formatted = (d / 1e3).toFixed(1).replace(/\.0$/, "") + " K";
+                formatted = (d / 1e3).toFixed(1).replace(/\.0$/, "") + "k";
             } else {
                 formatted = d.toString();
             }
 
-            return unitSuffix ? `${formatted} ${unitSuffix}` : formatted;
+            return unitSuffix ? `${formatted}${unitSuffix}` : formatted;
         };
 
         const yAxis = (sel) => {

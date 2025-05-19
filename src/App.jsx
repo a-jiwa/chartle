@@ -12,7 +12,6 @@ import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
 const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/006_deaths_in_armed_conflicts.json";
-const CSV_URL  = "https://ourworldindata.org/grapher/deaths-in-armed-conflicts-by-country.csv?v=1&csvType=full&useColumnShortNames=true";
 const MAX_GUESSES = 5;
 
 export default function App() {
@@ -97,7 +96,7 @@ export default function App() {
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
                     <Chart
-                        csvUrl={CSV_URL}
+                        csvUrl={meta.csvUrl}
                         meta={meta}
                         target={target}
                         others={meta.others ?? []}
