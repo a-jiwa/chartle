@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Chart    from "./components/Chart";
 import Guesses  from "./components/Guesses";
 import WinModal from "./components/WinModal";
+import LoseModal from "./components/LoseModal";
 
 import countryToIso from "./data/country_to_iso.json";
 import countryToRealCountry from "./data/country_to_real_country.json";
@@ -121,6 +122,9 @@ export default function App() {
 
             {/* win modal */}
             {status === "won" && <WinModal onClose={() => setStatus("done")} />}
+
+            {/* Lose modal */}
+            {status === "lost" && <LoseModal onClose={() => setStatus("done")} target={target} />}
         </div>
     );
 }
