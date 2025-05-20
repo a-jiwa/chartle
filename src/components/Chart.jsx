@@ -31,52 +31,25 @@ export default function Chart({
         d3.csv(csvUrl, d3.autoType).then((rows) => {
             if (!rows.length) return;
 
-            const columns = Object.keys(rows[0]);
-
-            const yearKey = columns.find(c => c.toLowerCase().includes("year")) || "Year";
-            const countryKey = columns.find(c => c.toLowerCase().includes("entity") || c.toLowerCase().includes("country")) || "Country";
-            const isoKey = columns.find(c => c === "Code"); // specifically "Code"
-
-            if (!yearKey || !countryKey || !isoKey) {
-                console.error("Missing required column(s):", { yearKey, countryKey, isoKey });
-                return;
-            }
-
-            const valueKey = columns.find(
-                key =>
-                    key !== yearKey &&
-                    key !== countryKey &&
-                    key !== isoKey &&
-                    typeof rows[0][key] === "number"
-            );
-
-            if (!valueKey) {
-                console.error("No numeric value column found.");
-                return;
-            }
-
             const filtered = rows.filter(row =>
-                row[isoKey] &&
-                typeof row[isoKey] === "string" &&
-                row[isoKey].trim() !== "" &&
-                !row[isoKey].startsWith("OWID") &&
-                (meta.yearStart == null || row[yearKey] >= meta.yearStart)
+                row.Code &&
+                typeof row.Code === "string" &&
+                row.Code.trim() !== "" &&
+                !row.Code.startsWith("OWID") &&
+                (meta.yearStart == null || row.Year >= meta.yearStart)
             );
 
             const standardized = filtered.map(row => ({
-                Year: row[yearKey],
-                Country: row[countryKey],
-                Production: row[valueKey]
+                Year: row.Year,
+                Country: row.Entity,
+                ISO: row.Code,
+                Production: row[Object.keys(row).find(k => !["Entity", "Code", "Year"].includes(k) && typeof row[k] === "number")]
             }));
 
             console.log("Filtered and standardized data:", standardized);
             setData(standardized);
         });
     }, [csvUrl]);
-
-
-
-
 
 
     // pick the 10 biggest producers based on each country's max value, ignoring the target
