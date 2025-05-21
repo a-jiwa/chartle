@@ -193,7 +193,6 @@ export default function Guesses({
             )}
 
             <p className="text-m text-gray-700">
-                Guesses:{" "}
                 <span className="font-semibold">{guesses.length}</span> / {max}
             </p>
 
