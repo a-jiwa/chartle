@@ -235,7 +235,7 @@ export default function Chart({
         );
 
         // Compute new left offset for title/subtitle alignment
-        const titleOffsetX = m.left - maxTickLabelWidth - 8; // 8px padding from tick label
+        const titleOffsetX = m.left - maxTickLabelWidth - 4; // 8px padding from tick label
 
 
         // Assuming these are declared earlier in your scope:
@@ -399,7 +399,7 @@ export default function Chart({
             .attr("font-size", 14)
             .attr("fill", "#6b7280") // gray-500
             .merge(source)
-            .attr("x", m.left)
+            .attr("x", titleOffsetX)  // <-- Updated to match heading alignment
             .attr("y", height - 6)
             .text(meta.source);
     }, [data, meta, width, height, target, others, guesses, guessColours]);
