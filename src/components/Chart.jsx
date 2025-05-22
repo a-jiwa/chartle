@@ -401,7 +401,7 @@ export default function Chart({
             .merge(source)
             .attr("x", titleOffsetX)  // <-- Updated to match heading alignment
             .attr("y", height - 6)
-            .text(meta.source);
+            .text("Source: " + meta.source);
     }, [data, meta, width, height, target, others, guesses, guessColours]);
 
     return (
