@@ -31,25 +31,54 @@ export default function Chart({
         d3.csv(csvUrl, d3.autoType).then((rows) => {
             if (!rows.length) return;
 
-            const filtered = rows.filter(row =>
-                row.Code &&
-                typeof row.Code === "string" &&
-                row.Code.trim() !== "" &&
-                !row.Code.startsWith("OWID") &&
-                (meta.yearStart == null || row.Year >= meta.yearStart)
-            );
+            const columnNames = Object.keys(rows[0]);
 
-            const standardized = filtered.map(row => ({
-                Year: row.Year,
-                Country: row.Entity,
-                ISO: row.Code,
-                Production: row[Object.keys(row).find(k => !["Entity", "Code", "Year"].includes(k) && typeof row[k] === "number")]
-            }));
+            // Detect wide format: many numeric year-named columns
+            const yearColumns = columnNames.filter(col => /^\d{4}$/.test(col));
+            const isWideFormat = yearColumns.length > 3;
 
-            console.log("Filtered and standardized data:", standardized);
+            let standardized;
+
+            if (isWideFormat) {
+                // Assume first column is Country, second is ISO
+                const [colCountry, colISO] = columnNames;
+
+                standardized = rows.flatMap(row =>
+                    yearColumns.map(year => ({
+                        Country: row[colCountry],
+                        ISO: row[colISO],
+                        Year: +year,
+                        Production: row[year]
+                    }))
+                );
+            } else {
+                // Assume first three columns: Country, ISO, Year
+                const [colCountry, colISO, colYear] = columnNames;
+
+                const colProduction = columnNames.find((col, i) =>
+                    i > 2 && typeof rows[0][col] === "number"
+                );
+
+                standardized = rows.filter(row =>
+                    row[colISO] &&
+                    typeof row[colISO] === "string" &&
+                    row[colISO].trim() !== "" &&
+                    !row[colISO].startsWith("OWID") &&
+                    (meta.yearStart == null || row[colYear] >= meta.yearStart)
+                ).map(row => ({
+                    Country: row[colCountry],
+                    ISO: row[colISO],
+                    Year: row[colYear],
+                    Production: row[colProduction],
+                }));
+            }
+
+            console.log("Standardized data:", standardized);
             setData(standardized);
         });
     }, [csvUrl]);
+
+
 
 
     // pick the 10 biggest producers based on each country's max value, ignoring the target
