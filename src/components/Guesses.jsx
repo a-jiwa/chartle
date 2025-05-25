@@ -42,6 +42,8 @@ export default function Guesses({
     const trimmed = value.trim();
     const lcTrimmed = trimmed.toLowerCase();
 
+    const currentGuess = Math.min(guesses.length + 1, max);
+
     /* — Valid country? — */
     const isValidCountry = COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed);
 
@@ -181,7 +183,7 @@ export default function Guesses({
     };
 
     return (
-        <div className="h-full flex flex-col items-center justify-center gap-4 p-4">
+        <div className="h-full flex flex-col items-center justify-center gap-4 pt-10 pb-20">
             {/* ── instruction ── */}
             {guesses.length === 0 && (
                 <p className="text-m font-medium text-gray-800 pt-0.5">
@@ -192,11 +194,8 @@ export default function Guesses({
                 </p>
             )}
 
-            <p className="text-m text-gray-700">
-                <span className="font-semibold">{guesses.length}</span> / {max}
-            </p>
-
-            <form onSubmit={submit} className="w-6/7 mx-auto">
+            {/* ─────────── Input form ─────────── */}
+            <form onSubmit={submit} className="w-full px-[50px]">
                 <div className="relative">
                     {/* ─────────── Input + button ─────────── */}
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -247,15 +246,16 @@ export default function Guesses({
 
                     <button
                         type="submit"
-                        disabled={!isValidCountry || disabled}
+                        disabled={!isValidCountry || disabled || guesses.length >= max}
                         className={`text-white absolute right-2 bottom-2 font-medium rounded-lg text-sm px-4 py-2 disabled:bg-gray-400 ${
-                            isValidCountry && !disabled
+                            isValidCountry && !disabled && guesses.length < max
                                 ? "bg-emerald-500 hover:bg-emerald-600 focus:ring-4 focus:ring-emerald-300"
                                 : "bg-gray-300 text-gray-700 cursor-not-allowed"
                         }`}
                     >
-                        Guess
+                        {`Guess ${currentGuess}/${max}`}
                     </button>
+
 
                     {/* ─────────── Suggestions ─────────── */}
                     {showSuggestions && filtered.length > 0 && (
@@ -288,7 +288,7 @@ export default function Guesses({
 
             {/* ─────────── Previous guesses ─────────── */}
             {guesses.length > 0 && (
-                <div className="flex flex-col items-center space-y-1">
+                <div className="w-full px-[50px] flex flex-col space-y-2">
                     {guesses.map((g, i) => {
                         const guessIso = countryToIso[g];
                         const match = targetData?.[guessIso];
@@ -300,16 +300,21 @@ export default function Guesses({
                         return (
                             <div
                                 key={g}
-                                className="font-semibold flex items-center gap-2"
-                                style={{
-                                    color: guessColours[i] ?? "#2A74B3",
-                                    fontSize: "20px",
-                                }}
+                                className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 bg-white"
                             >
-                                <span>{g}</span>
+                                {/* Left: numbered country */}
+                                <span
+                                    className="font-semibold text-gray-800"
+                                    style={{ color: guessColours[i] ?? "#2A74B3" }}
+                                >
+                                    {`${i + 1}. ${g}`}
+                                </span>
+
+                                {/* Right: arrow + distance */}
                                 {match && (
-                                    <span className="text-gray-700 text-sm">
-                                        {emoji} {distance} km
+                                    <span className="flex items-center gap-1 text-gray-700 text-sm font-medium">
+                                        <span>{emoji}</span>
+                                        <span>{distance} km</span>
                                     </span>
                                 )}
                             </div>

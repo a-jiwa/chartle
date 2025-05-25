@@ -117,7 +117,7 @@ export default function Chart({
         );
 
         /* ----- layout ----- */
-        const m = { top: 90, right: 30, bottom: 60, left: 50 };
+        const m = { top: 90, right: 50, bottom: 60, left: 50 };
         const innerW = width - m.left - m.right;
         const innerH = height - m.top - m.bottom;
 
@@ -169,14 +169,20 @@ export default function Chart({
             },
         ];
 
-        const guessLines = guesses.map((c, i) => ({
-            id: `${c}-guess`,
-            country: c,
-            rows: grouped.get(c) ?? [],
-            stroke: guessColours[i] ?? "#2A74B3",
-            width: 3,
-            opacity: 1,
-        }));
+        const guessLines = guesses.map((c, i) => {
+            const rows = grouped.get(c) ?? [];
+            const iso  = rows[0]?.ISO ?? c;
+
+            return {
+                id: `${c}-guess`,
+                country: c,
+                iso,
+                rows,
+                stroke: guessColours[i] ?? "#2A74B3",
+                width: 3,
+                opacity: 1,
+            };
+        });
 
         const lineData = [...baseLines, ...targetLine, ...guessLines];
 
@@ -184,8 +190,8 @@ export default function Chart({
         const svg = d3
             .select(svgRef.current)
             .attr("viewBox", [0, 0, width, height])
-            .attr("preserveAspectRatio", "xMidYMid meet");
-
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .style("overflow", "visible");
         let g = svg.select("g.chart-root");
         if (g.empty()) {
             g = svg
@@ -205,7 +211,7 @@ export default function Chart({
             .selectAll(".tick text")
             .attr("font-size", 16)
             .attr("font-weight", 500)
-            .attr("fill", "#111827")
+            .attr("fill", "#6b7280")
             .attr("dy", "0.95em") // increased vertical padding for x-axis labels
             .style("font-family", "Open Sans, sans-serif");
 
@@ -240,7 +246,7 @@ export default function Chart({
             sel.selectAll(".tick text")
                 .attr("font-size", 16)
                 .attr("font-weight", 500)
-                .attr("fill", "#111827")
+                .attr("fill", "#6b7280")
                 .style("font-family", "Open Sans, sans-serif");
             sel.selectAll(".domain").attr("stroke-opacity", 0);
             sel.selectAll(".tick line")
@@ -337,6 +343,40 @@ export default function Chart({
 
         guessGroups.exit().remove();
 
+        /* ────── right-hand labels for each guess line ────── */
+        const labelXOffset = 4;
+        const labelYOffset = 4;
+
+        const guessLabels = g.selectAll("text.guess-label")
+            .data(guessLines, d => d.id);
+
+        const guessLabelsMerged = guessLabels.enter()
+            .append("text")
+            .attr("class", "guess-label")
+            .attr("font-size", 14)
+            .attr("text-anchor", "start")
+            .merge(guessLabels);
+
+        guessLabelsMerged
+            .attr("font-weight", "bold")
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("fill", d => d.stroke)
+            .each(function (d) {
+                const rows = d.rows.filter(r => typeof r.Production === "number");
+                const last = rows[rows.length - 1];
+                if (!last) return;
+
+                const xPos = x(last.Year) + labelXOffset;
+                const yPos = y(last.Production / meta.scale) + labelYOffset;
+
+                d3.select(this)
+                    .attr("x", xPos)
+                    .attr("y", yPos)
+                    .text(d.iso);
+            });
+
+        guessLabels.exit().remove();
+
         // === Red target line (static base) and overlay animation ===
         const red = targetLine[0];
 
@@ -385,36 +425,48 @@ export default function Chart({
             .attr("d", redPathData);
         }
 
+        /* ───── two-size title helper ───── */
+        function pickFontSize(text, maxWidth) {
+            const normal = 24;   // default desktop size
+            const small  = 18;   // fallback if title would overflow
+            const rough  = text.length * normal * 0.6;   // crude width estimate
+            return rough <= maxWidth ? normal : small;
+        }
 
 
         /* ----- heading & subtitle ----- */
+        const headingOffset = 40;                       // top padding
+
         const heading = svg.selectAll("g.chart-heading").data([null]);
+        const hEnter  = heading.enter().append("g").attr("class", "chart-heading");
 
-        const hEnter = heading
-            .enter()
-            .append("g")
-            .attr("class", "chart-heading")
-            .attr("transform", `translate(${titleOffsetX},24)`);
+        heading.attr("transform", `translate(${titleOffsetX},${headingOffset})`);
 
-        heading
-            .attr("transform", `translate(${titleOffsetX},24)`);
-
-        hEnter
+        /* title */
+        const titleSel = hEnter
             .append("text")
             .attr("class", "title")
             .attr("text-anchor", "start")
-            .attr("font-size", 24)
             .attr("font-weight", 700)
             .attr("fill", "#111827")
+            .merge(heading.select("text.title"));
+
+        const fontSize = pickFontSize(meta.title, width - m.left - m.right);
+        titleSel
+            .attr("font-size", fontSize)
             .text(meta.title);
 
-        hEnter
+        /* subtitle (always 16 px) */
+        const subtitleSel = hEnter
             .append("text")
             .attr("class", "subtitle")
             .attr("y", 26)
-            .attr("font-size", 16)
-            .attr("fill", "#374151")
             .attr("text-anchor", "start")
+            .attr("fill", "#374151")
+            .merge(heading.select("text.subtitle"));
+
+        subtitleSel
+            .attr("font-size", 16)
             .text(meta.subtitle);
 
         /* ----- source note ----- */
@@ -426,16 +478,18 @@ export default function Chart({
             .attr("class", "chart-source")
             .attr("text-anchor", "start")
             .attr("font-size", 14)
-            .attr("fill", "#6b7280") // gray-500
+            .attr("fill", "#6b7280")     // gray-500
             .merge(source)
-            .attr("x", titleOffsetX)  // <-- Updated to match heading alignment
+            .attr("x", m.left)           // align with left margin
             .attr("y", height - 6)
             .text("Source: " + meta.source);
+
+
     }, [data, meta, width, height, target, others, guesses, guessColours]);
 
     return (
-        <div ref={wrapperRef} className="w-full h-full p-4">
-            <svg ref={svgRef} className="w-full h-full" />
+        <div ref={wrapperRef} className="w-full h-full">
+            <svg ref={svgRef} className="w-full h-full"/>
         </div>
     );
 }

@@ -1,66 +1,103 @@
 /* ─── src/App.jsx ─────────────────────────────────────────── */
 
 import { useState, useEffect } from "react";
-import Chart    from "./components/Chart";
-import Guesses  from "./components/Guesses";
-import WinModal from "./components/WinModal";
-import LoseModal from "./components/LoseModal";
+import confetti from "canvas-confetti";
 
-import countryToIso from "./data/country_to_iso.json";
+import Header from "./components/Header";
+import Chart     from "./components/Chart";
+import Guesses   from "./components/Guesses";
+import WinModal  from "./components/WinModal";
+import LoseModal from "./components/LoseModal";
+import ResultInfo from "./components/ResultInfo.jsx";
+
+import countryToIso         from "./data/country_to_iso.json";
 import countryToRealCountry from "./data/country_to_real_country.json";
 
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
-const META_URL = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/007_academic_papers.json";
+const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/007_academic_papers.json";
 const MAX_GUESSES = 5;
 
 export default function App() {
-    const [meta,    setMeta]    = useState(null);
-    const [guesses, setGuesses] = useState([]);
-    const [status,  setStatus]  = useState("playing");   // 'playing' | 'won' | 'lost' | 'done'
-    const [targetData, setTargetData] = useState(null);
+    /* ─── state ─────────────────────────────────────────── */
+    const [meta,         setMeta]         = useState(null);
+    const [guesses,      setGuesses]      = useState([]);
+    const [status,       setStatus]       = useState("playing");   // 'playing' | 'won' | 'lost' | 'done'
+    const [showWinModal, setShowWinModal] = useState(false);
+    const [targetData,   setTargetData]   = useState(null);
 
+    /* ─── analytics initialisation ─────────────────────── */
     useEffect(() => {
         initGA();
         trackPageView();
     }, []);
 
-    /* pull the config once */
+    /* ─── fetch top-level game config ───────────────────── */
     useEffect(() => {
         fetch(META_URL)
             .then(r => r.json())
-            .then(setMeta);
+            .then(setMeta)
+            .catch(err => console.error("Failed to fetch meta:", err));
     }, []);
 
-    /* show nothing until config arrives */
-    if (!meta) return null;
+    /* ─── derive target info from meta ──────────────────── */
+    const target       = meta?.target ?? null;                       // e.g. "India"
+    const targetIso    = target ? countryToRealCountry[target] : null;
+    const targetKey    = target ? target.toLowerCase() : null;
+    const guessColours = meta?.guessColours ?? [];
 
-    const guessColours = meta.guessColours;
-    const target = meta.target; // e.g. "India"
-    const targetIso = countryToRealCountry[target]; // Get real country ISO code
+    /* ─── fetch per-country hints once ISO known ────────── */
+    useEffect(() => {
+        if (!targetIso) return;                                      // nothing to fetch yet
+        const dataUrl =
+            `https://raw.githubusercontent.com/a-jiwa/chartle-data/main/countries/${targetIso}.json`;
 
-    if (!targetIso) return;    const targetKey    = target.toLowerCase();
+        fetch(dataUrl)
+            .then(r => r.json())
+            .then(setTargetData)
+            .catch(err => console.error("Failed to fetch target country data:", err));
+    }, [targetIso]);
 
-    const dataUrl = `https://raw.githubusercontent.com/a-jiwa/chartle-data/main/countries/${targetIso}.json`;
+    /* ─── confetti sequence ─────────────────────────────── */
+    useEffect(() => {
+        if (status !== "won") {
+            setShowWinModal(false);
+            return;
+        }
 
-    fetch(dataUrl)
-        .then((res) => res.json())
-        .then((data) => setTargetData(data))
-        .catch((err) => console.error("Failed to fetch target country data:", err));
+        const confettiDelay = 300;          // ms before confetti starts
+        const modalDelay    = confettiDelay + 1000; // modal appears 1 s after confetti
 
-    /** add a guess (case-insensitive, max 5, ignore dups) */
+        const confettiTimer = setTimeout(() => {
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 },
+                disableForReducedMotion: true
+            });
+        }, confettiDelay);
+
+        const modalTimer = setTimeout(() => setShowWinModal(true), modalDelay);
+
+        return () => {
+            clearTimeout(confettiTimer);
+            clearTimeout(modalTimer);
+        };
+    }, [status]);
+
+    /* ─── add a guess (case-insensitive, max 5) ─────────── */
     const handleAddGuess = (raw) => {
         if (status !== "playing") return;
 
-        const text   = raw.trim();
+        const text = raw.trim();
         if (!text) return;
 
-        const key    = text.toLowerCase();
-        const title  = text.replace(/\b\w/g, c => c.toUpperCase());
+        const key   = text.toLowerCase();
+        const title = text.replace(/\b\w/g, c => c.toUpperCase());
 
         const isValid = COUNTRIES.some(c => c.toLowerCase() === key);
-        if (!isValid) return; // ignore invalid guesses
+        if (!isValid) return;
 
         setGuesses(prev => {
             if (prev.some(g => g.toLowerCase() === key) || prev.length >= MAX_GUESSES) {
@@ -69,31 +106,35 @@ export default function App() {
 
             const next = [...prev, title];
 
-            // Track the guess
-        trackGuess(title, next.length);
+            trackGuess(title, next.length);
 
-        if (key === targetKey) {
-            setStatus("won");
-            trackGameEnd("won", next.length, target);
-        } else if (next.length >= MAX_GUESSES) {
-            setStatus("lost");
-            trackGameEnd("lost", next.length, target);
-        }
+            if (key === targetKey) {
+                setStatus("won");
+                trackGameEnd("won", next.length, target);
+            } else if (next.length >= MAX_GUESSES) {
+                setStatus("lost");
+                trackGameEnd("lost", next.length, target);
+            }
 
-            // Get direction + distance for hint
+            /* directional hint */
             const guessIso = countryToIso[title];
-            if (guessIso && targetData[guessIso]) {
+            if (guessIso && targetData && targetData[guessIso]) {
                 const { direction, distance_km } = targetData[guessIso];
-                console.log(`Your guess is ${distance_km}km to the ${direction}`);
+                console.log(`Your guess is ${distance_km} km to the ${direction}`);
             }
 
             return next;
         });
     };
 
+    /* ─── placeholder whilst data loads ─────────────────── */
+    if (!meta || !targetIso) return null;
+
+    /* ─── render ────────────────────────────────────────── */
     return (
         <div className="h-full flex flex-col items-center">
-            <div className="flex flex-col w-full max-w-[1000px] h-full">
+            <Header />
+            <div className="flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
                     <Chart
@@ -106,25 +147,41 @@ export default function App() {
                     />
                 </div>
 
-                {/* guess input pane */}
-                <div className="flex-none h-1/3">
-                    <Guesses
-                        guesses={guesses}
-                        onAddGuess={handleAddGuess}
-                        status={status}
-                        max={MAX_GUESSES}
-                        guessColours={guessColours}
-                        targetData={targetData}
-                        countryToIso={countryToIso}
-                    />
+                {/* bottom pane: either guesses or info */}
+                <div className="flex-none">
+                    {(status === "playing" || !meta?.infoTitle?.trim() && !meta?.infoDescription?.trim()) ? (
+                        <Guesses
+                            guesses={guesses}
+                            onAddGuess={handleAddGuess}
+                            status={status}
+                            max={MAX_GUESSES}
+                            guessColours={guessColours}
+                            targetData={targetData}
+                            countryToIso={countryToIso}
+                        />
+                    ) : (
+                        <ResultInfo
+                            title={meta.infoTitle}
+                            description={meta.infoDescription}
+                        />
+                    )}
                 </div>
+
             </div>
 
-            {/* win modal */}
-            {status === "won" && <WinModal onClose={() => setStatus("done")} />}
+            {/* win modal (appears after confetti) */}
+            {showWinModal && (
+                <WinModal
+                    onClose={() => setStatus("done")}
+                    guesses={guesses}
+                    target={target}
+                />
+            )}
 
-            {/* Lose modal */}
-            {status === "lost" && <LoseModal onClose={() => setStatus("done")} target={target} />}
+            {/* lose modal */}
+            {status === "lost" && (
+                <LoseModal onClose={() => setStatus("done")} target={target} />
+            )}
         </div>
     );
 }
