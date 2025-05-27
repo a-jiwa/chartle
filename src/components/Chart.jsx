@@ -270,7 +270,7 @@ export default function Chart({
         );
 
         // Compute new left offset for title/subtitle alignment
-        const titleOffsetX = m.left - maxTickLabelWidth - 4; // 8px padding from tick label
+        const titleOffsetX = m.left - maxTickLabelWidth - 4; // 4px padding from tick label
 
 
         // Assuming these are declared earlier in your scope:
@@ -376,6 +376,28 @@ export default function Chart({
             });
 
         guessLabels.exit().remove();
+
+        // If user guessed the target, draw its ISO label in red
+        if (guesses.includes(target)) {
+            const targetRows = grouped.get(target) ?? [];
+            const targetLast = targetRows.filter(r => typeof r.Production === "number").at(-1);
+            if (targetLast) {
+                g.selectAll("text.target-label").data([targetLast])
+                    .join("text")
+                    .attr("class", "target-label")
+                    .attr("font-size", 14)
+                    .attr("font-weight", "bold")
+                    .attr("text-anchor", "start")
+                    .attr("font-family", "Open Sans, sans-serif")
+                    .attr("fill", "#c43333") // red
+                    .attr("x", x(targetLast.Year) + 4)
+                    .attr("y", y(targetLast.Production / meta.scale) + 4)
+                    .text(targetRows[0]?.ISO ?? target);
+            }
+        } else {
+            g.selectAll("text.target-label").remove();
+        }
+
 
         // === Red target line (static base) and overlay animation ===
         const red = targetLine[0];
