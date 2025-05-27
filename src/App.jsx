@@ -16,7 +16,7 @@ import countryToRealCountry from "./data/country_to_real_country.json";
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
-const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/007_academic_papers.json";
+const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/010_share_elec_prod_nuclear.json";
 const MAX_GUESSES = 5;
 
 export default function App() {
