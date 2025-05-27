@@ -544,7 +544,9 @@ export default function Chart({
 
     return (
         <div ref={wrapperRef} className="w-full h-full">
-            <svg ref={svgRef} className="w-full h-full"/>
+            {width > 0 && height > 0 && (
+            <svg ref={svgRef} className="w-full h-full" />
+            )}
         </div>
-    );
+        );
 }
