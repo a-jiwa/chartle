@@ -347,59 +347,8 @@ export default function Chart({
         const labelXOffset = 4;
         const labelYOffset = 4;
 
-        const guessLabels = g.selectAll("text.guess-label")
-            .data(guessLines, d => d.id);
-
-        const guessLabelsMerged = guessLabels.enter()
-            .append("text")
-            .attr("class", "guess-label")
-            .attr("font-size", 14)
-            .attr("text-anchor", "start")
-            .merge(guessLabels);
-
-        guessLabelsMerged
-            .attr("font-weight", "bold")
-            .attr("font-family", "Open Sans, sans-serif")
-            .attr("fill", d => d.stroke)
-            .each(function (d) {
-                const rows = d.rows.filter(r => typeof r.Production === "number");
-                const last = rows[rows.length - 1];
-                if (!last) return;
-
-                const xPos = x(last.Year) + labelXOffset;
-                const yPos = y(last.Production / meta.scale) + labelYOffset;
-
-                d3.select(this)
-                    .attr("x", xPos)
-                    .attr("y", yPos)
-                    .text(d.iso);
-            });
-
-        guessLabels.exit().remove();
-
-        // If user guessed the target, draw its ISO label in red
-        if (guesses.includes(target)) {
-            const targetRows = grouped.get(target) ?? [];
-            const targetLast = targetRows.filter(r => typeof r.Production === "number").at(-1);
-            if (targetLast) {
-                g.selectAll("text.target-label").data([targetLast])
-                    .join("text")
-                    .attr("class", "target-label")
-                    .attr("font-size", 14)
-                    .attr("font-weight", "bold")
-                    .attr("text-anchor", "start")
-                    .attr("font-family", "Open Sans, sans-serif")
-                    .attr("fill", "#c43333") // red
-                    .attr("x", x(targetLast.Year) + 4)
-                    .attr("y", y(targetLast.Production / meta.scale) + 4)
-                    .text(targetRows[0]?.ISO ?? target);
-            }
-        } else {
-            g.selectAll("text.target-label").remove();
-        }
-
-        function avoidLabelOverlap(labels, minSpacing = 10) {
-            // Collect y positions and D3 nodes
+        function avoidLabelOverlap(labels, minSpacing = 12) {
+            // Get label nodes with their original y-positions
             const nodes = labels.nodes().map((el) => {
                 const sel = d3.select(el);
                 return {
@@ -409,7 +358,7 @@ export default function Chart({
                 };
             });
 
-            // Sort labels top to bottom (small y = higher on screen)
+            // Sort labels from top to bottom (ascending y)
             nodes.sort((a, b) => a.y - b.y);
 
             const placed = [];
@@ -418,20 +367,20 @@ export default function Chart({
                 const curr = nodes[i];
                 let bestY = curr.y;
                 let offset = 0;
-                let direction = -1; // try up first
+                let direction = -1; // start by trying to move up
 
                 while (true) {
                     const conflict = placed.some((p) => Math.abs(p.y - bestY) < minSpacing);
 
                     if (!conflict) break;
 
-                    // Alternate direction (up/down)
+                    // Alternate between up and down, increasing distance each loop
                     direction *= -1;
                     offset += minSpacing;
                     bestY = curr.y + direction * offset;
 
-                    // Fail-safe: don't shift more than N pixels
-                    if (offset > 80) break;
+                    // Safety stop
+                    if (offset > 100) break;
                 }
 
                 curr.node.attr("y", bestY);
@@ -439,7 +388,48 @@ export default function Chart({
             }
         }
 
-        avoidLabelOverlap(g.selectAll("text.guess-label, text.target-label"));
+
+        // Append labels after line animations
+        guessEnter.selectAll("path:last-child").each(function (d, i) {
+            const path = d3.select(this);
+            const length = this.getTotalLength();
+
+            const rows = d.rows.filter(r => typeof r.Production === "number");
+            const last = rows[rows.length - 1];
+            if (!last) return;
+
+            const xPos = x(last.Year) + labelXOffset;
+            const yPos = y(last.Production / meta.scale) + labelYOffset;
+
+            const drawLabel = () => {
+                g.append("text")
+                    .attr("class", d.country === target ? "target-label" : "guess-label")
+                    .attr("font-size", 14)
+                    .attr("font-weight", "bold")
+                    .attr("text-anchor", "start")
+                    .attr("font-family", "Open Sans, sans-serif")
+                    .attr("fill", d.country === target ? "#c43333" : d.stroke)
+                    .attr("x", xPos)
+                    .attr("y", yPos)
+                    .text(d.iso);
+
+                // Slight timeout to let DOM update before resolving overlaps
+                setTimeout(() => {
+                    avoidLabelOverlap(g.selectAll("text.guess-label, text.target-label"));
+                }, 0);
+            };
+
+            if (d.country === target) {
+                drawLabel(); // No animation delay
+            } else {
+                path.transition()
+                    .duration(2000)
+                    .attr("stroke-dashoffset", 0)
+                    .on("end", drawLabel); // Wait until line animation finishes
+            }
+        });
+
+
 
 
         // === Red target line (static base) and overlay animation ===
