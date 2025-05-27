@@ -398,6 +398,49 @@ export default function Chart({
             g.selectAll("text.target-label").remove();
         }
 
+        function avoidLabelOverlap(labels, minSpacing = 10) {
+            // Collect y positions and D3 nodes
+            const nodes = labels.nodes().map((el) => {
+                const sel = d3.select(el);
+                return {
+                    node: sel,
+                    y: parseFloat(sel.attr("y")),
+                    x: parseFloat(sel.attr("x")),
+                };
+            });
+
+            // Sort labels top to bottom (small y = higher on screen)
+            nodes.sort((a, b) => a.y - b.y);
+
+            const placed = [];
+
+            for (let i = 0; i < nodes.length; i++) {
+                const curr = nodes[i];
+                let bestY = curr.y;
+                let offset = 0;
+                let direction = -1; // try up first
+
+                while (true) {
+                    const conflict = placed.some((p) => Math.abs(p.y - bestY) < minSpacing);
+
+                    if (!conflict) break;
+
+                    // Alternate direction (up/down)
+                    direction *= -1;
+                    offset += minSpacing;
+                    bestY = curr.y + direction * offset;
+
+                    // Fail-safe: don't shift more than N pixels
+                    if (offset > 80) break;
+                }
+
+                curr.node.attr("y", bestY);
+                placed.push({ y: bestY });
+            }
+        }
+
+        avoidLabelOverlap(g.selectAll("text.guess-label, text.target-label"));
+
 
         // === Red target line (static base) and overlay animation ===
         const red = targetLine[0];
