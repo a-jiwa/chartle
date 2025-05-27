@@ -26,6 +26,8 @@ export default function App() {
     const [status,       setStatus]       = useState("playing");   // 'playing' | 'won' | 'lost' | 'done'
     const [showWinModal, setShowWinModal] = useState(false);
     const [targetData,   setTargetData]   = useState(null);
+    const [showLoseModal, setShowLoseModal] = useState(false);
+
 
     /* ─── analytics initialisation ─────────────────────── */
     useEffect(() => {
@@ -85,6 +87,20 @@ export default function App() {
             clearTimeout(modalTimer);
         };
     }, [status]);
+
+    /* ─── to delay lose modal only after line is rendered ─────────── */
+    useEffect(() => {
+            if (status === "lost") {
+                const timeout = setTimeout(() => {
+                    setShowLoseModal(true);
+                }, 3000); // 3 seconds delay
+
+                return () => clearTimeout(timeout);
+            } else {
+                setShowLoseModal(false);
+            }
+        }, [status]);
+
 
     /* ─── add a guess (case-insensitive, max 5) ─────────── */
     const handleAddGuess = (raw) => {
@@ -179,7 +195,7 @@ export default function App() {
             )}
 
             {/* lose modal */}
-            {status === "lost" && (
+            {showLoseModal && (
                 <LoseModal onClose={() => setStatus("done")} target={target} />
             )}
         </div>
