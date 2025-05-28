@@ -150,8 +150,6 @@ export default function App() {
     return (
         <div className="h-full flex flex-col items-center">
             <Header />
-            {/* Spacer div to push content below fixed header */}
-            <div className="h-10 flex-shrink-0" />
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
