@@ -150,7 +150,7 @@ export default function App() {
     return (
         <div className="h-full flex flex-col items-center">
             <Header />
-            <div className="flex flex-col w-full max-w-[700px] h-full">
+            <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
                     <Chart
