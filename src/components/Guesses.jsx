@@ -31,6 +31,7 @@ export default function Guesses({
                                     guessColours = [],
                                     targetData,
                                     countryToIso,
+                                    clue = false,
                                 }) {
     const [value, setValue] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -148,27 +149,33 @@ export default function Guesses({
         const finalDistance = dataForGuess?.distance_km ?? 0;
 
         /* ── start distance counter ── */
-        animateDistance(guess, finalDistance);
-
-        /* ── start compass spin ── */
-        const targetIndex = compassSequence.indexOf(finalDirection);
-        const totalSteps = compassSequence.length * 4 + targetIndex; // 3 spins + land
-
-        let currentStep = 0;
-        function spinStep() {
-            const delay = 50 + Math.pow(currentStep, 1.4); // exponential easing
-            const nextIndex = currentStep % compassSequence.length;
-            const nextEmoji = compassSequence[nextIndex];
-
-            setSpinningEmojis((prev) => ({
-                ...prev,
-                [guess]: nextEmoji,
-            }));
-
-            currentStep++;
-            if (currentStep <= totalSteps) setTimeout(spinStep, delay);
+        if (clue) {
+            animateDistance(guess, finalDistance);
+        } else {
+            setDistanceTicks((prev) => ({ ...prev, [guess]: finalDistance }));
         }
-        spinStep();
+
+        if (clue) {
+            /* ── start compass spin ── */
+            const targetIndex = compassSequence.indexOf(finalDirection);
+            const totalSteps = compassSequence.length * 4 + targetIndex; // 3 spins + land
+
+            let currentStep = 0;
+            function spinStep() {
+                const delay = 50 + Math.pow(currentStep, 1.4); // exponential easing
+                const nextIndex = currentStep % compassSequence.length;
+                const nextEmoji = compassSequence[nextIndex];
+
+                setSpinningEmojis((prev) => ({
+                    ...prev,
+                    [guess]: nextEmoji,
+                }));
+
+                currentStep++;
+                if (currentStep <= totalSteps) setTimeout(spinStep, delay);
+            }
+            spinStep();
+        }
 
         /* ── clear input ── */
         setValue("");
@@ -294,7 +301,7 @@ export default function Guesses({
                         const guessIso = countryToIso[g];
                         const match = targetData?.[guessIso];
                         const direction = match?.direction;
-                        const emoji = spinningEmojis[g] || direction || "";
+                        const emoji = clue ? (spinningEmojis[g] || direction || "") : "";
                         const distance =
                             distanceTicks[g] ?? match?.distance_km ?? 0;
 
@@ -312,7 +319,7 @@ export default function Guesses({
                                 </span>
 
                                 {/* Right: arrow + distance */}
-                                {match && (
+                                {match && clue && (
                                     <span className="flex items-center gap-1 text-gray-700 text-sm font-medium">
                                         <span>{emoji}</span>
                                         <span>{distance} km</span>
