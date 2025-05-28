@@ -150,9 +150,9 @@ export default function App() {
     return (
         <div className="h-full flex flex-col items-center">
             <Header />
-            <div className="flex flex-col w-full max-w-[700px] flex-1 min-h-0">
+            <div className="flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
-                <div className="flex-none h-[60vh] sm:h-[60vh] md:h-[65vh] max-h-[600px]">
+                <div className="flex-none h-2/3">
                     <Chart
                         csvUrl={meta.csvUrl}
                         meta={meta}
@@ -164,7 +164,7 @@ export default function App() {
                 </div>
 
                 {/* bottom pane: either guesses or info */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-none">
                     {(status === "playing" || !meta?.infoTitle?.trim() && !meta?.infoDescription?.trim()) ? (
                         <Guesses
                             guesses={guesses}
