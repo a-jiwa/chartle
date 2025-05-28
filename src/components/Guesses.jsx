@@ -183,7 +183,7 @@ export default function Guesses({
     };
 
     return (
-        <div className="h-full flex flex-col items-center justify-center gap-4 pt-10 pb-20">
+        <div className="flex flex-col items-center gap-3 py-5">
             {/* ── instruction ── */}
             {guesses.length === 0 && (
                 <p className="text-m font-medium text-gray-800 pt-0.5">
@@ -288,7 +288,7 @@ export default function Guesses({
 
             {/* ─────────── Previous guesses ─────────── */}
             {guesses.length > 0 && (
-                <div className="w-full px-[50px] flex flex-col space-y-2">
+                <div className="w-full px-[50px] overflow-y-auto max-h-[200px] flex flex-col space-y-2">
                     {[...guesses].reverse().map((g, idx) => {
                         const i = guesses.length - 1 - idx; // Adjust index to match original order
                         const guessIso = countryToIso[g];
