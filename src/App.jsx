@@ -8,7 +8,6 @@ import Chart     from "./components/Chart";
 import Guesses   from "./components/Guesses";
 import WinModal  from "./components/WinModal";
 import LoseModal from "./components/LoseModal";
-import ResultInfo from "./components/ResultInfo.jsx";
 
 import countryToIso         from "./data/country_to_iso.json";
 import countryToRealCountry from "./data/country_to_real_country.json";
@@ -48,6 +47,7 @@ export default function App() {
     const targetIso    = target ? countryToRealCountry[target] : null;
     const targetKey    = target ? target.toLowerCase() : null;
     const guessColours = meta?.guessColours ?? [];
+    const infoDescription = meta?.infoDescription ?? null;  
 
     /* ─── fetch per-country hints once ISO known ────────── */
     useEffect(() => {
@@ -163,9 +163,8 @@ export default function App() {
                     />
                 </div>
 
-                {/* bottom pane: either guesses or info */}
+                {/* bottom pane */}
                 <div className="flex-none">
-                    {(status === "playing" || !meta?.infoTitle?.trim() && !meta?.infoDescription?.trim()) ? (
                         <Guesses
                             guesses={guesses}
                             onAddGuess={handleAddGuess}
@@ -175,12 +174,6 @@ export default function App() {
                             targetData={targetData}
                             countryToIso={countryToIso}
                         />
-                    ) : (
-                        <ResultInfo
-                            title={meta.infoTitle}
-                            description={meta.infoDescription}
-                        />
-                    )}
                 </div>
 
             </div>
@@ -191,6 +184,7 @@ export default function App() {
                     onClose={() => setStatus("done")}
                     guesses={guesses}
                     target={target}
+                    infoDescription={infoDescription}
                 />
             )}
 

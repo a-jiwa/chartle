@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function WinModal({ onClose, guesses, target }) {
+export default function WinModal({ onClose, guesses, target, infoDescription }) {
     const [copied, setCopied] = useState(false);
 
     const guessCount = guesses.length;
@@ -24,13 +24,12 @@ export default function WinModal({ onClose, guesses, target }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl transition-all animate-in fade-in zoom-in space-y-6">
                 <div className="text-center space-y-2">
-                    <div className="text-4xl">🎉</div>
-                    <h2 className="text-2xl font-semibold text-emerald-600">You Win!</h2>
+                    <h2 className="text-2xl font-semibold text-emerald-600">Congratulations!</h2>
                     <p className="text-gray-700">
-                        Correct answer: <strong>{target}</strong>
+                        You guessed <strong>{target}</strong> in {guessCount} attempt{guessCount > 1 ? "s" : ""}
                     </p>
-                    <p className="text-sm text-gray-500">
-                        You guessed it in {guessCount} attempt{guessCount > 1 ? "s" : ""}.
+                    <p className="text-gray-700">
+                        {infoDescription}
                     </p>
                 </div>
 
