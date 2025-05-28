@@ -105,7 +105,9 @@ export default function Chart({
     /* --- redraw on changes --- */
     useEffect(() => {
         if (!data || !meta || !target || width === 0 || height === 0) return;
-
+        
+        const rafId = requestAnimationFrame(() => {
+            
         const unitSuffix = meta.unitSuffix;
 
         /* ----- country sets & groups ----- */
@@ -540,6 +542,9 @@ export default function Chart({
             .text("Source: " + meta.source);
 
 
+    });
+    
+    return () => cancelAnimationFrame(rafId); // cleanup
     }, [data, meta, width, height, target, others, guesses, guessColours]);
 
     return (
