@@ -1,12 +1,19 @@
-export default function LoseModal({ onClose, target }) {
+export default function LoseModal({ onClose, target, infoDescription, source }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl transition-all animate-in fade-in zoom-in space-y-6">
                 <div className="text-center space-y-2">
-                    <div className="text-4xl">❌</div>
-                    <h2 className="text-2xl font-semibold text-red-600">Out of guesses!</h2>
-                    <p className="text-gray-700">
-                        The correct answer was <strong className="text-red-600">{target}</strong>.
+                    <h2 className="text-2xl font-semibold" style={{ color: '#c43333' }}>Out of guesses</h2>
+                    <p className="text-gray-700 mb-6">
+                        The correct answer was <strong style={{ color: '#c43333' }}>{target}</strong>.
+                    </p>
+                    {infoDescription.split('\n').map((line, index) => (
+                    <p key={index} className="text-gray-700 text-left mb-4">
+                        {line}
+                    </p>
+                    ))}
+                    <p className="text-gray-700 text-left">
+                        Data source: {source}
                     </p>
                 </div>
 

@@ -48,6 +48,7 @@ export default function App() {
     const targetKey    = target ? target.toLowerCase() : null;
     const guessColours = meta?.guessColours ?? [];
     const infoDescription = meta?.infoDescription ?? null;  
+    const source = meta?.source ?? null;  
 
     /* ─── fetch per-country hints once ISO known ────────── */
     useEffect(() => {
@@ -76,7 +77,8 @@ export default function App() {
                 particleCount: 120,
                 spread: 70,
                 origin: { y: 0.6 },
-                disableForReducedMotion: true
+                disableForReducedMotion: true,
+                colors: ["#c43333", "#3b9e9e", "#4f7cac", "#b48f2b", "#8c6fa8", "#d17968"] // chartle colours
             });
         }, confettiDelay);
 
@@ -185,12 +187,18 @@ export default function App() {
                     guesses={guesses}
                     target={target}
                     infoDescription={infoDescription}
+                    source={source}
                 />
             )}
 
             {/* lose modal */}
             {showLoseModal && (
-                <LoseModal onClose={() => setStatus("done")} target={target} />
+                <LoseModal 
+                    onClose={() => setStatus("done")} 
+                    target={target}
+                    infoDescription={infoDescription}
+                    source={source}
+                 />
             )}
         </div>
     );

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function WinModal({ onClose, guesses, target, infoDescription }) {
+export default function WinModal({ onClose, guesses, target, infoDescription, source }) {
     const [copied, setCopied] = useState(false);
 
     const guessCount = guesses.length;
@@ -25,11 +25,16 @@ export default function WinModal({ onClose, guesses, target, infoDescription }) 
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl transition-all animate-in fade-in zoom-in space-y-6">
                 <div className="text-center space-y-2">
                     <h2 className="text-2xl font-semibold text-emerald-600">Congratulations!</h2>
-                    <p className="text-gray-700">
+                    <p className="text-gray-700 mb-6">
                         You guessed <strong>{target}</strong> in {guessCount} attempt{guessCount > 1 ? "s" : ""}
                     </p>
-                    <p className="text-gray-700">
-                        {infoDescription}
+                    {infoDescription.split('\n').map((line, index) => (
+                    <p key={index} className="text-gray-700 text-left mb-4">
+                        {line}
+                    </p>
+                    ))}
+                    <p className="text-gray-700 text-left">
+                        Data source: {source}
                     </p>
                 </div>
 
