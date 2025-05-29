@@ -33,7 +33,7 @@ export default function WinModal({ onClose, guesses, target, infoDescription, so
                         {line}
                     </p>
                     ))}
-                    <p className="text-gray-700 text-left">
+                    <p className="text-sm text-gray-700 text-left">
                         Data source: {source}
                     </p>
                 </div>
