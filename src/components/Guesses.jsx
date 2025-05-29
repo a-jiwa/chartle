@@ -74,6 +74,13 @@ export default function Guesses({
         })
         .reverse();
 
+    /* — Country has data? — */
+    const hasData = (country) => {
+        const iso = countryToIso[country];
+        return iso && targetData?.[iso];
+    };
+
+
     /* ───────────────── distance animation helper ─────────────────────
        Variable STEP SIZE
        • Far away  → big jumps  (fast)
@@ -136,6 +143,12 @@ export default function Guesses({
             setError("Invalid country. Please select from the list.");
             return;
         }
+
+        if (!guessIso || !targetData?.[guessIso]) {
+            setError("No data available for that country.");
+            return;
+        }
+
         if (guesses.some((g) => g.toLowerCase() === lcTrimmed)) {
             setError("You already guessed that country.");
             return;
@@ -285,27 +298,32 @@ export default function Guesses({
 
                     {/* ─────────── Suggestions ─────────── */}
                     {showSuggestions && filtered.length > 0 && (
-                        <ul
-                            className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
-                           bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto"
+                        <ul className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
+                            bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto"
                         >
-                            {filtered.map((country, idx) => (
-                                <li
-                                    key={country}
-                                    className={`cursor-pointer py-4 px-4 text-sm ${
-                                    idx === highlightedIndex
-                                        ? "bg-emerald-50 font-semibold"
-                                        : "hover:bg-gray-100 text-gray-800"
-                                    }`}
-                                    onMouseDown={() => {
-                                    selectSuggestion(country);
-                                    setHighlightedIndex(-1);
-                                    }}
-                                    onMouseEnter={() => setHighlightedIndex(idx)}
-                                >
-                                    {country}
-                                </li>
-                            ))}
+                            {filtered.map((country, idx) => {
+                                const noData = !hasData(country);
+                                const isHighlighted = idx === highlightedIndex;
+
+                                return (
+                                    <li
+                                        key={country}
+                                        className={`flex justify-between items-center px-4 py-2 text-sm ${
+                                            isHighlighted ? "bg-emerald-50" : "hover:bg-gray-100"
+                                        } ${noData ? "text-gray-400 cursor-not-allowed" : "text-gray-800 cursor-pointer"}`}
+                                        onMouseDown={() => {
+                                            if (!noData) {
+                                                selectSuggestion(country);
+                                                setHighlightedIndex(-1);
+                                            }
+                                        }}
+                                        onMouseEnter={() => setHighlightedIndex(idx)}
+                                    >
+                                        <span>{country}</span>
+                                        {noData && <span className="ml-2 text-xs italic">(no data)</span>}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>
