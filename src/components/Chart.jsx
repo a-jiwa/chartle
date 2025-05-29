@@ -2,7 +2,7 @@
    Responsive time‑series chart with:
    • target line (red), guess lines (blue), other lines (grey)
    • smooth Catmull‑Rom curves and animated y‑axis rescaling
-   • labels, grid, heading and source note
+   • labels, grid and heading
 ---------------------------------------------------------------- */
 
 import { useRef, useEffect, useState } from "react";
@@ -525,23 +525,6 @@ export default function Chart({
         subtitleSel
             .attr("font-size", 16)
             .text(meta.subtitle);
-
-        /* ----- source note ----- */
-        const source = svg.selectAll("text.chart-source").data([null]);
-
-        source
-            .enter()
-            .append("text")
-            .attr("class", "chart-source")
-            .attr("text-anchor", "start")
-            .attr("font-size", 14)
-            .attr("fill", "#6b7280")     // gray-500
-            .merge(source)
-            .attr("x", m.left)           // align with left margin
-            .attr("y", height - 6)
-            .text("Source: " + meta.source);
-
-
     });
     
     return () => cancelAnimationFrame(rafId); // cleanup
