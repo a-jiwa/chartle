@@ -96,7 +96,7 @@ export default function Chart({
             .map(([country]) => country)
             .filter((c, i, arr) => arr.indexOf(c) === i) // just in case
             .filter((c) => c !== target)
-            .slice(0, 10); // keep the top 10
+            //.slice(0, 10); // keep the top 10
 
         return topCountries;
     };
@@ -156,7 +156,7 @@ export default function Chart({
             country: c,
             rows: grouped.get(c) ?? [],
             stroke: "#757575",
-            width: 2.5,
+            width: 1.5,
             opacity: 0.4,
         }));
 
