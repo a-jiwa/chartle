@@ -38,6 +38,8 @@ export default function Guesses({
     const [error, setError] = useState("");
     const [spinningEmojis, setSpinningEmojis] = useState({});
     const [distanceTicks, setDistanceTicks] = useState({}); // ── NEW
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
 
     const disabled = status !== "playing";
     const trimmed = value.trim();
@@ -230,14 +232,31 @@ export default function Guesses({
                         onChange={(e) => {
                             setValue(e.target.value);
                             setShowSuggestions(true);
+                            setHighlightedIndex(-1);  // Reset highlight on new input
                             setError("");
                         }}
                         onKeyDown={(e) => {
-                            if (e.key === "Enter" && !isValidCountry && filtered.length) {
+                            if (e.key === "ArrowDown") {
                                 e.preventDefault();
-                                selectSuggestion(
-                                    filtered[filtered.length - 1]
+                                setShowSuggestions(true);
+                                setHighlightedIndex((idx) =>
+                                idx < filtered.length - 1 ? idx + 1 : 0
                                 );
+                            } else if (e.key === "ArrowUp") {
+                                e.preventDefault();
+                                setShowSuggestions(true);
+                                setHighlightedIndex((idx) =>
+                                idx > 0 ? idx - 1 : filtered.length - 1
+                                );
+                            } else if (e.key === "Enter") {
+                                if (highlightedIndex >= 0 && filtered[highlightedIndex]) {
+                                e.preventDefault();
+                                selectSuggestion(filtered[highlightedIndex]);
+                                setHighlightedIndex(-1);
+                                } else if (!isValidCountry && filtered.length) {
+                                e.preventDefault();
+                                selectSuggestion(filtered[filtered.length - 1]);
+                                }
                             }
                         }}
                         onBlur={() =>
@@ -273,12 +292,16 @@ export default function Guesses({
                             {filtered.map((country, idx) => (
                                 <li
                                     key={country}
-                                    className={`cursor-pointer py-4 px-4 text-sm hover:bg-gray-100 ${
-                                        idx === filtered.length - 1
-                                            ? "bg-emerald-50 font-semibold"
-                                            : "text-gray-800"
+                                    className={`cursor-pointer py-4 px-4 text-sm ${
+                                    idx === highlightedIndex
+                                        ? "bg-emerald-50 font-semibold"
+                                        : "hover:bg-gray-100 text-gray-800"
                                     }`}
-                                    onMouseDown={() => selectSuggestion(country)}
+                                    onMouseDown={() => {
+                                    selectSuggestion(country);
+                                    setHighlightedIndex(-1);
+                                    }}
+                                    onMouseEnter={() => setHighlightedIndex(idx)}
                                 >
                                     {country}
                                 </li>
