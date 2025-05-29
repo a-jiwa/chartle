@@ -155,6 +155,16 @@ export default function App() {
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
+                    {/* Title and subtitle as HTML */}
+                    <div className="px-4 pb-2">
+                        <h2 className="mt-5 text-left font-bold text-gray-900 text-[16px] md:text-[20px] leading-tight">
+                            {meta.title}
+                        </h2>
+                        <p className="text-left text-gray-600 text-[16px] mt-1">
+                            {meta.subtitle}
+                        </p>
+                    </div>
+                    
                     <Chart
                         csvUrl={meta.csvUrl}
                         meta={meta}
@@ -166,7 +176,7 @@ export default function App() {
                 </div>
 
                 {/* bottom pane */}
-                <div className="flex-none">
+                <div className="flex-none mt-8">
                         <Guesses
                             guesses={guesses}
                             onAddGuess={handleAddGuess}

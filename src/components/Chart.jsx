@@ -2,7 +2,7 @@
    Responsive time‑series chart with:
    • target line (red), guess lines (blue), other lines (grey)
    • smooth Catmull‑Rom curves and animated y‑axis rescaling
-   • labels, grid and heading
+   • labels and grid
 ---------------------------------------------------------------- */
 
 import { useRef, useEffect, useState } from "react";
@@ -119,7 +119,7 @@ export default function Chart({
         );
 
         /* ----- layout ----- */
-        const m = { top: 90, right: 50, bottom: 60, left: 50 };
+        const m = { top: 30, right: 50, bottom: 60, left: 50 };
         const innerW = width - m.left - m.right;
         const innerH = height - m.top - m.bottom;
 
@@ -481,50 +481,7 @@ export default function Chart({
             .attr("opacity", red.opacity)
             .attr("d", redPathData);
         }
-
-        /* ───── two-size title helper ───── */
-        function pickFontSize(text, maxWidth) {
-            const normal = 24;   // default desktop size
-            const small  = 18;   // fallback if title would overflow
-            const rough  = text.length * normal * 0.6;   // crude width estimate
-            return rough <= maxWidth ? normal : small;
-        }
-
-
-        /* ----- heading & subtitle ----- */
-        const headingOffset = 40;                       // top padding
-
-        const heading = svg.selectAll("g.chart-heading").data([null]);
-        const hEnter  = heading.enter().append("g").attr("class", "chart-heading");
-
-        heading.attr("transform", `translate(${titleOffsetX},${headingOffset})`);
-
-        /* title */
-        const titleSel = hEnter
-            .append("text")
-            .attr("class", "title")
-            .attr("text-anchor", "start")
-            .attr("font-weight", 700)
-            .attr("fill", "#111827")
-            .merge(heading.select("text.title"));
-
-        const fontSize = pickFontSize(meta.title, width - m.left - m.right);
-        titleSel
-            .attr("font-size", fontSize)
-            .text(meta.title);
-
-        /* subtitle (always 16 px) */
-        const subtitleSel = hEnter
-            .append("text")
-            .attr("class", "subtitle")
-            .attr("y", 26)
-            .attr("text-anchor", "start")
-            .attr("fill", "#374151")
-            .merge(heading.select("text.subtitle"));
-
-        subtitleSel
-            .attr("font-size", 16)
-            .text(meta.subtitle);
+       
     });
     
     return () => cancelAnimationFrame(rafId); // cleanup
