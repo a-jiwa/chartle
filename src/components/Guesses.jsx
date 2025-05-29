@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { COUNTRIES } from "../data/countries";
+import { guessColours } from "../data/colors.js";
 
 /* ─────────────────────────── Levenshtein helper ─────────────────────────── */
 function levenshtein(a = "", b = "") {
@@ -28,7 +29,6 @@ export default function Guesses({
                                     onAddGuess,
                                     status,
                                     max,
-                                    guessColours = [],
                                     targetData,
                                     countryToIso,
                                     clue = false,

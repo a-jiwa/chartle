@@ -8,6 +8,7 @@
 import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import useResizeObserver from "../hooks/useResizeObserver";
+import { guessColours } from "../data/colors.js";
 
 export default function Chart({
                                   csvUrl,
@@ -15,7 +16,6 @@ export default function Chart({
                                   target,
                                   others = [],
                                   guesses = [],
-                                  guessColours = [],
                               }) {
     /* ----- refs & state ----- */
     const wrapperRef = useRef(null);

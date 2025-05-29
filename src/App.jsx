@@ -12,6 +12,7 @@ import LoseModal from "./components/LoseModal";
 import countryToIso         from "./data/country_to_iso.json";
 import countryToRealCountry from "./data/country_to_real_country.json";
 
+import { guessColours } from "./data/colors.js";
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
@@ -46,7 +47,6 @@ export default function App() {
     const target       = meta?.target ?? null;                       // e.g. "India"
     const targetIso    = target ? countryToRealCountry[target] : null;
     const targetKey    = target ? target.toLowerCase() : null;
-    const guessColours = meta?.guessColours ?? [];
     const infoDescription = meta?.infoDescription ?? null;  
     const source = meta?.source ?? null;  
 
@@ -78,7 +78,7 @@ export default function App() {
                 spread: 70,
                 origin: { y: 0.6 },
                 disableForReducedMotion: true,
-                colors: ["#c43333", "#3b9e9e", "#4f7cac", "#b48f2b", "#8c6fa8", "#d17968"] // chartle colours
+                colors: ["#c43333", ...guessColours] // chartle colours
             });
         }, confettiDelay);
 
