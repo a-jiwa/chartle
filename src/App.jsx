@@ -16,6 +16,8 @@ import { guessColours } from "./data/colors.js";
 import { COUNTRIES } from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
+import canonicalNames from './data/canonical_country_names';
+
 const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/010_share_elec_prod_nuclear.json";
 const MAX_GUESSES = 5;
 
@@ -27,6 +29,7 @@ export default function App() {
     const [showWinModal, setShowWinModal] = useState(false);
     const [targetData,   setTargetData]   = useState(null);
     const [showLoseModal, setShowLoseModal] = useState(false);
+    const [availableCountries, setAvailableCountries] = useState([]);
 
 
     /* ─── analytics initialisation ─────────────────────── */
@@ -111,8 +114,8 @@ export default function App() {
         const text = raw.trim();
         if (!text) return;
 
-        const key   = text.toLowerCase();
-        const title = text.replace(/\b\w/g, c => c.toUpperCase());
+        const key = text.toLowerCase().trim();
+        const title = canonicalNames[key] || text.replace(/\b\w/g, c => c.toUpperCase());
 
         const isValid = COUNTRIES.some(c => c.toLowerCase() === key);
         if (!isValid) return;
@@ -172,6 +175,7 @@ export default function App() {
                         others={meta.others ?? []}
                         guesses={guesses}
                         guessColours={guessColours}
+                        setAvailableCountries={setAvailableCountries}
                     />
                 </div>
 
@@ -185,6 +189,7 @@ export default function App() {
                             guessColours={guessColours}
                             targetData={targetData}
                             countryToIso={countryToIso}
+                            validCountries={availableCountries}
                         />
                 </div>
 

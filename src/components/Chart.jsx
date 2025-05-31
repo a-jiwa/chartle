@@ -16,6 +16,7 @@ export default function Chart({
                                   target,
                                   others = [],
                                   guesses = [],
+                                  setAvailableCountries,
                               }) {
     /* ----- refs & state ----- */
     const wrapperRef = useRef(null);
@@ -75,6 +76,8 @@ export default function Chart({
 
             console.log("Standardized data:", standardized);
             setData(standardized);
+            const countries = Array.from(new Set(standardized.map(d => d.Country)));
+            setAvailableCountries(countries);
         });
     }, [csvUrl]);
 

@@ -32,6 +32,7 @@ export default function Guesses({
                                     targetData,
                                     countryToIso,
                                     clue = false,
+                                    validCountries = [],
                                 }) {
     const [value, setValue] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -48,7 +49,8 @@ export default function Guesses({
     const currentGuess = Math.min(guesses.length + 1, max);
 
     /* — Valid country? — */
-    const isValidCountry = COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed);
+    const isDataCountry = validCountries.includes(trimmed);
+    const isValidCountry = COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed) && isDataCountry;
 
     /* — Ranked suggestions — */
     const filtered = COUNTRIES.filter(
@@ -134,6 +136,10 @@ export default function Guesses({
         }
         if (!isValidCountry) {
             setError("Invalid country. Please select from the list.");
+            return;
+        }
+        if (!isDataCountry) {
+            setError("This country has no data available.");
             return;
         }
         if (guesses.some((g) => g.toLowerCase() === lcTrimmed)) {
@@ -289,23 +295,31 @@ export default function Guesses({
                             className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
                            bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto"
                         >
-                            {filtered.map((country, idx) => (
-                                <li
+                            {filtered.map((country, idx) => {
+                                const hasData = validCountries.includes(country);
+                                const isInactive = !hasData;
+
+                                return (
+                                    <li
                                     key={country}
-                                    className={`cursor-pointer py-4 px-4 text-sm ${
-                                    idx === highlightedIndex
+                                    className={`cursor-pointer py-4 px-4 text-sm flex justify-between items-center ${
+                                        idx === highlightedIndex
                                         ? "bg-emerald-50 font-semibold"
-                                        : "hover:bg-gray-100 text-gray-800"
-                                    }`}
+                                        : "hover:bg-gray-100"
+                                    } ${isInactive ? "text-gray-400" : "text-gray-800"}`}
                                     onMouseDown={() => {
-                                    selectSuggestion(country);
-                                    setHighlightedIndex(-1);
+                                        if (!isInactive) {
+                                        selectSuggestion(country);
+                                        setHighlightedIndex(-1);
+                                        }
                                     }}
                                     onMouseEnter={() => setHighlightedIndex(idx)}
-                                >
-                                    {country}
-                                </li>
-                            ))}
+                                    >
+                                    <span>{country}</span>
+                                    {isInactive && <span className="text-xs ml-2">(no data)</span>}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>
