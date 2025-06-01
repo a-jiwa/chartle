@@ -18,7 +18,7 @@ import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga"
 
 import canonicalNames from './data/canonical_country_names';
 
-const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/010_share_elec_prod_nuclear.json";
+const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/009_hospital_beds.json";
 const MAX_GUESSES = 5;
 
 export default function App() {
