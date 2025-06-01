@@ -33,6 +33,7 @@ export default function Guesses({
                                     countryToIso,
                                     clue = false,
                                     validCountries = [],
+                                    target,
                                 }) {
     const [value, setValue] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -349,9 +350,13 @@ export default function Guesses({
                             >
                                 {/* Left: numbered country */}
                                 <span
-                                    className="font-semibold text-gray-800"
-                                    style={{ color: guessColours[i] ?? "#2A74B3" }}
-                                >
+                                    className="font-semibold"
+                                    style={{
+                                        color: g.trim().toLowerCase() === target.trim().toLowerCase()
+                                        ? "#c43333"
+                                        : guessColours[i] ?? "#2A74B3"
+                                    }}
+                                    >
                                     {`${i + 1}. ${g}`}
                                 </span>
 

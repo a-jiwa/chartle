@@ -190,6 +190,7 @@ export default function App() {
                             targetData={targetData}
                             countryToIso={countryToIso}
                             validCountries={availableCountries}
+                            target={target}
                         />
                 </div>
 
