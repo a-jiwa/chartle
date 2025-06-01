@@ -22,7 +22,8 @@ export default function Chart({
     const wrapperRef = useRef(null);
     const svgRef = useRef(null);
     const { width, height } = useResizeObserver(wrapperRef);
-    const [data, setData] = useState(null);
+    const [data, setData] = useState(null);               // ← for full data
+    const [filteredData, setFilteredData] = useState(null); // ← for initial chart render
     const prevMaxRef = useRef(null); // last y-axis max
 
     /* --- load data --- */
@@ -75,9 +76,36 @@ export default function Chart({
             }
 
             console.log("Standardized data:", standardized);
-            setData(standardized);
-            const countries = Array.from(new Set(standardized.map(d => d.Country)));
-            setAvailableCountries(countries);
+            
+            // Determine time range
+            const years = standardized.map(d => d.Year);
+            const minYear = meta.yearStart ?? d3.min(years);
+            const maxYear = d3.max(years);
+            const yearRange = maxYear - minYear + 1;
+
+            // Filter: keep only countries with >50% data coverage
+            const rowsByCountry = d3.group(
+            standardized.filter(d => d.Year >= minYear && d.Year <= maxYear),
+            d => d.Country
+            );
+
+            const coverageThreshold = 0.5;
+            const qualifyingCountries = Array.from(rowsByCountry.entries())
+            .filter(([_, rows]) => {
+                const uniqueYears = new Set(rows.map(d => d.Year));
+                return uniqueYears.size / yearRange >= coverageThreshold;
+            })
+            .map(([country]) => country);
+
+            // Filter the dataset
+            const filteredData = standardized.filter(d => qualifyingCountries.includes(d.Country));
+
+            setData(standardized);         // full data (used to draw guessed lines later)
+            setFilteredData(filteredData); // just high-coverage for initial lines
+
+
+            const allCountries = Array.from(new Set(standardized.map(d => d.Country)));
+            setAvailableCountries(allCountries);
         });
     }, [csvUrl]);
 
@@ -107,14 +135,14 @@ export default function Chart({
 
     /* --- redraw on changes --- */
     useEffect(() => {
-        if (!data || !meta || !target || width === 0 || height === 0) return;
+        if (!data || !filteredData || !meta || !target || width === 0 || height === 0) return;
         
         const rafId = requestAnimationFrame(() => {
             
         const unitSuffix = meta.unitSuffix;
 
         /* ----- country sets & groups ----- */
-        const latestOthers = others.length ? others : autoOthers(data);
+        const latestOthers = others.length ? others : autoOthers(filteredData);
         const wanted = new Set([target, ...latestOthers, ...guesses]);
         const grouped = d3.group(
             data.filter((d) => wanted.has(d.Country)),
