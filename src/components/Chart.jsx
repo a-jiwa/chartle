@@ -83,13 +83,13 @@ export default function Chart({
             const maxYear = d3.max(years);
             const yearRange = maxYear - minYear + 1;
 
-            // Filter: keep only countries with >50% data coverage
+            // Filter: keep only countries with >60% data coverage
             const rowsByCountry = d3.group(
             standardized.filter(d => d.Year >= minYear && d.Year <= maxYear),
             d => d.Country
             );
 
-            const coverageThreshold = 0.5;
+            const coverageThreshold = 0.6;
             const qualifyingCountries = Array.from(rowsByCountry.entries())
             .filter(([_, rows]) => {
                 const uniqueYears = new Set(rows.map(d => d.Year));
