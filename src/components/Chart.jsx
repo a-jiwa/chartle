@@ -442,6 +442,9 @@ export default function Chart({
                     .attr("text-anchor", "start")
                     .attr("font-family", "Open Sans, sans-serif")
                     .attr("fill", d.country === target ? "#c43333" : d.stroke)
+                    .attr("stroke", "#f9f9f9")         
+                    .attr("stroke-width", 2.5)          
+                    .attr("paint-order", "stroke")        
                     .attr("x", xPos)
                     .attr("y", yPos)
                     .text(d.iso);
