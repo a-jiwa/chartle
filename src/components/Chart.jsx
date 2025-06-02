@@ -421,50 +421,61 @@ export default function Chart({
             }
         }
 
+        // Initial drawing of lines (animation happens here)
+        // Then after delay, draw labels:
+        setTimeout(() => {
+        // Draw labels after the lines animation is *done* (or after delay)
+        g.selectAll("text.guess-label").remove();
 
-        // Append labels after line animations
-        guessEnter.selectAll("path:last-child").each(function (d, i) {
-            const path = d3.select(this);
-            const length = this.getTotalLength();
-
+        g.selectAll("text.guess-label")
+            .data(guessLines, d => d.id)
+            .enter()
+            .append("text")
+            .attr("class", "guess-label")
+            .attr("font-size", 14)
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "start")
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("fill", d => d.stroke)
+            .attr("stroke", "#f9f9f9")
+            .attr("stroke-width", 2.5)
+            .attr("paint-order", "stroke")
+            .attr("x", d => {
             const rows = d.rows.filter(r => typeof r.Production === "number");
             const last = rows[rows.length - 1];
-            if (!last) return;
+            return x(last?.Year) + 4;
+            })
+            .attr("y", d => {
+            const rows = d.rows.filter(r => typeof r.Production === "number");
+            const last = rows[rows.length - 1];
+            return y(last?.Production / meta.scale) + 4;
+            })
+            .text(d => d.iso);
 
-            const xPos = x(last.Year) + labelXOffset;
-            const yPos = y(last.Production / meta.scale) + labelYOffset;
+        avoidLabelOverlap(g.selectAll("text.guess-label, text.target-label"));
+        }, 1800);  // match this to your line animation time
 
-            const drawLabel = () => {
-                g.append("text")
-                    .attr("class", d.country === target ? "target-label" : "guess-label")
-                    .attr("font-size", 14)
-                    .attr("font-weight", "bold")
-                    .attr("text-anchor", "start")
-                    .attr("font-family", "Open Sans, sans-serif")
-                    .attr("fill", d.country === target ? "#c43333" : d.stroke)
-                    .attr("stroke", "#f9f9f9")         
-                    .attr("stroke-width", 2.5)          
-                    .attr("paint-order", "stroke")        
-                    .attr("x", xPos)
-                    .attr("y", yPos)
-                    .text(d.iso);
 
-                // Slight timeout to let DOM update before resolving overlaps
-                setTimeout(() => {
-                    avoidLabelOverlap(g.selectAll("text.guess-label, text.target-label"));
-                }, 0);
-            };
 
-            if (d.country === target) {
-                drawLabel(); // No animation delay
-            } else {
-                path.transition()
-                    .duration(2000)
-                    .attr("stroke-dashoffset", 0)
-                    .on("end", drawLabel); // Wait until line animation finishes
-            }
-        });
+        // On chart readjust (like axis update or zoom), reposition existing labels *immediately* without delay:
 
+        function updateLabelsPosition() {
+        g.selectAll("text.guess-label")
+            .attr("x", d => {
+            const rows = d.rows.filter(r => typeof r.Production === "number");
+            const last = rows[rows.length - 1];
+            return x(last?.Year) + 4;
+            })
+            .attr("y", d => {
+            const rows = d.rows.filter(r => typeof r.Production === "number");
+            const last = rows[rows.length - 1];
+            return y(last?.Production / meta.scale) + 4;
+            });
+
+        avoidLabelOverlap(g.selectAll("text.guess-label, text.target-label"));
+        }
+
+        // Call `updateLabelsPosition()` anytime the chart updates scales or redraws without delay
 
 
 
