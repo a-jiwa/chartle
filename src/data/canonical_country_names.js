@@ -22,6 +22,7 @@ const canonicalCountryNames = {
   "south korea": "South Korea",
   "north korea": "North Korea",
   "macedonia": "North Macedonia",
+  "macao": "Macau",
   "palestinian territories": "Palestine",
 
   // --- Canonical names from COUNTRIES list ---
