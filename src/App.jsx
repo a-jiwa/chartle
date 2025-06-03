@@ -204,17 +204,24 @@ export default function App() {
                     target={target}
                     infoDescription={infoDescription}
                     source={source}
+                    csvUrl={meta.csvUrl}
+                    title={meta.title}
+                    maxGuesses={MAX_GUESSES}
                 />
             )}
 
             {/* lose modal */}
             {showLoseModal && (
-                <LoseModal 
-                    onClose={() => setStatus("done")} 
+                <LoseModal
+                    onClose={() => setStatus("done")}
                     target={target}
                     infoDescription={infoDescription}
                     source={source}
-                 />
+                    csvUrl={meta.csvUrl}
+                    guesses={guesses}
+                    title={meta.title}
+                    maxGuesses={MAX_GUESSES}
+                />
             )}
         </div>
     );
