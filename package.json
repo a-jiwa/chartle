@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://a-jiwa.github.io/chartle",
+  "homepage": "https://chartle.cc",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
