@@ -3,34 +3,45 @@
 import { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 
-import Header from "./components/Header";
-import Chart     from "./components/Chart";
-import Guesses   from "./components/Guesses";
-import WinModal  from "./components/WinModal";
-import LoseModal from "./components/LoseModal";
+import Header     from "./components/Header";
+import Chart      from "./components/Chart";
+import Guesses    from "./components/Guesses";
+import WinModal   from "./components/WinModal";
+import LoseModal  from "./components/LoseModal";
 
 import countryToIso         from "./data/country_to_iso.json";
 import countryToRealCountry from "./data/country_to_real_country.json";
 
+// ── NEW: daily persistence helpers ────────────────────────────
+import { todayKey }                      from "./utils/date";
+import { loadHistory, saveHistory }      from "./utils/storage";
+
 import { guessColours } from "./data/colors.js";
-import { COUNTRIES } from "./data/countries";
+import { COUNTRIES }    from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
-import canonicalNames from './data/canonical_country_names';
+import canonicalNames   from "./data/canonical_country_names";
 
 const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/011_share_elec_prod_coal.json";
 const MAX_GUESSES = 5;
 
+// ── Load today’s save (if any) once, before the component runs ──
+const TODAY        = todayKey();
+const history      = loadHistory();
+const todaysRecord = history[TODAY] ?? null; // { target, guesses, result } | undefined
+
 export default function App() {
     /* ─── state ─────────────────────────────────────────── */
-    const [meta,         setMeta]         = useState(null);
-    const [guesses,      setGuesses]      = useState([]);
-    const [status,       setStatus]       = useState("playing");   // 'playing' | 'won' | 'lost' | 'done'
-    const [showWinModal, setShowWinModal] = useState(false);
-    const [targetData,   setTargetData]   = useState(null);
-    const [showLoseModal, setShowLoseModal] = useState(false);
-    const [availableCountries, setAvailableCountries] = useState([]);
+    const [meta,  setMeta]  = useState(null);
 
+    // Seed guesses & status from localStorage so the player can’t replay the same day
+    const [guesses, setGuesses] = useState(todaysRecord?.guesses ?? []);
+    const [status,  setStatus]  = useState(todaysRecord?.result  ?? "playing"); // "playing" | "won" | "lost" | "done"
+
+    const [showWinModal,  setShowWinModal]  = useState(false);
+    const [showLoseModal, setShowLoseModal] = useState(false);
+    const [targetData,    setTargetData]    = useState(null);
+    const [availableCountries, setAvailableCountries] = useState([]);
 
     /* ─── analytics initialisation ─────────────────────── */
     useEffect(() => {
@@ -47,17 +58,17 @@ export default function App() {
     }, []);
 
     /* ─── derive target info from meta ──────────────────── */
-    const target       = meta?.target ?? null;                       // e.g. "India"
+    const target       = meta?.target ?? null;                   // e.g. "India"
     const targetIso    = target ? countryToRealCountry[target] : null;
     const targetKey    = target ? target.toLowerCase() : null;
-    const infoDescription = meta?.infoDescription ?? null;  
-    const source = meta?.source ?? null;  
+    const infoDescription = meta?.infoDescription ?? null;
+    const source          = meta?.source ?? null;
 
     /* ─── fetch per-country hints once ISO known ────────── */
     useEffect(() => {
-        if (!targetIso) return;                                      // nothing to fetch yet
-        const dataUrl =
-            `https://raw.githubusercontent.com/a-jiwa/chartle-data/main/countries/${targetIso}.json`;
+        if (!targetIso) return; // nothing to fetch yet
+
+        const dataUrl = `https://raw.githubusercontent.com/a-jiwa/chartle-data/main/countries/${targetIso}.json`;
 
         fetch(dataUrl)
             .then(r => r.json())
@@ -67,12 +78,9 @@ export default function App() {
 
     /* ─── confetti sequence ─────────────────────────────── */
     useEffect(() => {
-        if (status !== "won") {
-            setShowWinModal(false);
-            return;
-        }
+        if (status !== "won") { setShowWinModal(false); return; }
 
-        const confettiDelay = 300;          // ms before confetti starts
+        const confettiDelay = 300;      // ms before confetti starts
         const modalDelay    = confettiDelay + 1000; // modal appears 1 s after confetti
 
         const confettiTimer = setTimeout(() => {
@@ -95,19 +103,29 @@ export default function App() {
 
     /* ─── to delay lose modal only after line is rendered ─────────── */
     useEffect(() => {
-            if (status === "lost") {
-                const timeout = setTimeout(() => {
-                    setShowLoseModal(true);
-                }, 3000); // 3 seconds delay
+        if (status !== "lost") { setShowLoseModal(false); return; }
+        const t = setTimeout(() => setShowLoseModal(true), 3000);
+        return () => clearTimeout(t);
+    }, [status]);
 
-                return () => clearTimeout(timeout);
-            } else {
-                setShowLoseModal(false);
-            }
-        }, [status]);
+    /* ─── persist state to localStorage after every change ─ */
+    useEffect(() => {
+        if (!target) return; // wait until meta fetched
 
+        saveHistory({
+            ...loadHistory(),
+            [TODAY]: { target, guesses, result: status } });
+    }, [guesses, status, target]);
 
-    /* ─── add a guess (case-insensitive, max 5) ─────────── */
+    /* ─── (optional) auto‑reload after midnight ─────────── */
+    useEffect(() => {
+        const id = setInterval(() => {
+            if (todayKey() !== TODAY) window.location.reload();
+        }, 60_000); // once a minute
+        return () => clearInterval(id);
+    }, []);
+
+    /* ─── add a guess (case‑insensitive, max 5) ─────────── */
     const handleAddGuess = (raw) => {
         if (status !== "playing") return;
 
@@ -155,10 +173,10 @@ export default function App() {
     return (
         <div className="h-full flex flex-col items-center">
             <Header />
+
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
-                    {/* Title and subtitle as HTML */}
                     <div className="px-4 pb-2">
                         <h2 className="mt-5 text-left font-bold text-gray-900 text-[16px] md:text-[20px] leading-tight">
                             {meta.title}
@@ -167,7 +185,7 @@ export default function App() {
                             {meta.subtitle}
                         </p>
                     </div>
-                    
+
                     <Chart
                         csvUrl={meta.csvUrl}
                         meta={meta}
@@ -181,22 +199,21 @@ export default function App() {
 
                 {/* bottom pane */}
                 <div className="flex-none mt-8">
-                        <Guesses
-                            guesses={guesses}
-                            onAddGuess={handleAddGuess}
-                            status={status}
-                            max={MAX_GUESSES}
-                            guessColours={guessColours}
-                            targetData={targetData}
-                            countryToIso={countryToIso}
-                            validCountries={availableCountries}
-                            target={target}
-                        />
+                    <Guesses
+                        guesses={guesses}
+                        onAddGuess={handleAddGuess}
+                        status={status}
+                        max={MAX_GUESSES}
+                        guessColours={guessColours}
+                        targetData={targetData}
+                        countryToIso={countryToIso}
+                        validCountries={availableCountries}
+                        target={target}
+                    />
                 </div>
-
             </div>
 
-            {/* win modal (appears after confetti) */}
+            {/* win modal */}
             {showWinModal && (
                 <WinModal
                     onClose={() => setStatus("done")}
