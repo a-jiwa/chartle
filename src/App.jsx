@@ -22,7 +22,7 @@ import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga"
 
 import canonicalNames   from "./data/canonical_country_names";
 
-const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/011_share_elec_prod_coal.json";
+const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/001_banana_production.json";
 const MAX_GUESSES = 5;
 
 // ── Load today’s save (if any) once, before the component runs ──
