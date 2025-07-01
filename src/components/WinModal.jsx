@@ -84,7 +84,7 @@ export default function WinModal({ onClose, guesses, target, infoDescription, so
     const guessCount = guesses.length;
 
     const shareText = [
-        `🌍 Chartle — ${title}`,
+        `📈 Chartle — ${title}`,
         `${guessCount}/${maxGuesses} ✅`,
         emojiString,
         "chartle.cc"

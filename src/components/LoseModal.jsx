@@ -81,7 +81,7 @@ export default function LoseModal({ onClose, target, infoDescription, source, cs
     }, [csvUrl, target, guesses]);
 
     const shareText = [
-        `🌍 Chartle — ${title}`,
+        `📈 Chartle — ${title}`,
         `X/${maxGuesses} ❌`,
         emojiString,
         "chartle.cc"
