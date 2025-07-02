@@ -12,15 +12,18 @@ import LoseModal  from "./components/LoseModal";
 import countryToIso         from "./data/country_to_iso.json";
 import countryToRealCountry from "./data/country_to_real_country.json";
 
-// ── NEW: daily persistence helpers ────────────────────────────
+// ── Daily persistence helpers ────────────────────────────
 import { todayKey }                      from "./utils/date";
 import { loadHistory, saveHistory }      from "./utils/storage";
+
+import { fetchMeta } from "./utils/fetchMeta";
 
 import { guessColours } from "./data/colors.js";
 import { COUNTRIES }    from "./data/countries";
 import { initGA, trackPageView, trackGuess, trackGameEnd } from "./analytics/ga";
 
 import canonicalNames   from "./data/canonical_country_names";
+
 
 const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/heads/main/config/001_banana_production.json";
 const MAX_GUESSES = 5;
@@ -51,11 +54,12 @@ export default function App() {
 
     /* ─── fetch top-level game config ───────────────────── */
     useEffect(() => {
-        fetch(META_URL)
-            .then(r => r.json())
+        fetchMeta()
             .then(setMeta)
-            .catch(err => console.error("Failed to fetch meta:", err));
+            .catch(err => console.error(err.message));
     }, []);
+
+
 
     /* ─── derive target info from meta ──────────────────── */
     const target       = meta?.target ?? null;                   // e.g. "India"
