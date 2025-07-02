@@ -9,6 +9,8 @@ import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import useResizeObserver from "../hooks/useResizeObserver";
 import { guessColours } from "../data/colors.js";
+import { COUNTRIES } from "../data/countriesWithPopulation.js"; //
+
 
 export default function Chart({
                                   csvUrl,
@@ -98,13 +100,40 @@ export default function Chart({
             .map(([country]) => country);
 
             // Filter the dataset
-            const filteredData = standardized.filter(d => qualifyingCountries.includes(d.Country));
+            // Apply population threshold
+            const populationThreshold = 100_000;
+
+            // Build a quick lookup: country name → population
+            const popByCountry = new Map(
+            Object.entries(COUNTRIES)
+                .map(([iso, data]) => [data.name || iso, data.population])
+            );
+
+            // Filter to keep only countries with sufficient population
+            const populationFilteredCountries = qualifyingCountries.filter(country => {
+            const pop = popByCountry.get(country);
+            return typeof pop === "number" && pop >= populationThreshold;
+            });
+
+            // Filter the dataset
+            const filteredData = standardized.filter(d =>
+            populationFilteredCountries.includes(d.Country)
+            );
+
 
             setData(standardized);         // full data (used to draw guessed lines later)
             setFilteredData(filteredData); // just high-coverage for initial lines
 
 
-            const allCountries = Array.from(new Set(standardized.map(d => d.Country)));
+            const allCountries = Array.from(
+                new Set(
+                    standardized
+                    .map(d => d.Country)
+                    .filter(c => qualifyingCountries.includes(c)) // keep coverage threshold only
+                )
+            );
+
+
             setAvailableCountries(allCountries);
         });
     }, [csvUrl]);
