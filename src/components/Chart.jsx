@@ -27,12 +27,122 @@ export default function Chart({
     const [filteredData, setFilteredData] = useState(null); // ← for initial chart render
     const prevMaxRef = useRef(null); // last y-axis max
 
-    const downloadPNG = async () => {
-        if (!svgRef.current) return;
-        await d3ToPng(svgRef.current, "production-chart", {
-            scale: 2,            // sharp at 4K
-            background: "#fff",  // white backdrop
+    /* Helper – downloads the chart PNG if the clipboard path fails    */
+    function fallbackDownloadViaLink(svgElement, fileSlug) {
+        d3ToPng(svgElement, fileSlug, { scale: 2 }).then((dataUrl) => {
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = `${fileSlug}.png`;
+            a.click();
         });
+    }
+
+    /* Main handler – copy PNG to clipboard (promise-style for Safari) */
+    const downloadPNG = async () => {
+
+        /* Pull copy + make a quick slug*/
+        const TITLE_TEXT = meta?.title ?? "chart";
+        const SUBTITLE_TEXT = meta?.subtitle ?? "";
+
+        // “Banana production” → “banana-production”
+        const fileSlug = TITLE_TEXT
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
+
+        /* Early capability checks */
+        if (!window.isSecureContext) {
+            alert("Clipboard writes need HTTPS or localhost – saving PNG instead.");
+            return fallbackDownloadViaLink(svgRef.current, fileSlug);
+        }
+
+        if (!navigator.clipboard?.write) {
+            console.warn("Clipboard image write not supported in this browser.");
+            return fallbackDownloadViaLink(svgRef.current, fileSlug);
+        }
+
+        /* Position / spacing tweaks */
+        const OFFSET_X = 40;
+        const OFFSET_Y = 30;
+        const LINE_GAP = 24;
+
+        /*  Live SVG & size */
+        const svgLive = svgRef.current;
+        if (!svgLive) return;
+        const { width: w, height: h } = svgLive.getBoundingClientRect();
+
+        /* Invisible sandbox */
+        const sandbox = document.createElement("div");
+        Object.assign(sandbox.style, {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width:  `${w}px`,
+            height: `${h}px`,
+            opacity: 0,
+            pointerEvents: "none",
+        });
+        document.body.appendChild(sandbox);
+
+        /* Deep-clone SVG & pin size */
+        const clone = svgLive.cloneNode(true);
+        clone.setAttribute("width",  w);
+        clone.setAttribute("height", h);
+        clone.setAttribute("viewBox", `0 0 ${w} ${h}`);
+        sandbox.appendChild(clone);
+
+        /* Overlay dynamic title & subtitle */
+        const svgSel = d3
+            .select(clone)
+            .attr("font-family", "Inter, 'Open Sans', sans-serif");
+
+        const gTitle = svgSel.insert("g", ":first-child")
+            .attr("transform", `translate(${OFFSET_X},${OFFSET_Y})`);
+
+        gTitle.append("text")
+            .text(TITLE_TEXT)
+            .attr("font-size", 24)
+            .attr("font-weight", 700)
+            .attr("fill", "#0f172a");
+
+        gTitle.append("text")
+            .text(SUBTITLE_TEXT)
+            .attr("y", LINE_GAP)
+            .attr("font-size", 16)
+            .attr("fill", "#64748b");
+
+        /* Build a promise that resolves to a PNG Blob */
+        const pngBlobPromise = (async () => {
+            const dataUrl = await d3ToPng(clone, fileSlug, {
+                scale: 2,
+                background: "#fff",
+                ignore: ".guess-label,.target-label",
+                download: false,
+            });
+            return (await fetch(dataUrl)).blob();   // data-URL → Blob
+        })();
+
+        /* Attempt clipboard write immediately */
+        try {
+            const textBlob = new Blob(
+                [`Chart: ${TITLE_TEXT}\nchartle.cc`],   // caption
+                { type: "text/plain" }
+            );
+
+            const item = new ClipboardItem({
+                "image/png": pngBlobPromise,   // the chart
+                "text/plain": textBlob         // the caption
+            });
+
+            await navigator.clipboard.write([item]);
+            alert("Image + caption copied ✅");
+        } catch (err) {
+            console.warn("Clipboard write failed:", err);
+            fallbackDownloadViaLink(clone, fileSlug);
+        }
+
+        /* Tidy up once the PNG promise settles */
+        pngBlobPromise.finally(() => sandbox.remove());
     };
 
     /* --- load data --- */
@@ -117,7 +227,6 @@ export default function Chart({
             setAvailableCountries(allCountries);
         });
     }, [csvUrl]);
-
 
 
 
@@ -540,7 +649,7 @@ export default function Chart({
                 onClick={downloadPNG}
                 className="absolute top-15 right-5 px-3 py-1 rounded bg-slate-800 text-white"
             >
-                Download PNG
+                Copy PNG
             </button>
         </div>
         );
