@@ -118,16 +118,30 @@ export default function App() {
 
         saveHistory({
             ...loadHistory(),
-            [TODAY]: { target, guesses, result: status } });
+            [TODAY]: { target, guesses, result: status, title: meta.title } });
     }, [guesses, status, target]);
 
-    /* ─── (optional) auto‑reload after midnight ─────────── */
+    /* ─── auto‑reload after midnight ─────────── */
     useEffect(() => {
         const id = setInterval(() => {
             if (todayKey() !== TODAY) window.location.reload();
         }, 60_000); // once a minute
         return () => clearInterval(id);
     }, []);
+
+    useEffect(() => {
+        if (!meta) return;                    // still loading
+
+        const saved = todaysRecord;
+        if (!saved) return;                   // nothing stored for today
+
+        const samePuzzle = saved.title === meta.title;
+        if (!samePuzzle) {
+            // Different data: wipe any carried-over state
+            setGuesses([]);
+            setStatus("playing");
+        }
+    }, [meta]);
 
     /* ─── add a guess (case‑insensitive, max 5) ─────────── */
     const handleAddGuess = (raw) => {
