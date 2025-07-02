@@ -7,6 +7,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
+import d3ToPng from "d3-svg-to-png";
 import useResizeObserver from "../hooks/useResizeObserver";
 import { guessColours } from "../data/colors.js";
 
@@ -25,6 +26,14 @@ export default function Chart({
     const [data, setData] = useState(null);               // ← for full data
     const [filteredData, setFilteredData] = useState(null); // ← for initial chart render
     const prevMaxRef = useRef(null); // last y-axis max
+
+    const downloadPNG = async () => {
+        if (!svgRef.current) return;
+        await d3ToPng(svgRef.current, "production-chart", {
+            scale: 2,            // sharp at 4K
+            background: "#fff",  // white backdrop
+        });
+    };
 
     /* --- load data --- */
     useEffect(() => {
@@ -526,6 +535,13 @@ export default function Chart({
             {width > 0 && height > 0 && (
             <svg ref={svgRef} className="w-full h-full" />
             )}
+
+            <button
+                onClick={downloadPNG}
+                className="absolute top-15 right-5 px-3 py-1 rounded bg-slate-800 text-white"
+            >
+                Download PNG
+            </button>
         </div>
         );
 }
