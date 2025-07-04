@@ -8,9 +8,14 @@ import Chart      from "./components/Chart";
 import Guesses    from "./components/Guesses";
 import WinModal   from "./components/WinModal";
 import LoseModal  from "./components/LoseModal";
+import HelpModal  from "./components/HelpModal";
+import HistoryModal  from "./components/HistoryModal";
+import SettingsModal from "./components/SettingsModal";
+import AuthModal     from "./components/AuthModal";
 
 import countryToIso         from "./data/country_to_iso.json";
 import countryToRealCountry from "./data/country_to_real_country.json";
+
 
 // ── Daily persistence helpers ────────────────────────────
 import { todayKey }                      from "./utils/date";
@@ -45,6 +50,9 @@ export default function App() {
     const [showLoseModal, setShowLoseModal] = useState(false);
     const [targetData,    setTargetData]    = useState(null);
     const [availableCountries, setAvailableCountries] = useState([]);
+
+    const [panel, setPanel] = useState(null);   // "help" | "history" | "settings" | "auth" | null
+    const handleMenuOpen = (id) => setPanel(id);
 
     /* ─── analytics initialisation ─────────────────────── */
     useEffect(() => {
@@ -190,7 +198,7 @@ export default function App() {
     /* ─── render ────────────────────────────────────────── */
     return (
         <div className="h-full flex flex-col items-center overflow-y-scroll">
-            <Header />
+            <Header onOpen={handleMenuOpen} />
 
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
@@ -258,6 +266,25 @@ export default function App() {
                     maxGuesses={MAX_GUESSES}
                 />
             )}
+            <HelpModal
+                open={panel === "help"}
+                onClose={() => setPanel(null)}
+            />
+
+            <HistoryModal
+                open={panel === "history"}
+                onClose={() => setPanel(null)}
+            />
+
+            <SettingsModal
+                open={panel === "settings"}
+                onClose={() => setPanel(null)}
+            />
+
+            <AuthModal
+                open={panel === "auth"}
+                onClose={() => setPanel(null)}
+            />
         </div>
     );
 }
