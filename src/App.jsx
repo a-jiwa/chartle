@@ -239,10 +239,9 @@ export default function App() {
                 </div>
             </div>
 
-            {/* win modal */}
-            {showWinModal && (
-                <WinModal
-                    onClose={() => setStatus("done")}
+            <WinModal
+                open={showWinModal}
+                onClose={() => setStatus("done")}
                     guesses={guesses}
                     target={target}
                     infoDescription={infoDescription}
@@ -250,13 +249,10 @@ export default function App() {
                     csvUrl={meta.csvUrl}
                     title={meta.title}
                     maxGuesses={MAX_GUESSES}
-                />
-            )}
+            />
 
-            {/* lose modal */}
-            {showLoseModal && (
-                <LoseModal
-                    onClose={() => setStatus("done")}
+            <LoseModal
+                onClose={() => setStatus("done")}
                     target={target}
                     infoDescription={infoDescription}
                     source={source}
@@ -264,8 +260,8 @@ export default function App() {
                     guesses={guesses}
                     title={meta.title}
                     maxGuesses={MAX_GUESSES}
-                />
-            )}
+            />
+
             <HelpModal
                 open={panel === "help"}
                 onClose={() => setPanel(null)}
