@@ -189,7 +189,7 @@ export default function App() {
 
     /* ─── render ────────────────────────────────────────── */
     return (
-        <div className="h-full flex flex-col items-center">
+        <div className="h-full flex flex-col items-center overflow-y-scroll">
             <Header />
 
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
