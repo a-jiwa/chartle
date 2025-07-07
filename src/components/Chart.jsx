@@ -126,16 +126,11 @@ export default function Chart({
 
 
             const allCountries = Array.from(
-                new Set(
-                    standardized
-                    .map(d => d.Country)
-                    .filter(c => qualifyingCountries.includes(c)) // keep coverage threshold only
-                )
+                new Set(standardized.map(d => d.Country))
             );
-
-
+            
             setAvailableCountries(allCountries);
-        });
+                    });
     }, [csvUrl]);
 
 
