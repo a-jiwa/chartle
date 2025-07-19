@@ -20,6 +20,7 @@ import countryToRealCountry from "./data/country_to_real_country.json";
 // ── Daily persistence helpers ────────────────────────────
 import { todayKey }                      from "./utils/date";
 import { loadHistory, saveHistory }      from "./utils/storage";
+import { getGameDateFromUrl, hasDateOverride, stripDateOverrideFromUrl } from "./utils/gameDate";
 
 import { fetchMeta } from "./utils/fetchMeta";
 
@@ -34,9 +35,11 @@ const META_URL    = "https://raw.githubusercontent.com/a-jiwa/chartle-data/refs/
 const MAX_GUESSES = 5;
 
 // ── Load today’s save (if any) once, before the component runs ──
-const TODAY        = todayKey();
-const history      = loadHistory();
-const todaysRecord = history[TODAY] ?? null; // { target, guesses, result } | undefined
+const GAME_DATE = getGameDateFromUrl();
+const OVERRIDDEN = hasDateOverride();
+const history = loadHistory();
+const todaysRecord = history[GAME_DATE] ?? null;
+
 
 export default function App() {
     /* ─── state ─────────────────────────────────────────── */
@@ -54,6 +57,14 @@ export default function App() {
     const [panel, setPanel] = useState(null);   // "help" | "history" | "settings" | "auth" | null
     const handleMenuOpen = (id) => setPanel(id);
 
+    /* ── readable date for display ───────────── */
+    const GAME_DATE_LABEL = new Date(GAME_DATE).toLocaleDateString("en-GB", {
+        weekday: "short",  // Fri
+        day: "2-digit",    // 19
+        month: "short",    // Jul
+        year: "numeric"    // 2025
+    });
+
     /* ─── analytics initialisation ─────────────────────── */
     useEffect(() => {
         initGA();
@@ -62,11 +73,15 @@ export default function App() {
 
     /* ─── fetch top-level game config ───────────────────── */
     useEffect(() => {
-        fetchMeta()
+        fetchMeta(GAME_DATE)
             .then(setMeta)
             .catch(err => console.error(err.message));
     }, []);
 
+    /* ─── drop date from URL ───────────────────── */
+    useEffect(() => {
+        if (hasDateOverride()) stripDateOverrideFromUrl();
+    }, []);
 
 
     /* ─── derive target info from meta ──────────────────── */
@@ -126,14 +141,21 @@ export default function App() {
 
         saveHistory({
             ...loadHistory(),
-            [TODAY]: { target, guesses, result: status, title: meta.title } });
+            [GAME_DATE]: {
+                target,
+                guesses,
+                result: status,
+                title: meta.title
+            }
+        });
     }, [guesses, status, target]);
 
     /* ─── auto‑reload after midnight ─────────── */
     useEffect(() => {
+        if (OVERRIDDEN) return;
         const id = setInterval(() => {
-            if (todayKey() !== TODAY) window.location.reload();
-        }, 60_000); // once a minute
+            if (todayKey() !== GAME_DATE) window.location.reload();
+        }, 60000);
         return () => clearInterval(id);
     }, []);
 
@@ -197,18 +219,34 @@ export default function App() {
 
     /* ─── render ────────────────────────────────────────── */
     return (
+
         <div className="h-full flex flex-col items-center overflow-y-scroll">
             <Header onOpen={handleMenuOpen} />
 
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
-                    <div className="px-4 pb-2">
-                        <h2 className="mt-5 text-left font-bold text-gray-900 text-[16px] md:text-[20px] leading-tight">
-                            {meta.title}
-                        </h2>
-                        <p className="text-left text-gray-600 text-[16px] mt-1">
-                            {meta.subtitle}
+                    {/* title + subtitle + date */}
+                    <div className="px-4 pb-2 grid grid-cols-[1fr_auto] items-start gap-y-1">
+                        {/* left column */}
+                        <div>
+                            <h2 className="mt-5 text-left font-bold text-gray-900 text-[16px] md:text-[20px] leading-tight">
+                                {meta.title}
+                            </h2>
+                            <p className="text-left text-gray-600 text-[16px] mt-1">
+                                {meta.subtitle}
+                            </p>
+                        </div>
+
+                        {/* right: game date */}
+                        <p
+                            className={`mt-5 md:mt-5 md:ml-4 text-[14px] ${
+                                OVERRIDDEN
+                                    ? "text-yellow-800 bg-yellow-100 inline-block px-2 py-0.5 rounded"
+                                    : "text-gray-500"
+                            }`}
+                        >
+                            {GAME_DATE_LABEL}
                         </p>
                     </div>
 
