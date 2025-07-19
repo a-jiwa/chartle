@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { COUNTRIES } from "../data/countries";
 import { guessColours } from "../data/colors.js";
 
@@ -41,7 +41,7 @@ export default function Guesses({
     const [spinningEmojis, setSpinningEmojis] = useState({});
     const [distanceTicks, setDistanceTicks] = useState({}); // ── NEW
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
-
+    const [ready, setReady] = useState(false);
 
     const disabled = status !== "playing";
     const trimmed = value.trim();
@@ -52,6 +52,11 @@ export default function Guesses({
     /* — Valid country? — */
     const isDataCountry = validCountries.includes(trimmed);
     const isValidCountry = COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed) && isDataCountry;
+
+    useEffect(() => {
+        const t = setTimeout(() => setReady(true), 3000);
+        return () => clearTimeout(t);
+    }, []);
 
     /* — Ranked suggestions — */
     const filtered = COUNTRIES.filter(
@@ -202,16 +207,19 @@ export default function Guesses({
         <div className="flex flex-col items-center gap-3 py-5">
             {/* ── instruction ── */}
             {guesses.length === 0 && (
-                <p className="text-m font-medium text-gray-800 pt-0.5">
+                <p className="text-m font-medium text-gray-800 pt-0.5 transition-opacity duration-100 opacity-100">
                     Guess the country in{" "}
-                    <span className="font-semibold" style={{ color: "#c43333" }}>
-                        red
-                    </span>
+                    <span className="font-semibold" style={{ color: "#c43333" }}>red</span>
                 </p>
             )}
 
             {/* ─────────── Input form ─────────── */}
-            <form onSubmit={submit} className="w-full px-[50px]">
+            <form
+                onSubmit={submit}
+                className={`w-full px-[50px] transition-opacity duration-500 delay-300 ${
+                    ready ? "opacity-100" : "opacity-0"
+                }`}
+            >
                 <div className="relative">
                     {/* ─────────── Input + button ─────────── */}
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

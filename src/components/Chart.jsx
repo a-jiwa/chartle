@@ -215,7 +215,7 @@ export default function Chart({
             id: `${c}-base`,
             country: c,
             rows: grouped.get(c) ?? [],
-            stroke: "#757575",
+            stroke: "#b8b8b8",
             width: 1.5,
             opacity: 0.4,
         }));
@@ -267,15 +267,25 @@ export default function Chart({
         }
 
         /* ----- axes ----- */
-        g.select(".x-axis")
-            .attr("transform", `translate(0,${innerH})`)
-            .call(d3.axisBottom(x).ticks(5).tickFormat((d) => String(d)))
-            .selectAll(".tick text")
-            .attr("font-size", 16)
-            .attr("font-weight", 500)
-            .attr("fill", "#6b7280")
-            .attr("dy", "0.95em") // increased vertical padding for x-axis labels
-            .style("font-family", "Open Sans, sans-serif");
+            const xAxis = d3.axisBottom(x).ticks(5).tickFormat((d) => String(d));
+
+            const xAxisG = g.select(".x-axis")
+                .attr("transform", `translate(0,${innerH})`)
+                .style("opacity", 0); // Start hidden
+
+            xAxisG.transition()
+                .delay(2000)             // Delay before starting
+                .duration(1000)         // Fade-in time
+                .style("opacity", 1);   // Fade in
+
+            xAxisG.call(xAxis);
+
+            xAxisG.selectAll(".tick text")
+                .attr("font-size", 16)
+                .attr("font-weight", 500)
+                .attr("fill", "#6b7280")
+                .attr("dy", "0.95em")
+                .style("font-family", "Open Sans, sans-serif");
 
         const formatNumber = (d) => {
             if (typeof d !== "number" || isNaN(d)) return "";
@@ -313,16 +323,29 @@ export default function Chart({
             sel.selectAll(".domain").attr("stroke-opacity", 0);
             sel.selectAll(".tick line")
                 .attr("stroke", "#d1d5db")
-                .attr("stroke-opacity", 0.6)
+                .attr("stroke-opacity", 0.3)
                 .attr("stroke-width", 1);
         };
 
 
-        if (domainChanged) {
-            g.select(".y-axis").transition().duration(1500).call(yAxis);
-        } else {
-            g.select(".y-axis").call(yAxis);
-        }
+            const yAxisG = g.select(".y-axis");
+
+            if (domainChanged) {
+                yAxisG.transition().duration(1500).call(yAxis);
+            } else {
+                yAxisG.call(yAxis);
+            }
+
+            // Fade in ticks either way
+            yAxisG.selectAll(".tick")
+                .style("opacity", 0)
+                .transition()
+                .delay((_, i) => 2000 + i * 100)
+                .duration(1000)
+                .ease(d3.easeCubicOut)
+                .style("opacity", 1);
+
+
 
         // Get maximum tick label width
         const maxTickLabelWidth = Math.max(
@@ -350,12 +373,17 @@ export default function Chart({
         const baseGroups = gBase.selectAll("g.base-line").data(baseLines, d => d.id);
         const baseEnter = baseGroups.enter().append("g").attr("class", "base-line");
 
-        baseEnter.append("path")
-            .attr("fill", "none")
-            .attr("stroke", d => d.stroke)
-            .attr("stroke-width", d => d.width)
-            .attr("opacity", d => d.opacity)
-            .attr("d", d => lineGen(d.rows));
+            baseEnter.append("path")
+                .attr("fill", "none")
+                .attr("stroke", d => d.stroke)
+                .attr("stroke-width", d => d.width)
+                .attr("opacity", 0)                    // start fully transparent
+                .attr("d", d => lineGen(d.rows))
+                .transition()
+                .delay(3000)                            // delay before fade-in starts
+                .duration(3000)                        // slow fade-in over 1.5s
+                .attr("opacity", d => d.opacity);      // fade to target opacity (e.g. 0.4)
+
 
         baseGroups.select("path")
             .attr("stroke", d => d.stroke)

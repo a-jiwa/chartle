@@ -41,6 +41,8 @@ const todaysRecord = history[TODAY] ?? null; // { target, guesses, result } | un
 export default function App() {
     /* ─── state ─────────────────────────────────────────── */
     const [meta,  setMeta]  = useState(null);
+    const [ready, setReady] = useState(false);
+    const [showTitle, setShowTitle] = useState(false);
 
     // Seed guesses & status from localStorage so the player can’t replay the same day
     const [guesses, setGuesses] = useState(todaysRecord?.guesses ?? []);
@@ -53,6 +55,17 @@ export default function App() {
 
     const [panel, setPanel] = useState(null);   // "help" | "history" | "settings" | "auth" | null
     const handleMenuOpen = (id) => setPanel(id);
+
+
+    useEffect(() => {
+        const t = setTimeout(() => setShowTitle(true), 2000);
+        return () => clearTimeout(t);
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setReady(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
 
     /* ─── analytics initialisation ─────────────────────── */
     useEffect(() => {
@@ -198,18 +211,27 @@ export default function App() {
     /* ─── render ────────────────────────────────────────── */
     return (
         <div className="h-full flex flex-col items-center overflow-y-scroll">
+            <div
+                className={`transition-opacity duration-2000 ease-out ${ready ? "opacity-100" : "opacity-0"}`}
+            >
             <Header onOpen={handleMenuOpen} />
-
+            </div>
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
                     <div className="px-4 pb-2">
-                        <h2 className="mt-5 text-left font-bold text-gray-900 text-[16px] md:text-[20px] leading-tight">
-                            {meta.title}
-                        </h2>
-                        <p className="text-left text-gray-600 text-[16px] mt-1">
-                            {meta.subtitle}
-                        </p>
+                        <div
+                            className={`transition-opacity duration-700 ${
+                                showTitle ? "opacity-100" : "opacity-0"
+                            }`}
+                        >
+                            <h2 className="mt-5 text-left font-bold text-gray-900 text-[16px] md:text-[20px] leading-tight">
+                                {meta.title}
+                            </h2>
+                            <p className="text-left text-gray-600 text-[16px] mt-1">
+                                {meta.subtitle}
+                            </p>
+                        </div>
                     </div>
 
                     <Chart
@@ -225,6 +247,9 @@ export default function App() {
 
                 {/* bottom pane */}
                 <div className="flex-none mt-8">
+                    <div
+                        className={`transition-opacity duration-2000 ease-out ${ready ? "opacity-100" : "opacity-0"}`}
+                    >
                     <Guesses
                         guesses={guesses}
                         onAddGuess={handleAddGuess}
@@ -236,6 +261,7 @@ export default function App() {
                         validCountries={availableCountries}
                         target={target}
                     />
+                </div>
                 </div>
             </div>
 
