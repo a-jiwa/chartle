@@ -10,6 +10,7 @@ import * as d3 from "d3";
 import useResizeObserver from "../hooks/useResizeObserver";
 import { guessColours } from "../data/colors.js";
 import { COUNTRIES } from "../data/countriesWithPopulation.js"; //
+import { easeLinear } from 'd3-ease'   // comes with D3 bundle
 
 
 export default function Chart({
@@ -178,7 +179,7 @@ export default function Chart({
         const innerW = width - m.left - m.right;
         const innerH = height - m.top - m.bottom;
 
-        /* ----- scales ----- */
+            /* ----- scales ----- */
         const x = d3
             .scaleLinear()
             .domain(d3.extent(data, (d) => d.Year))
@@ -244,24 +245,284 @@ export default function Chart({
         const lineData = [...baseLines, ...targetLine, ...guessLines];
 
         /* ----- SVG root & main group ----- */
-        const svg = d3
-            .select(svgRef.current)
-            .attr("viewBox", [0, 0, width, height])
-            .attr("preserveAspectRatio", "xMidYMid meet")
-            .style("overflow", "visible");
-        let g = svg.select("g.chart-root");
-        if (g.empty()) {
-            g = svg
-                .append("g")
-                .attr("class", "chart-root")
-                .attr("transform", `translate(${m.left},${m.top})`)
-                .call((sel) => {
-                    sel.append("g").attr("class", "x-axis");
-                    sel.append("g").attr("class", "y-axis");
-                });
-        }
+            const svg = d3
+                .select(svgRef.current)
+                .attr("viewBox", [0, 0, width, height])
+                .attr("preserveAspectRatio", "xMidYMid meet")
+                .style("overflow", "visible")
 
-        /* ----- axes ----- */
+            let g = svg.select("g.chart-root")
+            if (g.empty()) {
+                g = svg
+                    .append("g")
+                    .attr("class", "chart-root")
+                    .attr("transform", `translate(${m.left},${m.top})`)
+                    .call(sel => {
+                        sel.append("g").attr("class", "x-axis")
+                        sel.append("g").attr("class", "y-axis")
+                    })
+            }
+
+            /* ───────── hover layer: guide, dots, red labels with background ─────── */
+            let hoverLayer = g.select('g.hover-layer')
+            if (hoverLayer.empty()) {
+                hoverLayer = g.append('g').attr('class', 'hover-layer')
+
+                /* vertical guide */
+                hoverLayer.append('line')
+                    .attr('class', 'hover-line')
+                    .attr('stroke', '#6b7280')
+                    .attr('stroke-width', 1)
+                    .attr('stroke-dasharray', '4 4')
+                    .attr('y1', 0)
+                    .style('opacity', 0)
+
+                /* target dot */
+                hoverLayer.append('circle')
+                    .attr('class', 'hover-dot-target')
+                    .attr('r', 4)
+                    .attr('fill', '#c43333')
+                    .attr('stroke', '#ffffff')
+                    .attr('stroke-width', 1.5)
+                    .style('opacity', 0)
+                    .attr('pointer-events', 'none')
+
+                /* travelling year label */
+                hoverLayer.append('text')
+                    .attr('class', 'hover-year-label')
+                    .attr('text-anchor', 'middle')
+                    .attr('font-size', 16)
+                    .attr('font-weight', 600)
+                    .attr('fill', '#292929')
+                    .attr('font-family', 'Open Sans, sans-serif')
+                    .attr('dy', '1.5em')
+                    .style('opacity', 0)
+                    .attr('pointer-events', 'none')
+
+                /* value label background */
+                hoverLayer.append('rect')
+                    .attr('class', 'hover-value-bg')
+                    .attr('fill', '#ffffff')
+                    .attr('rx', 3)
+                    .attr('ry', 3)
+                    .style('opacity', 0)
+                    .attr('pointer-events', 'none')
+
+                /* value label text */
+                hoverLayer.append('text')
+                    .attr('class', 'hover-value-label')
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', 14)
+                    .attr('font-weight', 600)
+                    .attr('fill', '#c43333')
+                    .attr('font-family', 'Open Sans, sans-serif')
+                    .style('opacity', 0)
+                    .attr('pointer-events', 'none')
+
+                /* invisible hit‑area */
+                hoverLayer.append('rect')
+                    .attr('class', 'hover-capture')
+                    .attr('fill', 'transparent')
+                    .attr('pointer-events', 'all')
+                    .style('touch-action', 'none')
+            }
+
+            /* resize‑sensitive elements */
+            hoverLayer.select('.hover-line').attr('y2', innerH)
+            hoverLayer.select('.hover-capture')
+                .attr('width', innerW)
+                .attr('height', innerH)
+            hoverLayer.select('.hover-year-label').attr('y', innerH)
+
+            /* dots for guess lines (enter / exit) */
+            const guessDots = hoverLayer.selectAll('circle.guess-dot')
+                .data(guessLines, d => d.id)
+
+            guessDots.enter()
+                .append('circle')
+                .attr('class', 'guess-dot')
+                .attr('r', 4)
+                .attr('fill', d => d.stroke)
+                .attr('stroke', '#ffffff')
+                .attr('stroke-width', 1.5)
+                .style('opacity', 0)
+                .attr('pointer-events', 'none')
+
+            guessDots.exit().remove()
+
+            const guessPills = hoverLayer
+                .selectAll('g.guess-pill')
+                .data(guessLines, d => d.id)
+
+            const gpEnter = guessPills
+                .enter()
+                .append('g')
+                .attr('class', 'guess-pill')
+                .style('pointer-events', 'none')
+                .style('opacity', 0)
+
+            gpEnter
+                .append('rect')
+                .attr('rx', 3)
+                .attr('ry', 3)
+                .attr('fill', '#ffffff')
+
+            gpEnter
+                .append('text')
+                .attr('font-size', 14)
+                .attr('font-weight', 600)
+                .attr('font-family', 'OpenSans,sans-serif')
+
+            guessPills.exit().remove()
+
+            hoverLayer.raise()   /* keep overlay on top */
+
+            /* helpers */
+            const bisectYear = d3.bisector(d => d.Year).left
+            const targetRows = grouped.get(target) ?? []
+
+            const interp = (rows, yr) => {
+                if (!rows.length) return null
+                const i = bisectYear(rows, yr)
+                if (i <= 0) return rows[0].Production / meta.scale
+                if (i >= rows.length) return rows[rows.length - 1].Production / meta.scale
+                const a = rows[i - 1], b = rows[i]
+                const t = (yr - a.Year) / (b.Year - a.Year)
+                return a.Production / meta.scale + t * ((b.Production / meta.scale) - (a.Production / meta.scale))
+            }
+
+            /* one‑decimal formatter */
+            const formatValue = d => {
+                if (d == null) return ''
+                const abs   = Math.abs(d)
+                let value   = d
+                let suffix  = ''
+                if (abs >= 1e9) { value = d / 1e9 ; suffix = 'B' }
+                else if (abs >= 1e6) { value = d / 1e6 ; suffix = 'M' }
+                else if (abs >= 1e3) { value = d / 1e3 ; suffix = 'k' }
+                return value.toFixed(1) + suffix + (meta.unitSuffix || '')
+            }
+
+            /* pointer handlers */
+            const pointerMove = ev => {
+                const [mx, my] = d3.pointer(ev, hoverLayer.node())
+
+                const PROX = 20
+
+                /* fade grey lines to 0.15 over 300ms */
+                gBase.selectAll('path')
+                    .interrupt()
+                    .transition().duration(300).ease(easeLinear)
+                    .attr('opacity', 0.15)
+
+                /* guide line */
+                hoverLayer.select('.hover-line')
+                    .attr('x1', mx)
+                    .attr('x2', mx)
+                    .style('opacity', 1)
+
+                /* year label */
+                const yr = x.invert(mx)
+                hoverLayer.select('.hover-year-label')
+                    .attr('x', mx)
+                    .text(Math.round(yr))
+                    .style('opacity', 1)
+
+                /* hide default x‑axis labels */
+                g.select('.x-axis').selectAll('.tick text').style('opacity', 0)
+
+                /* target dot + value label */
+                const yVal = interp(targetRows, yr)
+                if (yVal != null) {
+                    const cy = y(yVal)
+
+                    hoverLayer.select('.hover-dot-target')
+                        .attr('cx', mx)
+                        .attr('cy', cy)
+                        .style('opacity', 1)
+
+                    const txtSel = hoverLayer.select('.hover-value-label')
+                        .attr('x', mx + 8)
+                        .attr('y', cy - 6)
+                        .text(formatValue(yVal))
+                        .style('opacity', 1)
+
+                    /* background sized to text bbox */
+                    const box = txtSel.node().getBBox()
+                    hoverLayer.select('.hover-value-bg')
+                        .attr('x', box.x - 4)
+                        .attr('y', box.y - 2)
+                        .attr('width', box.width + 8)
+                        .attr('height', box.height + 4)
+                        .style('opacity', 0.85)
+                }
+
+                hoverLayer
+                    .selectAll('g.guess-pill')
+                    .each(function (d) {
+                        const val = interp(d.rows, yr)
+                        if (val == null) { d3.select(this).style('opacity', 0) ; return }
+
+                        const cy = y(val)
+                        const closeEnough = Math.abs(cy - my) <= PROX
+
+                        if (!closeEnough) { d3.select(this).style('opacity', 0) ; return }
+
+                        const txt = d3
+                            .select(this)
+                            .style('opacity', 1)
+                            .select('text')
+                            .attr('fill', d.stroke)
+                            .attr('x', mx + 8)
+                            .attr('y', cy - 6)
+                            .text(formatValue(val))
+
+                        const box = txt.node().getBBox()
+
+                        d3.select(this)
+                            .select('rect')
+                            .attr('x', box.x - 4)
+                            .attr('y', box.y - 2)
+                            .attr('width', box.width + 8)
+                            .attr('height', box.height + 4)
+                            .style('opacity', 0.85)
+                    })
+
+
+                /* guess dots */
+                hoverLayer.selectAll('circle.guess-dot')
+                    .each(function (d) {
+                        const yGuess = interp(d.rows, yr)
+                        d3.select(this)
+                            .style('opacity', yGuess == null ? 0 : 1)
+                            .attr('cx', mx)
+                            .attr('cy', y(yGuess))
+                    })
+            }
+
+            const pointerEnd = () => {
+                hoverLayer.select('.hover-line').style('opacity', 0)
+                hoverLayer.select('.hover-dot-target').style('opacity', 0)
+                hoverLayer.select('.hover-year-label').style('opacity', 0)
+                hoverLayer.select('.hover-value-label').style('opacity', 0)
+                hoverLayer.select('.hover-value-bg').style('opacity', 0)
+                hoverLayer.selectAll('g.guess-pill').style('opacity', 0)
+                hoverLayer.selectAll('circle.guess-dot').style('opacity', 0)
+                g.select('.x-axis').selectAll('.tick text').style('opacity', 1)
+
+                /* fade grey lines back to 0.4 over 300ms */
+                gBase.selectAll('path')
+                    .interrupt()                     // stop any running dim‑transition
+                    .transition().duration(300).ease(easeLinear)
+                    .attr('opacity', 0.4)
+            }
+
+            /* bind events */
+            hoverLayer.select('.hover-capture')
+                .on('pointerenter pointerdown pointermove', pointerMove)
+                .on('pointerup pointercancel pointerout', pointerEnd)
+
+            /* ----- axes ----- */
         g.select(".x-axis")
             .attr("transform", `translate(0,${innerH})`)
             .call(d3.axisBottom(x).ticks(5).tickFormat((d) => String(d)))
@@ -539,8 +800,11 @@ export default function Chart({
             .attr("opacity", red.opacity)
             .attr("d", redPathData);
         }
-       
-    });
+
+            /* keep the hover layer above everything that was just added */
+            hoverLayer.raise()
+
+        });
     
     return () => cancelAnimationFrame(rafId); // cleanup
     }, [data, meta, width, height, target, others, guesses, guessColours]);
