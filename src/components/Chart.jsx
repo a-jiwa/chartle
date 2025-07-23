@@ -405,9 +405,14 @@ export default function Chart({
 
             /* pointer handlers */
             const pointerMove = ev => {
-                const [mx, my] = d3.pointer(ev, hoverLayer.node())
+                /* raw pointer position in plot coordinates */
+                const [mxRaw, myRaw] = d3.pointer(ev, hoverLayer.node())
 
-                const PROX = 20
+                /* limit it to the drawable area */
+                const mx = Math.min(innerW, Math.max(0, mxRaw))
+                const my = Math.min(innerH, Math.max(0, myRaw))
+
+                const PROX = 40
 
                 /* fade grey lines to 0.15 over 300ms */
                 gBase.selectAll('path')
@@ -488,7 +493,6 @@ export default function Chart({
                             .style('opacity', 0.85)
                     })
 
-
                 /* guess dots */
                 hoverLayer.selectAll('circle.guess-dot')
                     .each(function (d) {
@@ -499,6 +503,7 @@ export default function Chart({
                             .attr('cy', y(yGuess))
                     })
             }
+
 
             const pointerEnd = () => {
                 hoverLayer.select('.hover-line').style('opacity', 0)
