@@ -1,6 +1,51 @@
-import Modal from "./Modal";
+import { useMemo } from "react"
+import Modal from "./Modal"
+import { loadHistory } from "../utils/storage"
+import { guessColours } from "../data/colors.js"
+
+const TARGET_COLOUR = "#c43333"   // red for a correct guess
+const LIGHT_BORDER  = "#d1d5db"   // Tailwind gray‑300 for empty cells
+
+/* Helpers */
+function dateKey(d) {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, "0")
+    const day = String(d.getDate()).padStart(2, "0")
+    return `${y}-${m}-${day}`
+}
+
+function goToDate(iso) {
+    const url = new URL(window.location.href)
+    url.searchParams.set("d", iso)
+    url.hash = ""
+    window.location.href = url.toString()
+}
 
 export default function HistoryModal({ open, onClose }) {
+    const rows = useMemo(() => {
+        const history = loadHistory()
+        const out = []
+
+        const stop = new Date("2025-07-01")
+        const cur  = new Date()
+        cur.setDate(cur.getDate())
+
+        while (cur >= stop) {
+            const key = dateKey(cur)
+            const rec = history[key] || {}
+
+            out.push({
+                key,
+                date: new Date(cur),
+                guesses: Array.isArray(rec.guesses) ? rec.guesses.slice(0, 5) : [],
+                target: rec.target || null
+            })
+
+            cur.setDate(cur.getDate() - 1)
+        }
+        return out
+    }, [])
+
     return (
         <Modal
             title="History"
@@ -15,7 +60,72 @@ export default function HistoryModal({ open, onClose }) {
                 </button>
             }
         >
-            <p>Your play history will appear here.</p>
+            <ul className="max-h-[70vh] px-4 overflow-y-auto divide-y divide-gray-200">
+                {rows.map(({ key, date, guesses, target }) => {
+                    const played = guesses.length > 0
+
+                    const fullDate = date.toLocaleDateString("en-GB", {
+                        weekday: "short",
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric"
+                    })
+                    const numericDate = date.toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit"
+                    }) // e.g. 23/07/25
+
+                    return (
+                        <li key={key}>
+                            <button
+                                type="button"
+                                onClick={() => goToDate(key)}
+                                className="w-full flex items-center justify-between
+                                           sm:px-1 px-3 sm:py-3 py-4
+                                           transition-colors hover:bg-gray-50 focus:bg-gray-50"
+                            >
+                                {/* Date label: numeric on xs, full on ≥sm */}
+                                <span
+                                    className={`text-sm ${
+                                        played
+                                            ? "font-bold text-gray-900"
+                                            : "font-medium text-gray-800"
+                                    }`}
+                                >
+                                    <span className="inline sm:hidden">{numericDate}</span>
+                                    <span className="hidden sm:inline">{fullDate}</span>
+                                </span>
+
+                                {/* Five circles */}
+                                <div className="flex gap-2">
+                                    {Array.from({ length: 5 }, (_, i) => {
+                                        let fill = "white"
+                                        let border = LIGHT_BORDER
+
+                                        if (i < guesses.length) {
+                                            const g = guesses[i] || ""
+                                            const correct =
+                                                target &&
+                                                g.toLowerCase() === target.toLowerCase()
+                                            fill = correct ? TARGET_COLOUR : guessColours[i]
+                                            border = fill
+                                        }
+
+                                        return (
+                                            <span
+                                                key={i}
+                                                className="block sm:h-4 sm:w-4 h-5 w-5 rounded-full border"
+                                                style={{ backgroundColor: fill, borderColor: border }}
+                                            />
+                                        )
+                                    })}
+                                </div>
+                            </button>
+                        </li>
+                    )
+                })}
+            </ul>
         </Modal>
-    );
+    )
 }
