@@ -74,23 +74,26 @@ export default function WinModal({
                 </button>
             }
         >
-            <p className="text-center mb-4">
-                You guessed <strong>{target}</strong> in{" "}
-                {guesses.length} attempt{guesses.length > 1 ? "s" : ""}.
-            </p>
+            {/* Add horizontal padding with px‑5 */}
+            <div className="px-5">
+                <p className="text-center mb-4">
+                    You guessed <strong>{target}</strong> in{" "}
+                    {guesses.length} attempt{guesses.length > 1 ? "s" : ""}.
+                </p>
 
-            {infoDescription.split("\n").map((line, i) => (
-                <p key={i}>{line}</p>
-            ))}
+                {infoDescription.split("\n").map((line, i) => (
+                    <p key={i}>{line}</p>
+                ))}
 
-            <p className="text-sm text-gray-700">Data source: {source}</p>
+                <p className="text-sm text-gray-700">Data source: {source}</p>
 
-            <button
-                onClick={handleCopy}
-                className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
-            >
-                {copied ? "Copied!" : "Share result"}
-            </button>
+                <button
+                    onClick={handleCopy}
+                    className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                >
+                    {copied ? "Copied!" : "Share result"}
+                </button>
+            </div>
         </Modal>
-    );
+    )
 }

@@ -48,7 +48,7 @@ export default function Modal({ title, open, onClose, children, footer = null })
                     </div>
 
                     {/* body */}
-                    <div className="space-y-4 p-4 md:p-5 text-base leading-relaxed text-gray-500">
+                    <div className="text-base leading-relaxed text-gray-500">
                         {children}
                     </div>
 
