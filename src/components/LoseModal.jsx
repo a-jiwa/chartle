@@ -74,6 +74,7 @@ export default function LoseModal({
                 </button>
             }
         >
+            <div className="px-5">
             <p className="text-center mb-4">
                 The correct answer was <strong>{target}</strong>.
             </p>
@@ -90,6 +91,7 @@ export default function LoseModal({
             >
                 {copied ? "Copied!" : "Share result"}
             </button>
+            </div>
         </Modal>
     );
 }

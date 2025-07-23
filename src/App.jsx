@@ -290,14 +290,15 @@ export default function App() {
             />
 
             <LoseModal
+                open={showLoseModal}
                 onClose={() => setStatus("done")}
-                    target={target}
-                    infoDescription={infoDescription}
-                    source={source}
-                    csvUrl={meta.csvUrl}
-                    guesses={guesses}
-                    title={meta.title}
-                    maxGuesses={MAX_GUESSES}
+                target={target}
+                infoDescription={infoDescription}
+                source={source}
+                csvUrl={meta.csvUrl}
+                guesses={guesses}
+                title={meta.title}
+                maxGuesses={MAX_GUESSES}
             />
 
             <HelpModal
