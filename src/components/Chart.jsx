@@ -29,6 +29,7 @@ export default function Chart({
     const [filteredData, setFilteredData] = useState(null); // ← for initial chart render
     const prevMaxRef = useRef(null); // last y-axis max
 
+
     /* --- load data --- */
     useEffect(() => {
         if (!csvUrl) return;
@@ -102,7 +103,7 @@ export default function Chart({
 
             // Filter the dataset
             // Apply population threshold
-            const populationThreshold = 100_000;
+            const populationThreshold = 300_000;
 
             // Build a quick lookup: country name → population
             const popByCountry = new Map(
@@ -165,6 +166,11 @@ export default function Chart({
         const rafId = requestAnimationFrame(() => {
             
         const unitSuffix = meta.unitSuffix;
+
+        const outlineColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--stroke-outline')
+            .trim() || "#f9f9f9";
+        console.log("Resolved stroke color:", outlineColor);
 
         /* ----- country sets & groups ----- */
         const latestOthers = others.length ? others : autoOthers(filteredData);
@@ -632,7 +638,7 @@ export default function Chart({
 
         guessEnter.append("path")
             .attr("fill", "none")
-            .attr("stroke", "#f9f9f9")
+            .attr("stroke", outlineColor)
             .attr("stroke-width", d => d.width + 2.5)
             .attr("opacity", 1)
             .attr("d", d => lineGen(d.rows));
@@ -732,7 +738,7 @@ export default function Chart({
                     .attr("text-anchor", "start")
                     .attr("font-family", "Open Sans, sans-serif")
                     .attr("fill", d.country === target ? "#c43333" : d.stroke)
-                    .attr("stroke", "#f9f9f9")         
+                    .attr("stroke", outlineColor)        
                     .attr("stroke-width", 2.5)          
                     .attr("paint-order", "stroke")        
                     .attr("x", xPos)
@@ -771,7 +777,7 @@ export default function Chart({
         const outline = gTarget
             .append("path")
             .attr("fill", "none")
-            .attr("stroke", "#f9f9f9")
+            .attr("stroke", outlineColor)
             .attr("stroke-width", red.width + 2.5)
             .attr("opacity", 1)
             .attr("d", redPathData);
@@ -800,7 +806,7 @@ export default function Chart({
         const redPathData = lineGen(red.rows);
         gTarget.selectAll("path").data([0, 1]).join("path")
             .attr("fill", "none")
-            .attr("stroke", (_, i) => (i === 0 ? "#f9f9f9" : red.stroke))
+            .attr("stroke", (_, i) => (i === 0 ? strokeOutline : red.stroke))
             .attr("stroke-width", (_, i) => (i === 0 ? red.width + 2.5 : red.width))
             .attr("opacity", red.opacity)
             .attr("d", redPathData);

@@ -32,29 +32,31 @@ export default function Modal({ title, open, onClose, children, footer = null })
         >
             <div
                 className="relative w-full max-w-2xl"
-                onClick={(e) => e.stopPropagation()} /* keep inner clicks alive */
+                onClick={(e) => e.stopPropagation()}
             >
-                <div className="relative rounded-lg bg-white shadow-sm">
+                <div className="relative rounded-lg bg-white shadow-sm dark:bg-gray-800">
                     {/* header */}
-                    <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 md:p-5">
-                        <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+                    <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 md:p-5 dark:border-gray-600">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            {title}
+                        </h3>
                         <button
                             aria-label="Close modal"
                             onClick={onClose}
-                            className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-900"
+                            className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
                         >
                             <X className="h-3.5 w-3.5" strokeWidth={2} />
                         </button>
                     </div>
 
                     {/* body */}
-                    <div className="text-base leading-relaxed text-gray-500">
+                    <div className="text-base leading-relaxed text-gray-500 dark:text-gray-300 p-4 md:p-5">
                         {children}
                     </div>
 
                     {/* footer */}
                     {footer && (
-                        <div className="flex items-center rounded-b border-t border-gray-200 p-4 md:p-5">
+                        <div className="flex items-center rounded-b border-t border-gray-200 p-4 md:p-5 dark:border-gray-600">
                             {footer}
                         </div>
                     )}

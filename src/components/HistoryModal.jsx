@@ -5,6 +5,7 @@ import { guessColours } from "../data/colors.js"
 
 const TARGET_COLOUR = "#c43333"   // red for a correct guess
 const LIGHT_BORDER  = "#d1d5db"   // Tailwind gray‑300 for empty cells
+const DARK_BORDER   = "#4b5563"   // Tailwind gray-600 for dark mode border fallback
 
 /* Helpers */
 function dateKey(d) {
@@ -27,7 +28,7 @@ export default function HistoryModal({ open, onClose }) {
         const out = []
 
         const stop = new Date("2025-07-01")
-        const cur  = new Date()
+        const cur = new Date()
         cur.setDate(cur.getDate())
 
         while (cur >= stop) {
@@ -54,13 +55,13 @@ export default function HistoryModal({ open, onClose }) {
             footer={
                 <button
                     onClick={onClose}
-                    className="ms-auto rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                    className="ms-auto rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-500"
                 >
                     Close
                 </button>
             }
         >
-            <ul className="max-h-[70vh] px-4 overflow-y-auto divide-y divide-gray-200">
+            <ul className="max-h-[70vh] px-4 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
                 {rows.map(({ key, date, guesses, target }) => {
                     const played = guesses.length > 0
 
@@ -83,14 +84,14 @@ export default function HistoryModal({ open, onClose }) {
                                 onClick={() => goToDate(key)}
                                 className="w-full flex items-center justify-between
                                            sm:px-1 px-3 sm:py-3 py-4
-                                           transition-colors hover:bg-gray-50 focus:bg-gray-50"
+                                           transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 focus:bg-gray-50 dark:focus:bg-gray-700"
                             >
                                 {/* Date label: numeric on xs, full on ≥sm */}
                                 <span
                                     className={`text-sm ${
                                         played
-                                            ? "font-bold text-gray-900"
-                                            : "font-medium text-gray-800"
+                                            ? "font-bold text-gray-900 dark:text-white"
+                                            : "font-medium text-gray-800 dark:text-gray-300"
                                     }`}
                                 >
                                     <span className="inline sm:hidden">{numericDate}</span>
@@ -115,8 +116,11 @@ export default function HistoryModal({ open, onClose }) {
                                         return (
                                             <span
                                                 key={i}
-                                                className="block sm:h-4 sm:w-4 h-5 w-5 rounded-full border"
-                                                style={{ backgroundColor: fill, borderColor: border }}
+                                                className="block sm:h-4 sm:w-4 h-5 w-5 rounded-full border dark:border-gray-600"
+                                                style={{
+                                                    backgroundColor: fill,
+                                                    borderColor: border || DARK_BORDER
+                                                }}
                                             />
                                         )
                                     })}

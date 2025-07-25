@@ -199,14 +199,14 @@ export default function Guesses({
     };
 
     return (
-        <div className="flex flex-col items-center gap-3 py-5">
+            <div className="flex flex-col items-center gap-3 py-5">
             {/* ── instruction ── */}
             {guesses.length === 0 && (
-                <p className="text-m font-medium text-gray-800 pt-0.5">
-                    Guess the country in{" "}
-                    <span className="font-semibold" style={{ color: "#c43333" }}>
-                        red
-                    </span>
+                <p className="text-m font-medium text-gray-800 dark:text-white pt-0.5">
+                Guess the country in{" "}
+                <span className="font-semibold" style={{ color: "#c43333" }}>
+                    red
+                </span>
                 </p>
             )}
 
@@ -269,10 +269,16 @@ export default function Guesses({
                         onBlur={() =>
                             setTimeout(() => setShowSuggestions(false), 100)
                         }
-                        className={`block w-full p-4 pl-10 text-sm rounded-lg bg-gray-50 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 outline-none ${
-                            trimmed && !isValidCountry
-                                ? "border border-red-500"
-                                : "border border-gray-300"
+                        className={`block w-full p-4 pl-10 text-sm rounded-lg
+                            bg-gray-50 dark:bg-gray-700
+                            focus:ring-emerald-500 focus:border-emerald-500
+                            disabled:bg-gray-100 dark:disabled:bg-gray-600
+                            outline-none
+                            text-gray-900 dark:text-gray-100
+                            ${
+                                trimmed && !isValidCountry
+                                ? "border border-red-500 dark:border-red-400"
+                                : "border border-gray-300 dark:border-gray-600"
                         }`}
                         autoComplete="on"
                     />
@@ -293,8 +299,9 @@ export default function Guesses({
                     {/* ─────────── Suggestions ─────────── */}
                     {showSuggestions && filtered.length > 0 && (
                         <ul
-                            className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
-                           bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto"
+                           className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
+                                    bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 
+                                    rounded-lg shadow-lg overflow-y-auto"
                         >
                             {filtered.map((country, idx) => {
                                 const hasData = validCountries.includes(country);
@@ -303,11 +310,11 @@ export default function Guesses({
                                 return (
                                     <li
                                     key={country}
-                                    className={`cursor-pointer py-4 px-4 text-sm flex justify-between items-center ${
-                                        idx === highlightedIndex
-                                        ? "bg-emerald-50 font-semibold"
-                                        : "hover:bg-gray-100"
-                                    } ${isInactive ? "text-gray-400" : "text-gray-800"}`}
+                                    className={`cursor-pointer py-4 px-4 text-sm flex justify-between items-center
+                                        ${idx === highlightedIndex
+                                            ? "bg-emerald-50 dark:bg-emerald-700 font-semibold text-gray-900 dark:text-white"
+                                            : "hover:bg-gray-100 dark:hover:bg-gray-700"}
+                                        ${isInactive ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"}`}
                                     onMouseDown={() => {
                                         if (!isInactive) {
                                         selectSuggestion(country);
@@ -346,7 +353,7 @@ export default function Guesses({
                         return (
                             <div
                                 key={g}
-                                className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 bg-white"
+                                className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700"
                             >
                                 {/* Left: numbered country */}
                                 <span

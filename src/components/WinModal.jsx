@@ -85,7 +85,7 @@ export default function WinModal({
                     <p key={i}>{line}</p>
                 ))}
 
-                <p className="text-sm text-gray-700">Data source: {source}</p>
+                <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">Data source: {source}</p>
 
                 <button
                     onClick={handleCopy}

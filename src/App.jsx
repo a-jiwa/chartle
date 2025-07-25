@@ -230,10 +230,10 @@ export default function App() {
                     <div className="px-4 pb-2 grid grid-cols-[1fr_auto] items-start gap-y-1">
                         {/* left column */}
                         <div>
-                            <h2 className="mt-5 text-left font-bold text-gray-900 text-[16px] md:text-[20px] leading-tight">
+                            <h2 className="mt-5 text-left font-bold text-gray-900 dark:text-white text-[16px] md:text-[20px] leading-tight">
                                 {meta.title}
                             </h2>
-                            <p className="text-left text-gray-600 text-[16px] mt-1">
+                            <p className="text-left text-gray-600 dark:text-gray-300 text-[16px] mt-1">
                                 {meta.subtitle}
                             </p>
                         </div>
