@@ -112,6 +112,7 @@ export default function WinModal({
         chart.append("g")
             .call(d3.axisLeft(y).tickSize(0))
             .selectAll("text")
+            .style("font-family", "'Open Sans', sans-serif")
             .style("font-size", "14px")
             .attr("fill", textColor)
             .attr("text-anchor", "start")
