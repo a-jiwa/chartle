@@ -226,7 +226,7 @@ export default function App() {
     /* ─── render ────────────────────────────────────────── */
     return (
 
-        <div className="h-full flex flex-col items-center overflow-y-scroll">
+        <div className="h-full antialiased flex flex-col items-center overflow-y-scroll">
             <Header
                 onOpen={handleMenuOpen}
                 dateLabel={GAME_DATE_LABEL_SHORT}

@@ -67,7 +67,7 @@ export default function HistoryModal({ open, onClose }) {
                 </button>
             }
         >
-            <ul className="max-h-[70vh] px-4 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+            <ul className="max-h-[60vh] px-4 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
                 {rows.map(({ key, date, guesses, target }) => {
                     const played = guesses.length > 0;
 

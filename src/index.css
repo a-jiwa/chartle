@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
 :root {
   --stroke-outline: #f9f9f9;
@@ -49,7 +48,7 @@ body,
   overflow: hidden;
   margin: 0;
   padding: 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans Variable", system-ui, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   transition:

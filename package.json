@@ -13,6 +13,8 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@fontsource-variable/open-sans": "^5.2.6",
+    "@fontsource/open-sans": "^5.2.6",
     "canvas-confetti": "^1.9.3",
     "country-json": "^2.3.0",
     "d3": "^7.9.0",
