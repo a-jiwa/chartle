@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 
-export default function Header({ onOpen }) {
+export default function Header({ onOpen, dateLabel, overridden }) {
     const { user } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -42,6 +42,17 @@ export default function Header({ onOpen }) {
     return (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-gray-300 dark:border-gray-700 bg-[#f9f9f9]/60 dark:bg-[#111]/60 backdrop-blur-md">
             <div className="relative mx-auto flex w-full max-w-[700px] flex-wrap items-center justify-center px-4 py-3">
+                {/* date (mobile only) */}
+                <span
+                    className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm md:hidden ${
+                        overridden
+                            ? "text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded"
+                            : "text-gray-500"
+                    }`}
+                >
+                    {dateLabel}
+                </span>
+
                 {/* title */}
                 <h1 className="text-xl font-[Menlo,_monospace] tracking-wide text-gray-800 dark:text-white">
                     chartle

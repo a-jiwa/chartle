@@ -58,11 +58,17 @@ export default function App() {
     const handleMenuOpen = (id) => setPanel(id);
 
     /* ── readable date for display ───────────── */
-    const GAME_DATE_LABEL = new Date(GAME_DATE).toLocaleDateString("en-GB", {
-        weekday: "short",  // Fri
-        day: "2-digit",    // 19
-        month: "short",    // Jul
-        year: "numeric"    // 2025
+    const GAME_DATE_LABEL_FULL = new Date(GAME_DATE).toLocaleDateString("en-GB", {
+        weekday: "short",   // Fri
+        day: "2-digit",     // 19
+        month: "short",     // Jul
+        year: "numeric"     // 2025
+    });
+
+    const GAME_DATE_LABEL_SHORT = new Date(GAME_DATE).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
     });
 
     /* ─── analytics initialisation ─────────────────────── */
@@ -221,7 +227,11 @@ export default function App() {
     return (
 
         <div className="h-full flex flex-col items-center overflow-y-scroll">
-            <Header onOpen={handleMenuOpen} />
+            <Header
+                onOpen={handleMenuOpen}
+                dateLabel={GAME_DATE_LABEL_SHORT}
+                overridden={OVERRIDDEN}
+            />
 
             <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
@@ -240,13 +250,13 @@ export default function App() {
 
                         {/* right: game date */}
                         <p
-                            className={`mt-5 md:mt-5 md:ml-4 text-[14px] ${
+                            className={`mt-5 md:mt-5 md:ml-4 text-[14px] hidden md:inline-block ${
                                 OVERRIDDEN
-                                    ? "text-yellow-800 bg-yellow-100 inline-block px-2 py-0.5 rounded"
+                                    ? "text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded"
                                     : "text-gray-500"
                             }`}
                         >
-                            {GAME_DATE_LABEL}
+                            {GAME_DATE_LABEL_FULL}
                         </p>
                     </div>
 
