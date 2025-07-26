@@ -19,7 +19,7 @@ import countryToRealCountry from "./data/country_to_real_country.json";
 
 // ── Daily persistence helpers ────────────────────────────
 import { todayKey }                      from "./utils/date";
-import { loadHistory, saveHistory }      from "./utils/storage";
+import { loadHistoryLocal, loadHistory, saveHistory } from './utils/historyStore.js';
 import { getGameDateFromUrl, hasDateOverride, stripDateOverrideFromUrl } from "./utils/gameDate";
 
 import { fetchMeta } from "./utils/fetchMeta";
@@ -37,7 +37,7 @@ const MAX_GUESSES = 5;
 // ── Load today’s save (if any) once, before the component runs ──
 const GAME_DATE = getGameDateFromUrl();
 const OVERRIDDEN = hasDateOverride();
-const history = loadHistory();
+const history      = loadHistoryLocal();
 const todaysRecord = history[GAME_DATE] ?? null;
 
 
