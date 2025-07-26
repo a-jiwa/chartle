@@ -199,16 +199,16 @@ export default function Guesses({
     };
 
     return (
-            <div className="flex flex-col items-center gap-3 py-5">
+            <div className="flex flex-col items-center gap-3 py-10">
             {/* ── instruction ── */}
-            {guesses.length === 0 && (
-                <p className="text-m font-medium text-gray-800 dark:text-white pt-0.5">
-                Guess the country in{" "}
-                <span className="font-semibold" style={{ color: "#c43333" }}>
-                    red
-                </span>
-                </p>
-            )}
+                <div className="h-6 flex items-end">
+                    {guesses.length === 0 && (
+                        <p className="text-m font-medium text-gray-800 dark:text-white pt-0.5">
+                            Guess the country in{' '}
+                            <span className="font-semibold text-[#c43333]">red</span>
+                        </p>
+                    )}
+                </div>
 
             {/* ─────────── Input form ─────────── */}
             <form onSubmit={submit} className="w-full px-[50px]">
