@@ -23,13 +23,22 @@
 
   --fifth-guess: #d17968;
   --fifth-guess-dark: #943F2E;
+
+  --other-lines: #757575;
+
+  --axis-text-color: #6b7280;
+  --axis-lines-color: #b6b6b6aa;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --stroke-outline: #111111;
-    --bg-color: #121212;      /* dark background */
-    --text-color: #eeeeee;    /* light text */
+    --stroke-outline: #121212;
+    --bg-color: #121212;   
+    --text-color: #eeeeee;  
+
+    --other-lines: #999999;
+
+    --target-red: #CF4444;
   }
 }
 

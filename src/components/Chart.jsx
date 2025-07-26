@@ -169,8 +169,7 @@ export default function Chart({
 
         const outlineColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--stroke-outline')
-            .trim() || "#f9f9f9";
-        console.log("Resolved stroke color:", outlineColor);
+            .trim();
 
         /* ----- country sets & groups ----- */
         const latestOthers = others.length ? others : autoOthers(filteredData);
@@ -217,7 +216,7 @@ export default function Chart({
             id: `${c}-base`,
             country: c,
             rows: grouped.get(c) ?? [],
-            stroke: "#757575",
+            stroke: getComputedStyle(document.documentElement).getPropertyValue('--other-lines').trim(),
             width: 1.5,
             opacity: 0.4,
         }));
@@ -227,7 +226,7 @@ export default function Chart({
                 id: `${target}-target`,
                 country: target,
                 rows: grouped.get(target) ?? [],
-                stroke: "#c43333",
+                stroke: getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim(),
                 width: 4,
                 opacity: 1,
             },
@@ -242,7 +241,7 @@ export default function Chart({
                 country: c,
                 iso,
                 rows,
-                stroke: guessColours[i] ?? "#2A74B3",
+                stroke: guessColours[i],
                 width: 3,
                 opacity: 1,
             };
@@ -540,7 +539,7 @@ export default function Chart({
             .selectAll(".tick text")
             .attr("font-size", 16)
             .attr("font-weight", 500)
-            .attr("fill", "#6b7280")
+            .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--axis-text-color').trim())
             .attr("dy", "0.95em") // increased vertical padding for x-axis labels
             .style("font-family", "Open Sans, sans-serif");
 
@@ -575,11 +574,11 @@ export default function Chart({
             sel.selectAll(".tick text")
                 .attr("font-size", 16)
                 .attr("font-weight", 500)
-                .attr("fill", "#6b7280")
+                .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--axis-text-color').trim())
                 .style("font-family", "Open Sans, sans-serif");
             sel.selectAll(".domain").attr("stroke-opacity", 0);
             sel.selectAll(".tick line")
-                .attr("stroke", "#d1d5db")
+                .attr("stroke", getComputedStyle(document.documentElement).getPropertyValue('--axis-lines-color').trim())
                 .attr("stroke-opacity", 0.6)
                 .attr("stroke-width", 1);
         };
@@ -737,7 +736,7 @@ export default function Chart({
                     .attr("font-weight", "bold")
                     .attr("text-anchor", "start")
                     .attr("font-family", "Open Sans, sans-serif")
-                    .attr("fill", d.country === target ? "#c43333" : d.stroke)
+                    .attr("fill", d.country === target ? getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim() : d.stroke)
                     .attr("stroke", outlineColor)        
                     .attr("stroke-width", 2.5)          
                     .attr("paint-order", "stroke")        
