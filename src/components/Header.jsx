@@ -1,14 +1,37 @@
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth.jsx';
 
 export default function Header({ onOpen }) {
+    const { user } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
 
+    /* avatar (desktop) or fallback label */
+    const accountLabel = user
+        ? user.photoURL
+            ? (
+                <img
+                    src={user.photoURL}
+                    alt="Account"
+                    className="h-6 w-6 rounded-full object-cover"
+                    referrerPolicy="no-referrer"
+                />
+            )
+            : (
+                <span
+                    aria-label="Account"
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-400 text-xs font-semibold text-white"
+                >
+            {user.displayName?.charAt(0).toUpperCase()}
+          </span>
+            )
+        : 'Sign in';
+
     const items = [
-        { id: "help",     label: "Help" },
-        { id: "history",  label: "History" },
-        { id: "settings", label: "Settings" },
-        { id: "auth",     label: "Login / Sign-up" },
+        { id: 'help',     label: 'Help' },
+        { id: 'history',  label: 'History' },
+        { id: 'settings', label: 'Settings' },
+        { id: 'auth',     label: accountLabel },
     ];
 
     const handleClick = (id) => {
@@ -39,14 +62,14 @@ export default function Header({ onOpen }) {
                         <button
                             key={id}
                             onClick={() => handleClick(id)}
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                            className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                         >
                             {label}
                         </button>
                     ))}
                 </nav>
 
-                {/* mobile dropdown – full-width */}
+                {/* mobile dropdown */}
                 {menuOpen && (
                     <nav className="absolute inset-x-0 top-full origin-top bg-white dark:bg-[#1a1a1a] shadow-md md:hidden">
                         <ul className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
@@ -56,7 +79,11 @@ export default function Header({ onOpen }) {
                                         onClick={() => handleClick(id)}
                                         className="block w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     >
-                                        {label}
+                                        {id === 'auth' && user
+                                            ? 'Account'
+                                            : typeof label === 'string'
+                                                ? label
+                                                : 'Account'}
                                     </button>
                                 </li>
                             ))}
