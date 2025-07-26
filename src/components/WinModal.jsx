@@ -68,9 +68,8 @@ export default function WinModal({
         const width = 300 - margin.left - margin.right;
         const height = data.length * 30;
 
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const textColor = prefersDark ? "#e5e7eb" : "#111827";
-        const barColor = "#3b9e9e";
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
+        const barColor = getComputedStyle(document.documentElement).getPropertyValue('--first-guess').trim();
 
         const chart = svg
             .attr("width", width + margin.left + margin.right)
@@ -124,23 +123,23 @@ export default function WinModal({
 
     return (
     <Modal
-        title="Congratulations!"
+        title="You guessed it!"
         open={open}
         onClose={onClose}
         // footer removed
     >
         <div className="px-5 text-left">
-            <div className="mb-3 space-y-2">
+            <div className="mb-4 space-y-3 [color:var(--text-color)]">
                 {infoDescription.split("\n").map((line, i) => (
                     <p key={i}>{line}</p>
                 ))}
             </div>
 
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+            <p className="text-sm [color:var(--text-color)] mb-8">
                 Data source: {source}
             </p>
 
-            <p className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 mt-6">
+            <p className="text-lg font-semibold [color:var(--text-color)] mb-2 mt-6">
                 Your track record
             </p>
 
@@ -150,13 +149,13 @@ export default function WinModal({
             <div className="mt-4 flex items-center justify-between gap-4">
                 <button
                     onClick={handleCopy}
-                    className="rounded-lg [background-color:#4f7cac] px-4 py-2 text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                    className="rounded-lg [background-color:var(--second-guess)] px-4 py-2 text-sm text-white hover:[background-color:var(--second-guess-dark)] focus:outline-none focus:ring-4 focus:ring-blue-300"
                 >
                     {copied ? "Copied!" : "Share result"}
                 </button>
                 <button
                     onClick={onClose}
-                    className="rounded-lg [background-color:#d17968] px-4 py-2 text-sm text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
+                    className="rounded-lg [background-color:var(--fifth-guess)] px-4 py-2 text-sm text-white hover:[background-color:var(--fifth-guess-dark)] focus:outline-none focus:ring-4 focus:ring-emerald-300"
                 >
                     Close
                 </button>

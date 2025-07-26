@@ -5,6 +5,24 @@
   --stroke-outline: #f9f9f9;
   --bg-color: #f9f9f9;
   --text-color: #111111;
+
+  --target-red: #c43333;
+  --target-red-dark: #942121;
+
+  --first-guess: #3b9e9e;
+  --first-guess-dark: #2e7777;
+
+  --second-guess: #4f7cac;
+  --second-guess-dark: #3A5B7E;
+
+  --third-guess: #b48f2b;
+  --third-guess-dark: #8c6f1f;
+
+  --fourth-guess: #8c6fa8;
+  --fourth-guess-dark: #684e83;
+
+  --fifth-guess: #d17968;
+  --fifth-guess-dark: #943F2E;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,5 +43,11 @@ body,
   font-family: 'Open Sans', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    fill 0.3s ease,
+    stroke 0.3s ease,
+    outline-color 0.3s ease;
 }
