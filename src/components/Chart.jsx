@@ -652,7 +652,7 @@ export default function Chart({
                 .attr("stroke-dasharray", `${length} ${length}`)
                 .attr("stroke-dashoffset", length)
                 .transition()
-                .duration(3000)
+                .duration(2500)
                 .attr("stroke-dashoffset", 0);
         });
 
@@ -751,7 +751,7 @@ export default function Chart({
                 drawLabel(); // No animation delay
             } else {
                 path.transition()
-                    .duration(3000)
+                    .duration(2500)
                     .attr("stroke-dashoffset", 0)
                     .on("end", drawLabel); // Wait until line animation finishes
             }
@@ -794,7 +794,7 @@ export default function Chart({
             .attr("stroke-dasharray", `${length} ${length}`)
             .attr("stroke-dashoffset", length)
             .transition()
-            .duration(3000)
+            .duration(2500)
             .attr("stroke-dashoffset", 0);
         });
         } else {
@@ -807,6 +807,83 @@ export default function Chart({
             .attr("opacity", red.opacity)
             .attr("d", redPathData);
         }
+
+// Remove any existing target label
+g.selectAll("text.target-unknown-label, text.target-label").remove();
+
+// Get target data
+const targetData = grouped.get(target) ?? [];
+const validRows = targetData.filter(r => typeof r.Production === "number");
+const last = validRows[validRows.length - 1];
+
+if (last) {
+    const xPos = x(last.Year) + 4;
+    const yPos = y(last.Production / meta.scale) + 4;
+    const targetISO = targetData[0]?.ISO ?? target;
+
+    const drawTargetLabel = () => {
+        g.append("text")
+            .attr("class", "target-label")
+            .attr("font-size", 14)
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "start")
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim())
+            .attr("stroke", outlineColor)
+            .attr("stroke-width", 2.5)
+            .attr("paint-order", "stroke")
+            .attr("x", xPos)
+            .attr("y", yPos)
+            .text(targetISO);
+    };
+
+    const drawUnknownLabel = () => {
+        g.append("text")
+            .attr("class", "target-unknown-label")
+            .attr("font-size", 14)
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "start")
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim())
+            .attr("stroke", outlineColor)
+            .attr("stroke-width", 2.5)
+            .attr("paint-order", "stroke")
+            .attr("x", xPos)
+            .attr("y", yPos)
+            .text("???");
+    };
+
+    if (guesses.includes(target)) {
+        drawTargetLabel(); // show correct label
+    } else {
+        const redPath = gTarget.select("path:nth-child(2)");
+        const delay = 2500;
+
+        const timeoutId = setTimeout(() => {
+            if (!guesses.includes(target)) {
+                drawUnknownLabel();
+            }
+        }, delay);
+
+        // Cleanup function to remove "???" if target is guessed later
+        const observer = new MutationObserver(() => {
+            if (guesses.includes(target)) {
+                clearTimeout(timeoutId); // cancel delayed label if needed
+                g.selectAll("text.target-unknown-label").remove();
+                drawTargetLabel(); // draw actual ISO label
+                observer.disconnect();
+            }
+        });
+
+        // Watch for changes to the <svg> to respond to new guesses
+        observer.observe(svgRef.current, { childList: true, subtree: true });
+
+        // Just in case: cleanup observer when component unmounts
+        return () => observer.disconnect();
+    }
+}
+
+
 
             /* keep the hover layer above everything that was just added */
             hoverLayer.raise()
