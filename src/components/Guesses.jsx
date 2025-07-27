@@ -203,9 +203,9 @@ export default function Guesses({
             {/* ── instruction ── */}
                 <div className="h-6 flex items-end">
                     {guesses.length === 0 && (
-                        <p className="text-m font-medium text-gray-800 dark:text-white pt-0.5">
+                        <p className="text-[18px] font-medium text-gray-800 dark:text-white pt-0.5">
                             Guess the country in{' '}
-                            <span className="font-semibold text-[#c43333]">red</span>
+                            <span className="font-semibold text-[var(--target-red)]">red</span>
                         </p>
                     )}
                 </div>
