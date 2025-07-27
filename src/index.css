@@ -30,6 +30,8 @@
 
   --modal-bg-color: #f9f9f9;
   --modal-overlay: #202020b4;
+
+  --guessed-box: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,6 +46,8 @@
 
     --modal-bg-color: #343434;
     --modal-overlay: #202020b4;
+
+    --guessed-box: #202020;
   }
 }
 

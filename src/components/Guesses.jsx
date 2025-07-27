@@ -353,7 +353,7 @@ export default function Guesses({
                         return (
                             <div
                                 key={g}
-                                className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700"
+                                className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 [background-color:var(--guessed-box)] dark:border-gray-600"
                             >
                                 {/* Left: numbered country */}
                                 <span
