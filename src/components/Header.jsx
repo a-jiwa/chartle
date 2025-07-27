@@ -45,8 +45,8 @@ export default function Header({ onOpen, dateLabel, overridden }) {
                 <span
                     className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm ${
                         overridden
-                            ? "text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded"
-                            : "text-gray-500"
+                            ? "bg-yellow-100 dark:bg-yellow-900 px-2 py-0.5 rounded text-yellow-800 dark:text-yellow-300"
+                            : "text-[color:var(--axis-text-color)]"
                     }`}
                 >
                     {dateLabel}
