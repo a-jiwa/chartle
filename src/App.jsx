@@ -248,16 +248,6 @@ export default function App() {
                             </p>
                         </div>
 
-                        {/* right: game date */}
-                        <p
-                            className={`mt-5 md:mt-5 md:ml-4 text-[14px] hidden md:inline-block ${
-                                OVERRIDDEN
-                                    ? "text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded"
-                                    : "text-gray-500"
-                            }`}
-                        >
-                            {GAME_DATE_LABEL_FULL}
-                        </p>
                     </div>
 
                     <Chart
