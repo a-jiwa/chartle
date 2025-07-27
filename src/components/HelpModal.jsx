@@ -12,7 +12,7 @@ export default function HelpModal({ open, onClose }) {
                     <span style={{ color: "var(--target-red)" }} className="font-bold">red</span> in today’s chart.
                 </p>
                 <p className="[color:var(--text-color)]">
-                    Type any country in the world into the input box below the chart to see how it compares to the red target country.
+                    Type any country in the world into the box below the chart to see how it compares to the red target country.
                 </p>
                 <p className="[color:var(--text-color)]">
                     That’s it, no other clues. Good luck!
