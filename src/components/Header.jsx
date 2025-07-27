@@ -68,13 +68,13 @@ export default function Header({ onOpen, dateLabel, overridden }) {
 
                 {/* Dropdown menu (mobile + desktop) */}
                 {menuOpen && (
-                    <nav className="absolute inset-x-0 top-full origin-top bg-white dark:bg-[#1a1a1a] shadow-md">
+                    <nav className="absolute right-4 top-full w-48 origin-top rounded-md [background-color:var(--guessed-box)] shadow-md">
                         <ul className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
                             {items.map(({ id, label }) => (
                                 <li key={id}>
                                     <button
                                         onClick={() => handleClick(id)}
-                                        className="block w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        className="block w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     >
                                         {id === 'auth' && user
                                             ? 'Account'
