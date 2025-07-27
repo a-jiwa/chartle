@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { COUNTRIES } from "../data/countries";
 import { guessColours } from "../data/colors.js";
 
@@ -53,6 +53,19 @@ export default function Guesses({
     const isDataCountry = validCountries.includes(trimmed);
     const isValidCountry = COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed) && isDataCountry;
 
+    const suggestionsRef = useRef(null);
+    const userHasScrolledRef = useRef(false);
+
+    function handleScroll() {
+        if (!userHasScrolledRef.current) {
+            const el = suggestionsRef.current;
+            const atBottom =
+                el.scrollTop + el.clientHeight >= el.scrollHeight - 2;   // 2‑px tolerance
+
+            if (!atBottom) userHasScrolledRef.current = true;          // user moved away
+        }
+    }
+
     /* — Ranked suggestions — */
     const filtered = COUNTRIES.filter(
         (c) => c.toLowerCase().includes(lcTrimmed) && lcTrimmed
@@ -76,6 +89,19 @@ export default function Guesses({
             return a.localeCompare(b);
         })
         .reverse();
+
+    useEffect(() => {
+        if (showSuggestions && suggestionsRef.current) {
+            const box = suggestionsRef.current
+            box.scrollTop = box.scrollHeight
+        }
+    }, [showSuggestions, lcTrimmed])
+
+    useEffect(() => {
+        if (!showSuggestions) {
+            userHasScrolledRef.current = false;
+        }
+    }, [showSuggestions]);
 
     /* ───────────────── distance animation helper ─────────────────────
        Variable STEP SIZE
@@ -299,7 +325,9 @@ export default function Guesses({
                     {/* ─────────── Suggestions ─────────── */}
                     {showSuggestions && filtered.length > 0 && (
                         <ul
-                           className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
+                            ref={suggestionsRef}
+                            onScroll={handleScroll}
+                            className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
                                     bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 
                                     rounded-lg shadow-lg overflow-y-auto"
                         >
