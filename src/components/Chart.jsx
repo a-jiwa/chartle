@@ -584,11 +584,8 @@ export default function Chart({
         };
 
 
-        if (domainChanged) {
-            g.select(".y-axis").transition().duration(1500).call(yAxis);
-        } else {
-            g.select(".y-axis").call(yAxis);
-        }
+        g.select(".y-axis").call(yAxis);
+
 
         // Get maximum tick label width
         const maxTickLabelWidth = Math.max(
@@ -655,7 +652,7 @@ export default function Chart({
                 .attr("stroke-dasharray", `${length} ${length}`)
                 .attr("stroke-dashoffset", length)
                 .transition()
-                .duration(2000)
+                .duration(3000)
                 .attr("stroke-dashoffset", 0);
         });
 
@@ -754,7 +751,7 @@ export default function Chart({
                 drawLabel(); // No animation delay
             } else {
                 path.transition()
-                    .duration(2000)
+                    .duration(3000)
                     .attr("stroke-dashoffset", 0)
                     .on("end", drawLabel); // Wait until line animation finishes
             }
@@ -797,7 +794,7 @@ export default function Chart({
             .attr("stroke-dasharray", `${length} ${length}`)
             .attr("stroke-dashoffset", length)
             .transition()
-            .duration(2000)
+            .duration(3000)
             .attr("stroke-dashoffset", 0);
         });
         } else {
