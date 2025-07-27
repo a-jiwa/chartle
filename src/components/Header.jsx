@@ -54,7 +54,7 @@ export default function Header({ onOpen, dateLabel, overridden }) {
 
                 {/* Title centered */}
                 <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-[Menlo,_monospace] tracking-wide text-gray-800 dark:text-white">
-                    chartle
+                    📈 chartle
                 </h1>
 
                 {/* Hamburger button (always right) */}
