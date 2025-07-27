@@ -94,13 +94,14 @@ export default function WinModal({
             .attr('fill', barColor);
 
         chart.selectAll('.label')
-            .data(data)
+            .data(data.filter(d => d.count > 0))  // only data points with count > 0
             .enter()
             .append('text')
             .attr('x', (d) => labelPadding + x(d.count) - 5)
             .attr('y', (d) => y(d.tries) + y.bandwidth() / 2 + 4)
             .attr('text-anchor', 'end')
             .attr('fill', '#ffffff')
+            .style('font-family', "'Open Sans', sans-serif")
             .style('font-size', '14px')
             .text((d) => d.count);
 
@@ -128,22 +129,25 @@ export default function WinModal({
     }, [open]);
 
     return (
-        <Modal title="You guessed it!" open={open} onClose={onClose}>
-            <div className="px-5 text-left">
+        <Modal open={open} onClose={onClose}>
+            <div className="px-5 text-center">
+                {/* Custom title */}
+                <h2 className="text-2xl font-bold mb-4 [color:var(--text-color)]">You guessed it!</h2>
+
                 {/* description */}
-                <div className="mb-4 space-y-3 [color:var(--text-color)]">
+                <div className="mb-4 space-y-3 [color:var(--text-color)] text-left">
                     {infoDescription.split('\n').map((line, i) => (
                         <p key={i}>{line}</p>
                     ))}
                 </div>
 
                 {/* source */}
-                <p className="text-sm [color:var(--text-color)] mb-8">
+                <p className="text-sm [color:var(--text-color)] mb-8 text-left">
                     Data source: {source}
                 </p>
 
                 {/* record + chart */}
-                <p className="text-lg font-semibold [color:var(--text-color)] mb-2 mt-6">
+                <p className="text-lg font-semibold [color:var(--text-color)] mb-2 mt-6 text-left">
                     Your track record
                 </p>
                 <svg ref={chartRef} className="w-full h-auto mb-4" />
@@ -158,7 +162,16 @@ export default function WinModal({
                     </button>
                     <button
                         onClick={onClose}
-                        className="rounded-lg [background-color:var(--fifth-guess)] px-4 py-2 text-sm text-white hover:[background-color:var(--fifth-guess-dark)] focus:outline-none focus:ring-4 focus:ring-emerald-300"
+                        className="
+                            rounded-lg 
+                            bg-black 
+                            px-4 py-2 
+                            text-sm 
+                            text-white 
+                            focus:outline-none 
+                            focus:ring-4 
+                            focus:ring-emerald-300
+                            "
                     >
                         Close
                     </button>

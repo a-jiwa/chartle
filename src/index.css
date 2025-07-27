@@ -27,6 +27,9 @@
 
   --axis-text-color: #6b7280;
   --axis-lines-color: #b6b6b6aa;
+
+  --modal-bg-color: #f9f9f9;
+  --modal-overlay: #202020b4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +41,9 @@
     --other-lines: #999999;
 
     --target-red: #CF4444;
+
+    --modal-bg-color: #343434;
+    --modal-overlay: #202020b4;
   }
 }
 
