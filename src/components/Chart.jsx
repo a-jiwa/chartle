@@ -862,7 +862,7 @@ if (last) {
             .attr("paint-order", "stroke")
             .attr("x", xPos)
             .attr("y", yPos)
-            .text("???");
+            .text("xxx");
     };
 
     if (guesses.includes(target)) {
