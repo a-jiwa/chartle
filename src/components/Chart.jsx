@@ -70,7 +70,8 @@ export default function Chart({
                     typeof row[colISO] === "string" &&
                     row[colISO].trim() !== "" &&
                     !row[colISO].startsWith("OWID") &&
-                    (meta.yearStart == null || row[colYear] >= meta.yearStart)
+                    (meta.yearStart == null || row[colYear] >= meta.yearStart) &&
+                    (meta.yearEnd == null || row[colYear] <= meta.yearEnd)
                 ).map(row => ({
                     Country: row[colCountry],
                     ISO: row[colISO],
@@ -84,7 +85,7 @@ export default function Chart({
             // Determine time range
             const years = standardized.map(d => d.Year);
             const minYear = meta.yearStart ?? d3.min(years);
-            const maxYear = d3.max(years);
+            const maxYear = meta.yearEnd ?? d3.max(years);
             const yearRange = maxYear - minYear + 1;
 
             // Filter: keep only countries with >60% data coverage
@@ -187,7 +188,10 @@ export default function Chart({
             /* ----- scales ----- */
         const x = d3
             .scaleLinear()
-            .domain(d3.extent(data, (d) => d.Year))
+            .domain([
+                meta.yearStart ?? d3.min(data, d => d.Year),
+                meta.yearEnd ?? d3.max(data, d => d.Year)
+            ])
             .range([0, innerW]);
 
         const yMax = d3.max(grouped, ([, rows]) =>
@@ -210,6 +214,10 @@ export default function Chart({
             .curve(d3.curveMonotoneX)
             .x((d) => x(d.Year))
             .y((d) => y(d.Production / meta.scale));
+
+        console.log('x-domain:', x.domain());
+        console.log('sample target years:', grouped.get(target).map(d => d.Year));
+
 
         /* ----- build line data ----- */
         const baseLines = latestOthers.map((c) => ({

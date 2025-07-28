@@ -18,6 +18,7 @@ export async function fetchMeta(dateOverride) {
         target: row.target,
         unitSuffix: row.unitSuffix || "",
         yearStart: row.yearStart || undefined,
+        yearEnd: row.yearEnd || undefined,
         csvUrl: row.OWID_datalink,
         others: [],
         infoDescription: row.infoDescription || "",
