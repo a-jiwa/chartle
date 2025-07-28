@@ -543,7 +543,11 @@ export default function Chart({
             /* ----- axes ----- */
         g.select(".x-axis")
             .attr("transform", `translate(0,${innerH})`)
-            .call(d3.axisBottom(x).ticks(5).tickFormat((d) => String(d)))
+            .call(
+            d3.axisBottom(x)
+                .ticks(Math.min(5, Math.floor(innerW / 100))) // adaptive + max of 5
+                .tickFormat(d => String(d))
+            )
             .selectAll(".tick text")
             .attr("font-size", 16)
             .attr("font-weight", 500)
