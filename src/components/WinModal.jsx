@@ -21,7 +21,8 @@ export default function WinModal({
     subtitle,
     yearStart,
     yearEnd,
-    gameDate // <-- add this
+    gameDate, // <-- add this
+    unitSuffix // <-- add this
 }) {
     const [copied, setCopied]   = useState(false);
     const [emojiString]         = useState('');       // unchanged
@@ -227,18 +228,19 @@ export default function WinModal({
             .call(
                 d3.axisLeft(y)
                     .ticks(4)
-                    .tickFormat(d3.format("~s"))
-                    .tickSize(-innerW)
-                    .tickSizeOuter(0)
+                    .tickFormat(d => unitSuffix ? `${d}${unitSuffix}` : d)
+                    .tickSize(0) // no tick lines
             )
             .selectAll("text")
             .attr("font-size", axisFontSize)
             .attr("font-weight", 400)
             .attr("fill", axisColor)
+            //.attr("dx", "-0.5em")
             .style("font-family", "Open Sans, sans-serif");
 
         // Remove axis domain lines for a cleaner look
         g.selectAll(".domain").attr("stroke", "none");
+        g.selectAll(".tick line").attr("stroke", "none");
 
         // Draw other lines (grey)
         const allCountries = Array.from(grouped.keys());
