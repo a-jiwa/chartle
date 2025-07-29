@@ -280,14 +280,16 @@ export default function App() {
             <WinModal
                 open={showWinModal}
                 onClose={() => setStatus("done")}
-                    guesses={guesses}
-                    target={target}
-                    infoDescription={infoDescription}
-                    source={source}
-                    csvUrl={meta.csvUrl}
-                    title={meta.title}
-                    subtitle={meta.subtitle}
-                    maxGuesses={MAX_GUESSES}
+                guesses={guesses}
+                target={target}
+                infoDescription={infoDescription}
+                source={source}
+                csvUrl={meta.csvUrl}
+                title={meta.title}
+                subtitle={meta.subtitle}
+                maxGuesses={MAX_GUESSES}
+                yearStart={meta.yearStart}   // <-- add this
+                yearEnd={meta.yearEnd}       // <-- add this
             />
 
             <LoseModal

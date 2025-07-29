@@ -6,6 +6,7 @@ import {
     loadHistory,
 } from '../utils/historyStore.js';
 import { guessColours } from "../data/colors.js"; // Add this import
+import { COUNTRIES } from "../data/countriesWithPopulation.js"; // Add this import at the top
 
 export default function WinModal({
     open,
@@ -18,6 +19,8 @@ export default function WinModal({
     title,
     maxGuesses,
     subtitle,
+    yearStart,    // <-- add this
+    yearEnd       // <-- add this
 }) {
     const [copied, setCopied]   = useState(false);
     const [emojiString]         = useState('');       // unchanged
@@ -84,8 +87,31 @@ export default function WinModal({
             }));
         }
 
-        // Group data
-        const grouped = d3.group(standardized, d => d.Country);
+        // --- FILTERING LOGIC ---
+        const minYear = typeof yearStart === "number" ? yearStart : d3.min(standardized, d => d.Year);
+        const maxYear = typeof yearEnd === "number" ? yearEnd : d3.max(standardized, d => d.Year);
+        const yearRange = maxYear - minYear + 1;
+
+        // Filter to year range
+        const filteredByYear = standardized.filter(d => d.Year >= minYear && d.Year <= maxYear);
+
+        // Group by ISO code (or country name)
+        const countryGroups = d3.group(filteredByYear, d => d.ISO);
+
+        // Coverage filter only
+        const filteredCountries = Array.from(countryGroups.entries())
+            .filter(([iso, data]) => {
+                // Coverage: at least 60% of years have non-null Production
+                const coverage = data.filter(d => d.Production != null && d.Production !== "").length / yearRange;
+                return coverage >= 0.6;
+            })
+            .map(([iso]) => iso);
+
+        // Filter data to only include filtered countries
+        const filteredData = filteredByYear.filter(d => filteredCountries.includes(d.ISO));
+
+        // Group data for chart drawing (by country name for display)
+        const grouped = d3.group(filteredData, d => d.Country);
 
         // Get CSS variables for colors
         const styles = getComputedStyle(document.documentElement);
@@ -243,8 +269,6 @@ export default function WinModal({
             .attr("stroke-width", 8) // main line thickness
             .attr("opacity", 1)
             .attr("d", lineGen(targetRows));
-
-        // No labels
 
         // Convert SVG to PNG
         const serializer = new XMLSerializer();
