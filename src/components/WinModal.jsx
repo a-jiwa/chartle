@@ -19,8 +19,9 @@ export default function WinModal({
     title,
     maxGuesses,
     subtitle,
-    yearStart,    // <-- add this
-    yearEnd       // <-- add this
+    yearStart,
+    yearEnd,
+    gameDate // <-- add this
 }) {
     const [copied, setCopied]   = useState(false);
     const [emojiString]         = useState('');       // unchanged
@@ -47,13 +48,13 @@ export default function WinModal({
     async function exportChartAsPNG() {
 
         const exportWidth = 1080;
-        const exportHeight = 1080;
+        const exportHeight = 1280;
         const titleFontSize = 54;
         const subtitleFontSize = 36;
         const axisFontSize = 32;
         const titleMargin = 60;
         const subtitleMargin = 120;
-        const m = { top: 200, right: 60, bottom: 100, left: 110 }; // more top for text
+        const m = { top: 220 + 20, right: 60, bottom: 130, left: 110 }; // 20px below subtitle
         const innerW = exportWidth - m.left - m.right;
         const innerH = exportHeight - m.top - m.bottom;
 
@@ -135,7 +136,7 @@ export default function WinModal({
 
         const lineGen = d3.line()
             .defined(d => typeof d.Production === "number" && !isNaN(d.Production))
-            .curve(d3.curveCatmullRom)
+            .curve(d3.curveMonotoneX)
             .x(d => x(d.Year))
             .y(d => y(d.Production));
 
@@ -144,12 +145,32 @@ export default function WinModal({
             .attr("xmlns", "http://www.w3.org/2000/svg")
             .attr("width", exportWidth)
             .attr("height", exportHeight)
-            .attr("viewBox", [0, 0, exportWidth, exportHeight]);
+            .attr("viewBox", [0, 0, exportWidth, exportHeight])
+            .style("background", "#f9f9f9");
+
+        // Header rectangle (top bar)
+        svg.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", exportWidth)
+            .attr("height", 80)
+            .attr("fill", targetColor);
+
+        // Header text (centered, white, bold)
+        svg.append("text")
+            .attr("x", exportWidth / 2)
+            .attr("y", 55) // vertically centered in the bar
+            .attr("text-anchor", "middle")
+            .attr("font-size", 48)
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("font-weight", "bold")
+            .attr("fill", "#fff")
+            .text(`Guessed in ${guesses.length} ${guesses.length === 1 ? "try" : "tries"}`);
 
         // Title (left aligned)
         svg.append("text")
             .attr("x", m.left)
-            .attr("y", titleMargin)
+            .attr("y", 160) // <-- increase this value
             .attr("text-anchor", "start")
             .attr("font-size", titleFontSize)
             .attr("font-weight", "bold")
@@ -160,7 +181,7 @@ export default function WinModal({
         // Subtitle (left aligned)
         svg.append("text")
             .attr("x", m.left)
-            .attr("y", subtitleMargin)
+            .attr("y", 220) // <-- increase this value
             .attr("text-anchor", "start")
             .attr("font-size", subtitleFontSize)
             .attr("font-family", "Open Sans, sans-serif")
@@ -269,6 +290,42 @@ export default function WinModal({
             .attr("stroke-width", 8) // main line thickness
             .attr("opacity", 1)
             .attr("d", lineGen(targetRows));
+
+        // Add label "?" at the last point of the target line
+        const lastTargetRow = targetRows[targetRows.length - 1];
+        if (lastTargetRow) {
+            g.append("text")
+                .attr("x", x(lastTargetRow.Year) + 10) // nudge right
+                .attr("y", y(lastTargetRow.Production))
+                .attr("font-size", 40)
+                .attr("font-family", "Open Sans, sans-serif")
+                .attr("font-weight", "bold")
+                .attr("fill", targetColor)
+                .attr("alignment-baseline", "middle")
+                .text("?");
+        }
+
+        // Footer left: chartle.cc
+        svg.append("text")
+            .attr("x", m.left)
+            .attr("y", exportHeight - 30)
+            .attr("text-anchor", "start")
+            .attr("font-size", 30)
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("font-weight", "bold")
+            .attr("fill", "#222")
+            .text("📈 chartle.cc");
+
+        // Footer right: game date
+        svg.append("text")
+            .attr("x", exportWidth - m.right)
+            .attr("y", exportHeight - 30)
+            .attr("text-anchor", "end")
+            .attr("font-size", 30)
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("font-weight", "bold")
+            .attr("fill", "#222")
+            .text(gameDate || "");
 
         // Convert SVG to PNG
         const serializer = new XMLSerializer();
@@ -396,7 +453,7 @@ export default function WinModal({
     }, [open]);
 
     return (
-        <Modal open={open} onClose={onClose} title={title} subtitle={subtitle}>
+        <Modal open={open} onClose={onClose} >
             <div className="px-5 text-center">
                 {/* Custom title */}
                 <h2 className="text-2xl font-bold mb-4 [color:var(--text-color)]">You guessed it!</h2>

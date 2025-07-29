@@ -288,8 +288,9 @@ export default function App() {
                 title={meta.title}
                 subtitle={meta.subtitle}
                 maxGuesses={MAX_GUESSES}
-                yearStart={meta.yearStart}   // <-- add this
-                yearEnd={meta.yearEnd}       // <-- add this
+                yearStart={meta.yearStart}
+                yearEnd={meta.yearEnd}
+                gameDate={GAME_DATE_LABEL_SHORT} // <-- add this
             />
 
             <LoseModal
