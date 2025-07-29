@@ -5,18 +5,20 @@ import {
     loadHistoryLocal,
     loadHistory,
 } from '../utils/historyStore.js';
+import { guessColours } from "../data/colors.js"; // Add this import
 
 export default function WinModal({
-                                     open,
-                                     onClose,
-                                     guesses,
-                                     target,
-                                     infoDescription,
-                                     source,
-                                     csvUrl,
-                                     title,
-                                     maxGuesses,
-                                 }) {
+    open,
+    onClose,
+    guesses,
+    target,
+    infoDescription,
+    source,
+    csvUrl,
+    title,
+    maxGuesses,
+    subtitle,
+}) {
     const [copied, setCopied]   = useState(false);
     const [emojiString]         = useState('');       // unchanged
     const chartRef              = useRef(null);
@@ -37,6 +39,247 @@ export default function WinModal({
             console.error('Copy failed:', err);
         }
     };
+
+    // --- PNG Export Function ---
+    async function exportChartAsPNG() {
+
+        const exportWidth = 1080;
+        const exportHeight = 1080;
+        const titleFontSize = 54;
+        const subtitleFontSize = 36;
+        const axisFontSize = 32;
+        const titleMargin = 60;
+        const subtitleMargin = 120;
+        const m = { top: 200, right: 60, bottom: 100, left: 110 }; // more top for text
+        const innerW = exportWidth - m.left - m.right;
+        const innerH = exportHeight - m.top - m.bottom;
+
+        // Fetch and process CSV data
+        const rows = await d3.csv(csvUrl, d3.autoType);
+        const columnNames = Object.keys(rows[0]);
+        const yearColumns = columnNames.filter(col => /^\d{4}$/.test(col));
+        const isWideFormat = yearColumns.length > 3;
+        let standardized;
+
+        if (isWideFormat) {
+            const [colCountry, colISO] = columnNames;
+            standardized = rows.flatMap(row =>
+                yearColumns.map(year => ({
+                    Country: row[colCountry],
+                    ISO: row[colISO],
+                    Year: +year,
+                    Production: row[year]
+                }))
+            );
+        } else {
+            const [colCountry, colISO, colYear] = columnNames;
+            const colProduction = columnNames.find((col, i) =>
+                i > 2 && typeof rows[0][col] === "number"
+            );
+            standardized = rows.map(row => ({
+                Country: row[colCountry],
+                ISO: row[colISO],
+                Year: row[colYear],
+                Production: row[colProduction],
+            }));
+        }
+
+        // Group data
+        const grouped = d3.group(standardized, d => d.Country);
+
+        // Get CSS variables for colors
+        const styles = getComputedStyle(document.documentElement);
+        const axisColor = styles.getPropertyValue('--axis-text-color').trim() || "#222";
+        const gridColor = styles.getPropertyValue('--grid-line').trim() || "#eee";
+        const targetColor = styles.getPropertyValue('--target-red').trim() || "#e33434";
+        const otherLineColor = styles.getPropertyValue('--other-lines').trim() || "#888";
+
+        // Scales
+        const x = d3.scaleLinear()
+            .domain([
+                d3.min(standardized, d => d.Year),
+                d3.max(standardized, d => d.Year)
+            ])
+            .range([0, innerW]);
+
+        const yMax = d3.max(standardized, d => d.Production);
+        const y = d3.scaleLinear()
+            .domain([0, yMax])
+            .range([innerH, 0]);
+
+        const lineGen = d3.line()
+            .defined(d => typeof d.Production === "number" && !isNaN(d.Production))
+            .curve(d3.curveCatmullRom)
+            .x(d => x(d.Year))
+            .y(d => y(d.Production));
+
+        // Create SVG
+        const svg = d3.create("svg")
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("width", exportWidth)
+            .attr("height", exportHeight)
+            .attr("viewBox", [0, 0, exportWidth, exportHeight]);
+
+        // Title (left aligned)
+        svg.append("text")
+            .attr("x", m.left)
+            .attr("y", titleMargin)
+            .attr("text-anchor", "start")
+            .attr("font-size", titleFontSize)
+            .attr("font-weight", "bold")
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("fill", "#222")
+            .text(title || "Chart Title");
+
+        // Subtitle (left aligned)
+        svg.append("text")
+            .attr("x", m.left)
+            .attr("y", subtitleMargin)
+            .attr("text-anchor", "start")
+            .attr("font-size", subtitleFontSize)
+            .attr("font-family", "Open Sans, sans-serif")
+            .attr("fill", "#444")
+            .text(subtitle || "");
+
+        // Main group
+        const g = svg.append("g")
+            .attr("transform", `translate(${m.left},${m.top})`);
+
+        // Draw grid lines (horizontal) - before any lines
+        g.append("g")
+            .attr("class", "grid")
+            .selectAll("line")
+            .data(y.ticks(4))
+            .join("line")
+            .attr("x1", 0)
+            .attr("x2", innerW)
+            .attr("y1", d => y(d))
+            .attr("y2", d => y(d))
+            .attr("stroke", gridColor)
+            .attr("stroke-width", 1)
+            .attr("opacity", 0.5); // <-- 50% opacity
+
+        // Axes
+        g.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(0,${innerH})`)
+            .call(
+                d3.axisBottom(x)
+                    .ticks(4)
+                    .tickFormat(d => String(d))
+            )
+            .selectAll("text")
+            .attr("font-size", axisFontSize)
+            .attr("font-weight", 400)
+            .attr("fill", axisColor)
+            .attr("dy", "0.95em")
+            .style("font-family", "Open Sans, sans-serif");
+
+        g.append("g")
+            .attr("class", "y-axis")
+            .call(
+                d3.axisLeft(y)
+                    .ticks(4)
+                    .tickFormat(d3.format("~s"))
+                    .tickSize(-innerW)
+                    .tickSizeOuter(0)
+            )
+            .selectAll("text")
+            .attr("font-size", axisFontSize)
+            .attr("font-weight", 400)
+            .attr("fill", axisColor)
+            .style("font-family", "Open Sans, sans-serif");
+
+        // Remove axis domain lines for a cleaner look
+        g.selectAll(".domain").attr("stroke", "none");
+
+        // Draw other lines (grey)
+        const allCountries = Array.from(grouped.keys());
+        const guessSet = new Set(guesses.concat([target]));
+        allCountries.forEach(country => {
+            if (!guessSet.has(country)) {
+                const rows = grouped.get(country) ?? [];
+                g.append("path")
+                    .attr("fill", "none")
+                    .attr("stroke", otherLineColor)
+                    .attr("stroke-width", 2)
+                    .attr("opacity", 0.4)
+                    .attr("d", lineGen(rows));
+            }
+        });
+
+        // Draw guess lines (colored, with #f9f9f9 outline)
+        guesses.forEach((c, i) => {
+            const rows = grouped.get(c) ?? [];
+            // Outline
+            g.append("path")
+                .attr("fill", "none")
+                .attr("stroke", "#f9f9f9")
+                .attr("stroke-width", 12) // outline thickness
+                .attr("opacity", 1)
+                .attr("d", lineGen(rows));
+            // Main colored line
+            g.append("path")
+                .attr("fill", "none")
+                .attr("stroke", guessColours[i % guessColours.length])
+                .attr("stroke-width", 6) // main line thickness
+                .attr("opacity", 1)
+                .attr("d", lineGen(rows));
+        });
+
+        // Draw target line (red, with #f9f9f9 outline)
+        const targetRows = grouped.get(target) ?? [];
+        // Outline
+        g.append("path")
+            .attr("fill", "none")
+            .attr("stroke", "#f9f9f9")
+            .attr("stroke-width", 14) // thicker outline for target
+            .attr("opacity", 1)
+            .attr("d", lineGen(targetRows));
+        // Main red line
+        g.append("path")
+            .attr("fill", "none")
+            .attr("stroke", targetColor)
+            .attr("stroke-width", 8) // main line thickness
+            .attr("opacity", 1)
+            .attr("d", lineGen(targetRows));
+
+        // No labels
+
+        // Convert SVG to PNG
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svg.node());
+        const img = new window.Image();
+        img.width = exportWidth;
+        img.height = exportHeight;
+        const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = function () {
+            const canvas = document.createElement("canvas");
+            canvas.width = exportWidth;
+            canvas.height = exportHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#f9f9f9"; // <-- set your desired background color
+            ctx.fillRect(0, 0, exportWidth, exportHeight);
+            ctx.drawImage(img, 0, 0, exportWidth, exportHeight);
+
+            canvas.toBlob((blob) => {
+                // Download PNG
+                const pngUrl = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = pngUrl;
+                a.download = "chartle_export.png";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(pngUrl);
+            }, "image/png");
+
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;
+    }
 
     /* ------ helper to convert history → bar‑chart data ------ */
     function chartData(history) {
@@ -129,7 +372,7 @@ export default function WinModal({
     }, [open]);
 
     return (
-        <Modal open={open} onClose={onClose}>
+        <Modal open={open} onClose={onClose} title={title} subtitle={subtitle}>
             <div className="px-5 text-center">
                 {/* Custom title */}
                 <h2 className="text-2xl font-bold mb-4 [color:var(--text-color)]">You guessed it!</h2>
@@ -155,7 +398,10 @@ export default function WinModal({
                 {/* buttons */}
                 <div className="mt-4 flex items-center justify-between gap-4">
                     <button
-                        onClick={handleCopy}
+                        onClick={() => {
+                            handleCopy();
+                            exportChartAsPNG();
+                        }}
                         className="rounded-lg [background-color:var(--second-guess)] px-4 py-2 text-sm text-white hover:[background-color:var(--second-guess-dark)] focus:outline-none focus:ring-4 focus:ring-blue-300"
                     >
                         {copied ? 'Copied!' : 'Share result'}

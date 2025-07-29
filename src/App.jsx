@@ -286,6 +286,7 @@ export default function App() {
                     source={source}
                     csvUrl={meta.csvUrl}
                     title={meta.title}
+                    subtitle={meta.subtitle}
                     maxGuesses={MAX_GUESSES}
             />
 
@@ -298,6 +299,7 @@ export default function App() {
                 csvUrl={meta.csvUrl}
                 guesses={guesses}
                 title={meta.title}
+                subtitle={meta.subtitle}
                 maxGuesses={MAX_GUESSES}
             />
 

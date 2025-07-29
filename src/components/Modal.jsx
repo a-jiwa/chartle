@@ -12,7 +12,7 @@ import { useEffect } from "react";
  * children ReactNode – body content
  * footer  ReactNode – optional footer content
  */
-export default function Modal({ title, open, onClose, children, footer = null }) {
+export default function Modal({ title, subtitle, open, onClose, children, footer = null }) {
     /* close on Esc */
     useEffect(() => {
         const onKey = (e) => e.key === "Escape" && onClose();
@@ -36,15 +36,22 @@ export default function Modal({ title, open, onClose, children, footer = null })
             >
                 <div className="relative rounded-lg bg-[var(--modal-bg-color)] shadow-sm ">
                     {/* header */}
-                    {title && (
-                        <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 md:p-5 dark:border-gray-600">
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                {title}
-                            </h3>
+                    {(title || subtitle) && (
+                        <div className="flex flex-col gap-1 rounded-t border-b border-gray-200 p-4 md:p-5 dark:border-gray-600">
+                            {title && (
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                    {title}
+                                </h3>
+                            )}
+                            {subtitle && (
+                                <div className="text-base text-gray-600 dark:text-gray-300">
+                                    {subtitle}
+                                </div>
+                            )}
                             <button
                                 aria-label="Close modal"
                                 onClick={onClose}
-                                className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
+                                className="absolute top-4 right-4 ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
                             >
                                 <X className="h-3.5 w-3.5" strokeWidth={2} />
                             </button>
