@@ -37,7 +37,7 @@ export default function WinModal({
         // Red squares for wrong guesses, green for correct, grey for unused
         return (
             '🟥'.repeat(correctIndex) +
-            '🟩' +
+            '✅' +
             '⬜️'.repeat(maxGuesses - (correctIndex + 1))
         );
     };
