@@ -49,13 +49,13 @@ export default function WinModal({
     async function exportChartAsPNG() {
 
         const exportWidth = 1080;
-        const exportHeight = 1280;
-        const titleFontSize = 50;
-        const subtitleFontSize = 34;
+        const exportHeight = 1080;
+        const titleFontSize = 45;
+        const subtitleFontSize = 30;
         const axisFontSize = 32;
         const titleMargin = 60;
         const subtitleMargin = 120;
-        const m = { top: 220 + 20, right: 60, bottom: 130, left: 110 }; // 20px below subtitle
+        const m = { top: 180, right: 60, bottom: 110, left: 110 }; // 20px below subtitle
         const innerW = exportWidth - m.left - m.right;
         const innerH = exportHeight - m.top - m.bottom;
 
@@ -146,29 +146,10 @@ export default function WinModal({
             .attr("viewBox", [0, 0, exportWidth, exportHeight])
             .style("background", "#f9f9f9");
 
-        // Header rectangle (top bar)
-        svg.append("rect")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", exportWidth)
-            .attr("height", 80)
-            .attr("fill", targetColor);
-
-        // Header text (centered, white, bold)
-        svg.append("text")
-            .attr("x", exportWidth / 2)
-            .attr("y", 55) // vertically centered in the bar
-            .attr("text-anchor", "middle")
-            .attr("font-size", 48)
-            .attr("font-family", "Open Sans, sans-serif")
-            .attr("font-weight", "bold")
-            .attr("fill", "#fff")
-            .text(`Guessed in ${guesses.length} ${guesses.length === 1 ? "try" : "tries"}`);
-
         // Title (left aligned)
         svg.append("text")
             .attr("x", 30)
-            .attr("y", 160) // <-- increase this value
+            .attr("y", 70) // <-- increase this value
             .attr("text-anchor", "start")
             .attr("font-size", titleFontSize)
             .attr("font-weight", "bold")
@@ -179,7 +160,7 @@ export default function WinModal({
         // Subtitle (left aligned)
         svg.append("text")
             .attr("x", 30)
-            .attr("y", 220) // <-- increase this value
+            .attr("y", 130) // <-- increase this value
             .attr("text-anchor", "start")
             .attr("font-size", subtitleFontSize)
             .attr("font-family", "Open Sans, sans-serif")
@@ -328,7 +309,7 @@ export default function WinModal({
         // Footer left: chartle.cc
         svg.append("text")
             .attr("x", m.left)
-            .attr("y", exportHeight - 30)
+            .attr("y", exportHeight - 20)
             .attr("text-anchor", "start")
             .attr("font-size", 30)
             .attr("font-family", "Open Sans, sans-serif")
@@ -339,7 +320,7 @@ export default function WinModal({
         // Footer right: game date
         svg.append("text")
             .attr("x", exportWidth - m.right)
-            .attr("y", exportHeight - 30)
+            .attr("y", exportHeight - 20)
             .attr("text-anchor", "end")
             .attr("font-size", 30)
             .attr("font-family", "Open Sans, sans-serif")
@@ -518,9 +499,34 @@ export default function WinModal({
                 {/* buttons */}
                 <div className="mt-4 flex items-center justify-between gap-4">
                     <button
-                        onClick={() => {
-                            handleCopy();
-                            exportChartAsPNG();
+                        onClick={async () => {
+                            try {
+                                // Export chart as PNG and get the blob
+                                const blob = await exportChartAsPNG();
+                                const file = new File([blob], "chartle.png", { type: "image/png" });
+
+                                // Prepare share data
+                                const shareData = {
+                                    title: "Chartle Result",
+                                    text: shareText,
+                                    files: [file],
+                                };
+
+                                // Check if Web Share API is available and can share files
+                                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                    await navigator.share(shareData);
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2000);
+                                } else {
+                                    // Fallback: just copy text to clipboard
+                                    await navigator.clipboard.writeText(shareText);
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2000);
+                                    alert("Sharing with image is not supported on this device/browser. Share text copied to clipboard.");
+                                }
+                            } catch (err) {
+                                console.error("Share failed:", err);
+                            }
                         }}
                         className="rounded-lg [background-color:var(--second-guess)] px-4 py-2 text-sm text-white hover:[background-color:var(--second-guess-dark)] focus:outline-none focus:ring-4 focus:ring-blue-300"
                     >
