@@ -169,7 +169,7 @@ export default function WinModal({
             .attr("y", 70) // <-- increase this value
             .attr("text-anchor", "start")
             .attr("font-size", titleFontSize)
-            .attr("font-weight", "bold")
+            .attr("font-weight", "semibold")
             .attr("font-family", "Open Sans, sans-serif")
             .attr("fill", "#222")
             .text(title || "Chart Title");
