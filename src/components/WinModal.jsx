@@ -31,19 +31,25 @@ export default function WinModal({
         if (!guesses || !target) return '';
         const correctIndex = guesses.findIndex(g => g === target);
         if (correctIndex === -1) {
-            // Not guessed, all red squares
-            return '🟥'.repeat(guesses.length);
+            // Not guessed, all red squares, no grey
+            return '🟥'.repeat(guesses.length) + '⬜️'.repeat(maxGuesses - guesses.length);
         }
-        // Red squares for wrong guesses, green for correct
-        return '🟥'.repeat(correctIndex) + '✅';
+        // Red squares for wrong guesses, green for correct, grey for unused
+        return (
+            '🟥'.repeat(correctIndex) +
+            '🟩' +
+            '⬜️'.repeat(maxGuesses - (correctIndex + 1))
+        );
     };
 
     const emojiString = getEmojiString();
 
     const shareText = [
         `📈 Chartle`,
+        ``,
         `${emojiString} ${guesses.length}/${maxGuesses}`,
-        'chartle.cc',
+        ``,
+        'https://chartle.cc',
     ].join('\n');
 
     const handleCopy = async () => {
