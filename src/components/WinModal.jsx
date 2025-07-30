@@ -90,8 +90,8 @@ export default function WinModal({
         }
 
         // --- FILTERING LOGIC ---
-        const minYear = typeof yearStart === "number" ? yearStart : d3.min(standardized, d => d.Year);
-        const maxYear = typeof yearEnd === "number" ? yearEnd : d3.max(standardized, d => d.Year);
+        const minYear = !isNaN(Number(yearStart)) ? Number(yearStart) : d3.min(standardized, d => d.Year);
+        const maxYear = !isNaN(Number(yearEnd)) ? Number(yearEnd) : d3.max(standardized, d => d.Year);
         const yearRange = maxYear - minYear + 1;
 
         // Filter to year range
@@ -110,7 +110,7 @@ export default function WinModal({
             .map(([iso]) => iso);
 
         // Filter data to only include filtered countries
-        const filteredData = filteredByYear.filter(d => filteredCountries.includes(d.ISO));
+        const filteredData = standardized.filter(d => d.Year >= minYear && d.Year <= maxYear);
 
         // Group data for chart drawing (by country name for display)
         const grouped = d3.group(filteredData, d => d.Country);
@@ -124,10 +124,7 @@ export default function WinModal({
 
         // Scales
         const x = d3.scaleLinear()
-            .domain([
-                d3.min(standardized, d => d.Year),
-                d3.max(standardized, d => d.Year)
-            ])
+            .domain([minYear, maxYear])
             .range([0, innerW]);
 
         const yMax = d3.max(standardized, d => d.Production);
