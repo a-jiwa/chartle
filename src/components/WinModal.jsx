@@ -225,14 +225,13 @@ export default function WinModal({
             .call(
                 d3.axisLeft(y)
                     .ticks(4)
-                    .tickFormat(d => unitSuffix ? `${d}${unitSuffix}` : d)
-                    .tickSize(0) // no tick lines
+                    .tickFormat(formatNumber)
+                    .tickSize(0)
             )
             .selectAll("text")
             .attr("font-size", axisFontSize)
             .attr("font-weight", 400)
             .attr("fill", axisColor)
-            //.attr("dx", "-0.5em")
             .style("font-family", "Open Sans, sans-serif");
 
         // Remove axis domain lines for a cleaner look
@@ -255,6 +254,9 @@ export default function WinModal({
         });
 
         // Draw guess lines (colored, with #f9f9f9 outline)
+        // Track label positions to avoid overlap
+        let labelPositions = [];
+
         guesses.forEach((c, i) => {
             const rows = grouped.get(c) ?? [];
             // Outline
@@ -276,13 +278,31 @@ export default function WinModal({
             const lastRow = rows[rows.length - 1];
             if (lastRow) {
                 const isTarget = c === target;
+                let labelX = x(lastRow.Year) + 10;
+                let labelY = y(lastRow.Production);
+
+                // Check for overlap with previous labels
+                const labelRadius = 18; // half font size + padding
+                labelPositions.forEach(pos => {
+                    if (Math.abs(labelX - pos.x) < labelRadius * 2 &&
+                        Math.abs(labelY - pos.y) < labelRadius * 2) {
+                        // Offset vertically to avoid overlap
+                        labelY += labelRadius * 2;
+                    }
+                });
+                labelPositions.push({ x: labelX, y: labelY });
+
+                // Draw label with stroke for contrast
                 g.append("text")
-                    .attr("x", x(lastRow.Year) + 10)
-                    .attr("y", y(lastRow.Production))
+                    .attr("x", labelX)
+                    .attr("y", labelY)
                     .attr("font-size", 32)
                     .attr("font-family", "Open Sans, sans-serif")
                     .attr("font-weight", "bold")
-                    .attr("fill", isTarget ? targetColor : guessColours[i % guessColours.length]) // <-- use red if correct
+                    .attr("fill", isTarget ? targetColor : guessColours[i % guessColours.length])
+                    .attr("stroke", "#f9f9f9") // stroke matches background
+                    .attr("stroke-width", 6)
+                    .attr("paint-order", "stroke")
                     .attr("alignment-baseline", "middle")
                     .text(String(i + 1));
             }
@@ -451,6 +471,25 @@ export default function WinModal({
             drawChart(chartData(hist));
         });
     }, [open]);
+
+    const formatNumber = (d) => {
+        if (typeof d !== "number" || isNaN(d)) return "";
+
+        const abs = Math.abs(d);
+        let formatted;
+
+        if (abs >= 1e9) {
+            formatted = (d / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
+        } else if (abs >= 1e6) {
+            formatted = (d / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+        } else if (abs >= 1e3) {
+            formatted = (d / 1e3).toFixed(1).replace(/\.0$/, "") + "k";
+        } else {
+            formatted = d.toString();
+        }
+
+        return unitSuffix ? `${formatted}${unitSuffix}` : formatted;
+    };
 
     return (
         <Modal open={open} onClose={onClose} >
