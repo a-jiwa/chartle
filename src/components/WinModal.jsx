@@ -337,30 +337,25 @@ export default function WinModal({
         const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
         const url = URL.createObjectURL(svgBlob);
 
-        img.onload = function () {
-            const canvas = document.createElement("canvas");
-            canvas.width = exportWidth;
-            canvas.height = exportHeight;
-            const ctx = canvas.getContext("2d");
-            ctx.fillStyle = "#f9f9f9"; // <-- set your desired background color
-            ctx.fillRect(0, 0, exportWidth, exportHeight);
-            ctx.drawImage(img, 0, 0, exportWidth, exportHeight);
+        return new Promise((resolve, reject) => {
+            img.onload = function () {
+                const canvas = document.createElement("canvas");
+                canvas.width = exportWidth;
+                canvas.height = exportHeight;
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#f9f9f9";
+                ctx.fillRect(0, 0, exportWidth, exportHeight);
+                ctx.drawImage(img, 0, 0, exportWidth, exportHeight);
 
-            canvas.toBlob((blob) => {
-                // Download PNG
-                const pngUrl = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = pngUrl;
-                a.download = "chartle_export.png";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(pngUrl);
-            }, "image/png");
-
-            URL.revokeObjectURL(url);
-        };
-        img.src = url;
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error("PNG export failed"));
+                }, "image/png");
+                URL.revokeObjectURL(url);
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
     }
 
     /* ------ helper to convert history → bar‑chart data ------ */
