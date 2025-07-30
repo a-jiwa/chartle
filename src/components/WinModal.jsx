@@ -50,8 +50,8 @@ export default function WinModal({
 
         const exportWidth = 1080;
         const exportHeight = 1280;
-        const titleFontSize = 54;
-        const subtitleFontSize = 36;
+        const titleFontSize = 50;
+        const subtitleFontSize = 34;
         const axisFontSize = 32;
         const titleMargin = 60;
         const subtitleMargin = 120;
@@ -167,7 +167,7 @@ export default function WinModal({
 
         // Title (left aligned)
         svg.append("text")
-            .attr("x", m.left)
+            .attr("x", 30)
             .attr("y", 160) // <-- increase this value
             .attr("text-anchor", "start")
             .attr("font-size", titleFontSize)
@@ -178,7 +178,7 @@ export default function WinModal({
 
         // Subtitle (left aligned)
         svg.append("text")
-            .attr("x", m.left)
+            .attr("x", 30)
             .attr("y", 220) // <-- increase this value
             .attr("text-anchor", "start")
             .attr("font-size", subtitleFontSize)
@@ -261,16 +261,31 @@ export default function WinModal({
             g.append("path")
                 .attr("fill", "none")
                 .attr("stroke", "#f9f9f9")
-                .attr("stroke-width", 12) // outline thickness
+                .attr("stroke-width", 12)
                 .attr("opacity", 1)
                 .attr("d", lineGen(rows));
             // Main colored line
             g.append("path")
                 .attr("fill", "none")
                 .attr("stroke", guessColours[i % guessColours.length])
-                .attr("stroke-width", 6) // main line thickness
+                .attr("stroke-width", 6)
                 .attr("opacity", 1)
                 .attr("d", lineGen(rows));
+
+            // Add guess number label at the end of the line
+            const lastRow = rows[rows.length - 1];
+            if (lastRow) {
+                const isTarget = c === target;
+                g.append("text")
+                    .attr("x", x(lastRow.Year) + 10)
+                    .attr("y", y(lastRow.Production))
+                    .attr("font-size", 32)
+                    .attr("font-family", "Open Sans, sans-serif")
+                    .attr("font-weight", "bold")
+                    .attr("fill", isTarget ? targetColor : guessColours[i % guessColours.length]) // <-- use red if correct
+                    .attr("alignment-baseline", "middle")
+                    .text(String(i + 1));
+            }
         });
 
         // Draw target line (red, with #f9f9f9 outline)
@@ -289,20 +304,6 @@ export default function WinModal({
             .attr("stroke-width", 8) // main line thickness
             .attr("opacity", 1)
             .attr("d", lineGen(targetRows));
-
-        // Add label "?" at the last point of the target line
-        const lastTargetRow = targetRows[targetRows.length - 1];
-        if (lastTargetRow) {
-            g.append("text")
-                .attr("x", x(lastTargetRow.Year) + 10) // nudge right
-                .attr("y", y(lastTargetRow.Production))
-                .attr("font-size", 40)
-                .attr("font-family", "Open Sans, sans-serif")
-                .attr("font-weight", "bold")
-                .attr("fill", targetColor)
-                .attr("alignment-baseline", "middle")
-                .text("?");
-        }
 
         // Footer left: chartle.cc
         svg.append("text")
