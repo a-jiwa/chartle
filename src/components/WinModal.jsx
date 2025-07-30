@@ -25,13 +25,24 @@ export default function WinModal({
     unitSuffix // <-- add this
 }) {
     const [copied, setCopied]   = useState(false);
-    const [emojiString]         = useState('');       // unchanged
     const chartRef              = useRef(null);
 
+    const getEmojiString = () => {
+        if (!guesses || !target) return '';
+        const correctIndex = guesses.findIndex(g => g === target);
+        if (correctIndex === -1) {
+            // Not guessed, all red squares
+            return '🟥'.repeat(guesses.length);
+        }
+        // Red squares for wrong guesses, green for correct
+        return '🟥'.repeat(correctIndex) + '✅';
+    };
+
+    const emojiString = getEmojiString();
+
     const shareText = [
-        `📈 Chartle — ${title}`,
-        `${guesses.length}/${maxGuesses} ✅`,
-        emojiString,
+        `📈 Chartle`,
+        `${emojiString} ${guesses.length}/${maxGuesses}`,
         'chartle.cc',
     ].join('\n');
 
