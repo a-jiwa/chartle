@@ -6,7 +6,6 @@ import {
     loadHistory,
 } from '../utils/historyStore.js';
 import { guessColours } from "../data/colors.js"; // Add this import
-import { COUNTRIES } from "../data/countriesWithPopulation.js"; // Add this import at the top
 
 export default function WinModal({
     open,
@@ -47,7 +46,8 @@ export default function WinModal({
     const shareText = [
         `📈 Chartle`,
         ``,
-        `${emojiString} ${guesses.length}/${maxGuesses}`,
+        `Guessed in ${guesses.length} ${guesses.length === 1 ? "try" : "tries"}`,
+        `${emojiString}`,
         ``,
         'https://chartle.cc',
     ].join('\n');
@@ -86,19 +86,35 @@ export default function WinModal({
         if (isWideFormat) {
             const [colCountry, colISO] = columnNames;
             standardized = rows.flatMap(row =>
-                yearColumns.map(year => ({
-                    Country: row[colCountry],
-                    ISO: row[colISO],
-                    Year: +year,
-                    Production: row[year]
-                }))
+                yearColumns
+                    .filter(year =>
+                        row[colISO] &&
+                        typeof row[colISO] === "string" &&
+                        row[colISO].trim() !== "" &&
+                        !row[colISO].startsWith("OWID") &&
+                        (yearStart == null || +year >= yearStart) &&
+                        (yearEnd == null || +year <= yearEnd)
+                    )
+                    .map(year => ({
+                        Country: row[colCountry],
+                        ISO: row[colISO],
+                        Year: +year,
+                        Production: row[year]
+                    }))
             );
         } else {
             const [colCountry, colISO, colYear] = columnNames;
             const colProduction = columnNames.find((col, i) =>
                 i > 2 && typeof rows[0][col] === "number"
             );
-            standardized = rows.map(row => ({
+            standardized = rows.filter(row =>
+                row[colISO] &&
+                typeof row[colISO] === "string" &&
+                row[colISO].trim() !== "" &&
+                !row[colISO].startsWith("OWID") &&
+                (yearStart == null || row[colYear] >= yearStart) &&
+                (yearEnd == null || row[colYear] <= yearEnd)
+            ).map(row => ({
                 Country: row[colCountry],
                 ISO: row[colISO],
                 Year: row[colYear],
