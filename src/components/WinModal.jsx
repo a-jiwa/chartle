@@ -226,6 +226,7 @@ export default function WinModal({
                 d3.axisBottom(x)
                     .ticks(4)
                     .tickFormat(d => String(d))
+                    .tickSize(6)  // Add tick size to match Chart.jsx
             )
             .selectAll("text")
             .attr("font-size", axisFontSize)
@@ -233,6 +234,14 @@ export default function WinModal({
             .attr("fill", axisColor)
             .attr("dy", "0.95em")
             .style("font-family", "Open Sans, sans-serif");
+
+        g.select(".x-axis .domain")
+            .attr("stroke", axisColor)
+            .attr("stroke-width", 1);
+
+        g.selectAll(".x-axis .tick line")
+            .attr("stroke", axisColor)
+            .attr("stroke-width", 1);
 
         g.append("g")
             .attr("class", "y-axis")
@@ -248,9 +257,9 @@ export default function WinModal({
             .attr("fill", axisColor)
             .style("font-family", "Open Sans, sans-serif");
 
-        // Remove axis domain lines for a cleaner look
-        g.selectAll(".domain").attr("stroke", "none");
-        g.selectAll(".tick line").attr("stroke", "none");
+        // Remove only y-axis domain and tick lines
+        g.select(".y-axis .domain").attr("stroke", "none");
+        g.selectAll(".y-axis .tick line").attr("stroke", "none");
 
         // Draw other lines (grey)
         const allCountries = Array.from(grouped.keys());
