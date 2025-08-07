@@ -129,15 +129,20 @@ export default function HistoryModal ({ open, onClose }) {
                                     {/* guess circles */}
                                     <div className='flex gap-2'>
                                         {Array.from({ length: 5 }, (_, i) => {
-                                            let fill   = 'white'
+                                            let fill   = 'var(--modal-bg-color)'  // Use CSS variable for unguessed dots
                                             let border = LIGHT_BORDER
 
                                             if (i < guesses.length) {
                                                 const g = guesses[i] || ''
-                                                const correct =
-                                                    target && g.toLowerCase() === target.toLowerCase()
-                                                fill   = correct ? TARGET_COLOUR : guessColours[i]
-                                                border = fill
+                                                const correct = target && g.toLowerCase() === target.toLowerCase()
+                                                
+                                                if (correct) {
+                                                    fill   = TARGET_COLOUR  // Red for correct guess
+                                                    border = TARGET_COLOUR
+                                                } else {
+                                                    fill   = 'var(--other-lines)'  // Use CSS variable for grey attempts
+                                                    border = 'var(--other-lines)'
+                                                }
                                             }
 
                                             return (
