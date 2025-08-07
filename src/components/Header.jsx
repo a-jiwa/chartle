@@ -39,7 +39,7 @@ export default function Header({ onOpen, dateLabel, overridden }) {
     };
 
     return (
-        <header className="fixed inset-x-0 top-0 z-50 border-b border-gray-300 dark:border-gray-700 bg-[#f9f9f9]/60 dark:bg-[#111]/60 backdrop-blur-md">
+        <header className="fixed inset-x-0 top-0 z-50 border-b border-gray-300 dark:border-gray-700 backdrop-blur-md" style={{ backgroundColor: 'var(--header-bg-color)' }}>
             <div className="relative mx-auto w-full max-w-[700px] px-4 py-3 h-[52px]">
                 {/* Date label (always left) */}
                 <span

@@ -265,7 +265,7 @@ export default function Guesses({
                         onChange={(e) => {
                             setValue(e.target.value);
                             setShowSuggestions(true);
-                            setHighlightedIndex(-1);  // Reset highlight on new input
+                            setHighlightedIndex(-1);
                             setError("");
                         }}
                         onKeyDown={(e) => {
@@ -295,8 +295,7 @@ export default function Guesses({
                         onBlur={() =>
                             setTimeout(() => setShowSuggestions(false), 100)
                         }
-                        className={`block w-full p-4 pl-10 text-sm rounded-lg
-                            bg-gray-50 dark:bg-gray-700
+                        className={`block w-full p-4 pl-10 text-sm rounded-lg bg-white dark:bg-gray-700
                             focus:ring-emerald-500 focus:border-emerald-500
                             disabled:bg-gray-100 dark:disabled:bg-gray-600
                             outline-none
@@ -381,7 +380,8 @@ export default function Guesses({
                         return (
                             <div
                                 key={g}
-                                className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 [background-color:var(--guessed-box)] dark:border-gray-600"
+                                className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600"
+                                style={{ backgroundColor: 'var(--bg-color)' }}
                             >
                                 {/* Left: numbered country */}
                                 <span
