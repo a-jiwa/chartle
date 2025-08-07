@@ -233,7 +233,7 @@ export default function App() {
                 overridden={OVERRIDDEN}
             />
 
-            <div className="pt-12 flex flex-col w-full max-w-[700px] h-full">
+            <div className="pt-13 flex flex-col w-full max-w-[700px] h-full">
                 {/* chart pane */}
                 <div className="flex-none h-2/3">
                     {/* title + subtitle + date */}
