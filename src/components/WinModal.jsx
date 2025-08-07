@@ -427,7 +427,7 @@ export default function WinModal({
 
         const styles = getComputedStyle(document.documentElement);
         const textColor = styles.getPropertyValue('--text-color').trim();
-        const barColor  = styles.getPropertyValue('--first-guess').trim();
+        const barColor  = styles.getPropertyValue('--target-red').trim();
 
         const chart = svg
             .attr('width',  width  + margin.left + margin.right)
