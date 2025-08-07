@@ -34,13 +34,15 @@
 
   --guessed-box: #ffffff;
 
-  --header-bg-color: #f1f1f1;
+  --header-bg-color: #f4f4f4;
+
+  --submit-button-color:#dcdcdc;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --stroke-outline: #121212;
-    --bg-color: #121212;   
+    --stroke-outline: #212121;
+    --bg-color: #212121;   
     --text-color: #eeeeee;
 
     --other-lines: #dfdfdf;
@@ -50,11 +52,13 @@
     --target-red: #CF4444;
 
     --modal-bg-color: #343434;
-    --modal-overlay: #202020b4;
+    --modal-overlay: #303030b4;
 
-    --guessed-box: #202020;
+    --guessed-box: #303030;
 
-    --header-bg-color: #343434;
+    --header-bg-color: #181818;
+
+    --submit-button-color:#dcdcdc;
   }
 }
 
