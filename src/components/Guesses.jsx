@@ -295,6 +295,7 @@ export default function Guesses({
                         onBlur={() =>
                             setTimeout(() => setShowSuggestions(false), 100)
                         }
+                        style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)' }}
                         className={`block w-full p-4 pl-10 text-sm rounded-lg bg-white dark:bg-gray-700
                             focus:ring-emerald-500 focus:border-emerald-500
                             disabled:bg-gray-100 dark:disabled:bg-gray-600
@@ -381,7 +382,10 @@ export default function Guesses({
                             <div
                                 key={g}
                                 className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600"
-                                style={{ backgroundColor: 'var(--bg-color)' }}
+                                style={{ 
+                                    backgroundColor: 'var(--bg-color)',
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+                                }}
                             >
                                 {/* Left: numbered country */}
                                 <span
