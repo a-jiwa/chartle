@@ -295,11 +295,15 @@ export default function Guesses({
                         onBlur={() =>
                             setTimeout(() => setShowSuggestions(false), 100)
                         }
-                        className={`block w-full p-4 pl-10 text-sm rounded-lg bg-white dark:bg-gray-700
+                        style={{ 
+                            backgroundColor: 'var(--guessed-box)',
+                            color: 'var(--text-color)',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)' 
+                        }}
+                        className={`block w-full p-4 pl-10 text-sm rounded-lg
                             focus:ring-emerald-500 focus:border-emerald-500
                             disabled:bg-gray-100 dark:disabled:bg-gray-600
                             outline-none
-                            text-gray-900 dark:text-gray-100
                             ${
                                 trimmed && !isValidCountry
                                 ? "border border-red-500 dark:border-red-400"
@@ -381,7 +385,10 @@ export default function Guesses({
                             <div
                                 key={g}
                                 className="flex justify-between items-center w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600"
-                                style={{ backgroundColor: 'var(--header-bg-color)' }}
+                                style={{ 
+                                    backgroundColor: 'var(--bg-color)',
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+                                }}
                             >
                                 {/* Left: numbered country */}
                                 <span

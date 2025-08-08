@@ -741,7 +741,7 @@ export default function Chart({
             const drawLabel = () => {
                 g.append("text")
                     .attr("class", d.country === target ? "target-label" : "guess-label")
-                    .attr("font-size", 14)
+                    .attr("font-size", 16)
                     .attr("font-weight", "bold")
                     .attr("text-anchor", "start")
                     .attr("font-family", "Open Sans, sans-serif")
@@ -836,7 +836,7 @@ if (last) {
     const drawTargetLabel = () => {
         g.append("text")
             .attr("class", "target-label")
-            .attr("font-size", 14)
+            .attr("font-size", 16)
             .attr("font-weight", "bold")
             .attr("text-anchor", "start")
             .attr("font-family", "Open Sans, sans-serif")
@@ -852,7 +852,7 @@ if (last) {
     const drawUnknownLabel = () => {
         g.append("text")
             .attr("class", "target-unknown-label")
-            .attr("font-size", 14)
+            .attr("font-size", 16)
             .attr("font-weight", "bold")
             .attr("text-anchor", "start")
             .attr("font-family", "Open Sans, sans-serif")

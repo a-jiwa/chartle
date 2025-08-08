@@ -32,6 +32,8 @@
   --modal-bg-color: #f9f9f9;
   --modal-overlay: #202020b4;
 
+  --history-wrong: #acacac;
+
   --guessed-box: #ffffff;
 
   --header-bg-color: #f4f4f4;
@@ -53,6 +55,8 @@
 
     --modal-bg-color: #343434;
     --modal-overlay: #303030b4;
+
+    --history-wrong: #acacac;
 
     --guessed-box: #303030;
 

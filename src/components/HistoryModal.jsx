@@ -140,8 +140,8 @@ export default function HistoryModal ({ open, onClose }) {
                                                     fill   = TARGET_COLOUR  // Red for correct guess
                                                     border = TARGET_COLOUR
                                                 } else {
-                                                    fill   = 'var(--other-lines)'  // Use CSS variable for grey attempts
-                                                    border = 'var(--other-lines)'
+                                                    fill   = 'var(--history-wrong)'  // Use CSS variable for grey attempts
+                                                    border = 'var(--history-wrong)'
                                                 }
                                             }
 
