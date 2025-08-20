@@ -67,11 +67,9 @@ export default function WinModal({
 
         const exportWidth = 1080;
         const exportHeight = 1080;
-        const titleFontSize = 45;
-        const subtitleFontSize = 30;
-        const axisFontSize = 32;
-        const titleMargin = 60;
-        const subtitleMargin = 120;
+        const titleFontSize = 42;
+        const subtitleFontSize = 28;
+        const axisFontSize = 30;
         const m = { top: 180, right: 60, bottom: 110, left: 110 }; // 20px below subtitle
         const innerW = exportWidth - m.left - m.right;
         const innerH = exportHeight - m.top - m.bottom;
@@ -177,17 +175,17 @@ export default function WinModal({
             .attr("width", exportWidth)
             .attr("height", exportHeight)
             .attr("viewBox", [0, 0, exportWidth, exportHeight])
-            .style("background", "#f9f9f9");
+            .style("background", styles.getPropertyValue('--bg-color').trim());
 
         // Title (left aligned)
         svg.append("text")
             .attr("x", 30)
-            .attr("y", 70) // <-- increase this value
+            .attr("y", 70)
             .attr("text-anchor", "start")
             .attr("font-size", titleFontSize)
             .attr("font-weight", "semibold")
             .attr("font-family", "Open Sans, sans-serif")
-            .attr("fill", "#222")
+            .attr("fill", styles.getPropertyValue('--text-color').trim())
             .text(title || "Chart Title");
 
         // Subtitle (left aligned)
@@ -197,7 +195,7 @@ export default function WinModal({
             .attr("text-anchor", "start")
             .attr("font-size", subtitleFontSize)
             .attr("font-family", "Open Sans, sans-serif")
-            .attr("fill", "#444")
+            .attr("fill", styles.getPropertyValue('--text-color').trim())
             .text(subtitle || "");
 
         // Main group
@@ -285,7 +283,7 @@ export default function WinModal({
             // Outline
             g.append("path")
                 .attr("fill", "none")
-                .attr("stroke", "#f9f9f9")
+                .attr("stroke", styles.getPropertyValue('--stroke-outline').trim())
                 .attr("stroke-width", 12)
                 .attr("opacity", 1)
                 .attr("d", lineGen(rows));
@@ -323,7 +321,7 @@ export default function WinModal({
                     .attr("font-family", "Open Sans, sans-serif")
                     .attr("font-weight", "bold")
                     .attr("fill", isTarget ? targetColor : guessColours[i % guessColours.length])
-                    .attr("stroke", "#f9f9f9") // stroke matches background
+                    .attr("stroke", styles.getPropertyValue('--stroke-outline').trim()) // stroke matches background
                     .attr("stroke-width", 6)
                     .attr("paint-order", "stroke")
                     .attr("alignment-baseline", "middle")
@@ -336,7 +334,7 @@ export default function WinModal({
         // Outline
         g.append("path")
             .attr("fill", "none")
-            .attr("stroke", "#f9f9f9")
+            .attr("stroke", styles.getPropertyValue('--stroke-outline').trim())
             .attr("stroke-width", 14) // thicker outline for target
             .attr("opacity", 1)
             .attr("d", lineGen(targetRows));
@@ -356,7 +354,7 @@ export default function WinModal({
             .attr("font-size", 30)
             .attr("font-family", "Open Sans, sans-serif")
             .attr("font-weight", "bold")
-            .attr("fill", "#222")
+            .attr("fill", styles.getPropertyValue('--text-color').trim())
             .text("📈 chartle.cc");
 
         // Footer right: game date
@@ -367,7 +365,7 @@ export default function WinModal({
             .attr("font-size", 30)
             .attr("font-family", "Open Sans, sans-serif")
             .attr("font-weight", "bold")
-            .attr("fill", "#222")
+            .attr("fill", styles.getPropertyValue('--text-color').trim())
             .text(gameDate || "");
 
         // Convert SVG to PNG
@@ -385,7 +383,7 @@ export default function WinModal({
                 canvas.width = exportWidth;
                 canvas.height = exportHeight;
                 const ctx = canvas.getContext("2d");
-                ctx.fillStyle = "#f9f9f9";
+                ctx.fillStyle = styles.getPropertyValue('--bg-color').trim();
                 ctx.fillRect(0, 0, exportWidth, exportHeight);
                 ctx.drawImage(img, 0, 0, exportWidth, exportHeight);
 
