@@ -44,13 +44,14 @@ export default function WinModal({
     const emojiString = getEmojiString();
 
     const shareText = [
-        `📈 Chartle`,
+        `📈 Chartle.cc`,
+        ``,
+        // Title and subtitle on the same line, subtitle in parentheses if present
+        subtitle ? `${title} (${subtitle})` : `${title}`,
         ``,
         `Guessed in ${guesses.length} ${guesses.length === 1 ? "try" : "tries"}`,
         `${emojiString}`,
-        ``,
-        'https://chartle.cc',
-    ].join('\n');
+    ].filter(Boolean).join('\n');
 
     const handleCopy = async () => {
         try {
@@ -67,10 +68,8 @@ export default function WinModal({
 
         const exportWidth = 1080;
         const exportHeight = 1080;
-        const titleFontSize = 42;
-        const subtitleFontSize = 28;
         const axisFontSize = 30;
-        const m = { top: 180, right: 60, bottom: 110, left: 110 }; // 20px below subtitle
+        const m = { top: 60, right: 60, bottom: 110, left: 110 }; // reduced top margin
         const innerW = exportWidth - m.left - m.right;
         const innerH = exportHeight - m.top - m.bottom;
 
@@ -177,27 +176,6 @@ export default function WinModal({
             .attr("viewBox", [0, 0, exportWidth, exportHeight])
             .style("background", styles.getPropertyValue('--bg-color').trim());
 
-        // Title (left aligned)
-        svg.append("text")
-            .attr("x", 30)
-            .attr("y", 70)
-            .attr("text-anchor", "start")
-            .attr("font-size", titleFontSize)
-            .attr("font-weight", "semibold")
-            .attr("font-family", "Open Sans, sans-serif")
-            .attr("fill", styles.getPropertyValue('--text-color').trim())
-            .text(title || "Chart Title");
-
-        // Subtitle (left aligned)
-        svg.append("text")
-            .attr("x", 30)
-            .attr("y", 130) // <-- increase this value
-            .attr("text-anchor", "start")
-            .attr("font-size", subtitleFontSize)
-            .attr("font-family", "Open Sans, sans-serif")
-            .attr("fill", styles.getPropertyValue('--text-color').trim())
-            .text(subtitle || "");
-
         // Main group
         const g = svg.append("g")
             .attr("transform", `translate(${m.left},${m.top})`);
@@ -224,22 +202,14 @@ export default function WinModal({
                 d3.axisBottom(x)
                     .ticks(4)
                     .tickFormat(d => String(d))
-                    .tickSize(6)  // Add tick size to match Chart.jsx
+                    .tickSize(6)
             )
             .selectAll("text")
             .attr("font-size", axisFontSize)
             .attr("font-weight", 400)
             .attr("fill", axisColor)
             .attr("dy", "0.95em")
-            .style("font-family", "Open Sans, sans-serif");
-
-        g.select(".x-axis .domain")
-            .attr("stroke", axisColor)
-            .attr("stroke-width", 1);
-
-        g.selectAll(".x-axis .tick line")
-            .attr("stroke", axisColor)
-            .attr("stroke-width", 1);
+            .attr("font-family", "Open Sans, sans-serif"); // <-- use attr, not style
 
         g.append("g")
             .attr("class", "y-axis")
@@ -253,7 +223,7 @@ export default function WinModal({
             .attr("font-size", axisFontSize)
             .attr("font-weight", 400)
             .attr("fill", axisColor)
-            .style("font-family", "Open Sans, sans-serif");
+            .attr("font-family", "Open Sans, sans-serif"); // <-- use attr, not style
 
         // Remove only y-axis domain and tick lines
         g.select(".y-axis .domain").attr("stroke", "none");
