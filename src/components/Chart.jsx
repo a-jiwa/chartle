@@ -132,7 +132,7 @@ export default function Chart({
                 new Set(standardized.map(d => d.Country))
             );
             
-            setAvailableCountries(allCountries);
+            setAvailableCountries(populationFilteredCountries);
                     });
     }, [csvUrl]);
 
