@@ -21,6 +21,10 @@ export default function Chart({
                                   guesses = [],
                                   setAvailableCountries,
                               }) {
+    // Detect mobile/touch devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                     ('ontouchstart' in window) || 
+                     (navigator.maxTouchPoints > 0);
     /* ----- refs & state ----- */
     const wrapperRef = useRef(null);
     const svgRef = useRef(null);
@@ -347,6 +351,10 @@ export default function Chart({
                     .attr('fill', 'transparent')
                     .attr('pointer-events', 'all')
                     .style('touch-action', 'none')
+                    .style('user-select', 'none')
+                    .style('-webkit-user-select', 'none')
+                    .style('-moz-user-select', 'none')
+                    .style('-ms-user-select', 'none')
             }
 
             /* resize‑sensitive elements */
@@ -427,6 +435,9 @@ export default function Chart({
 
             /* pointer handlers */
             const pointerMove = ev => {
+                // Prevent default to avoid text selection on mobile
+                ev.preventDefault();
+                
                 /* raw pointer position in plot coordinates */
                 const [mxRaw, myRaw] = d3.pointer(ev, hoverLayer.node())
 
@@ -434,12 +445,13 @@ export default function Chart({
                 const mx = Math.min(innerW, Math.max(0, mxRaw))
                 const my = Math.min(innerH, Math.max(0, myRaw))
 
-                const PROX = 40
+                // Increase proximity threshold on mobile for easier interaction
+                const PROX = isMobile ? 60 : 40
 
                 /* fade grey lines to 0.15 over 300ms */
                 gBase.selectAll('path')
                     .interrupt()
-                    .transition().duration(300).ease(easeLinear)
+                    .transition().duration(isMobile ? 150 : 300).ease(easeLinear)
                     .attr('opacity', 0.15)
 
                 /* guide line */
@@ -540,14 +552,25 @@ export default function Chart({
                 /* fade grey lines back to 0.4 over 300ms */
                 gBase.selectAll('path')
                     .interrupt()                     // stop any running dim‑transition
-                    .transition().duration(300).ease(easeLinear)
+                    .transition().duration(isMobile ? 150 : 300).ease(easeLinear)
                     .attr('opacity', 0.4)
             }
 
             /* bind events */
             hoverLayer.select('.hover-capture')
                 .on('pointerenter pointerdown pointermove', pointerMove)
-                .on('pointerup pointercancel pointerout', pointerEnd)
+                .on('pointerup pointercancel', pointerEnd)
+                // Don't use pointerout on mobile - it can fire when crossing over lines
+                .on('pointerleave', (ev) => {
+                    // Only end hover if we're actually leaving the chart area
+                    const rect = ev.currentTarget.getBoundingClientRect();
+                    const x = ev.clientX;
+                    const y = ev.clientY;
+                    
+                    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+                        pointerEnd();
+                    }
+                })
 
             /* ----- axes ----- */
         g.select(".x-axis")
@@ -915,7 +938,16 @@ if (last) {
     }, [data, meta, width, height, target, others, guesses, guessColours]);
 
     return (
-        <div ref={wrapperRef} className="w-full h-full">
+        <div 
+            ref={wrapperRef} 
+            className="w-full h-full"
+            style={{
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
+            }}
+        >
             {width > 0 && height > 0 && (
             <svg ref={svgRef} className="w-full h-full" />
             )}
