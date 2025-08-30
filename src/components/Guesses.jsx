@@ -83,13 +83,19 @@ export default function Guesses({
             const aLc = a.toLowerCase();
             const bLc = b.toLowerCase();
 
-            /* startsWith comes first */
+            /* Data availability comes first */
+            const aHasData = validCountries.includes(a);
+            const bHasData = validCountries.includes(b);
+            if (aHasData && !bHasData) return -1;
+            if (!aHasData && bHasData) return 1;
+
+            /* startsWith comes second */
             const aStarts = aLc.startsWith(lcTrimmed);
             const bStarts = bLc.startsWith(lcTrimmed);
             if (aStarts && !bStarts) return -1;
             if (!aStarts && bStarts) return 1;
 
-            /* Levenshtein distance */
+            /* Levenshtein distance comes third */
             const distA = levenshtein(aLc, lcTrimmed);
             const distB = levenshtein(bLc, lcTrimmed);
             if (distA !== distB) return distA - distB;
