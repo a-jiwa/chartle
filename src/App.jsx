@@ -58,6 +58,14 @@ export default function App() {
     const [panel, setPanel] = useState(null);   // "help" | "history" | "settings" | "auth" | null
     const handleMenuOpen = (id) => setPanel(id);
 
+    const handleFirstTimeHelpClose = () => {
+        setShowFirstTimeHelp(false);
+        localStorage.setItem('chartle-has-seen-help', 'true');
+    };
+
+    // Check if this is the user's first visit
+    const [showFirstTimeHelp, setShowFirstTimeHelp] = useState(false);
+
     /* ── readable date for display ───────────── */
     const GAME_DATE_LABEL_FULL = new Date(GAME_DATE).toLocaleDateString("en-GB", {
         weekday: "short",   // Fri
@@ -76,6 +84,14 @@ export default function App() {
     useEffect(() => {
         initGA();
         trackPageView();
+    }, []);
+
+    /* ─── first-time user help modal ─────────────────────── */
+    useEffect(() => {
+        const hasSeenHelp = localStorage.getItem('chartle-has-seen-help');
+        if (!hasSeenHelp) {
+            setShowFirstTimeHelp(true);
+        }
     }, []);
 
     /* ─── fetch top-level game config ───────────────────── */
@@ -356,6 +372,11 @@ export default function App() {
             <HelpModal
                 open={panel === "help"}
                 onClose={() => setPanel(null)}
+            />
+
+            <HelpModal
+                open={showFirstTimeHelp}
+                onClose={handleFirstTimeHelpClose}
             />
 
             <HistoryModal
