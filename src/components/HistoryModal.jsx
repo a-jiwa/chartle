@@ -22,7 +22,7 @@ function goToDate (iso) {
     window.location.href = url.toString()
 }
 
-export default function HistoryModal ({ open, onClose }) {
+export default function HistoryModal ({ open, onClose, currentGameDate }) {
     const [rows, setRows]       = useState([])
     const [loading, setLoading] = useState(false)
 
@@ -94,6 +94,7 @@ export default function HistoryModal ({ open, onClose }) {
                     ? skeleton
                     : rows.map(({ key, date, guesses, target }) => {
                         const played = guesses.length > 0
+                        const isCurrentGame = currentGameDate === key
 
                         const fullDate = date.toLocaleDateString('en-GB', {
                             weekday: 'short',
@@ -114,17 +115,19 @@ export default function HistoryModal ({ open, onClose }) {
                                     onClick={() => goToDate(key)}
                                     className='flex w-full items-center justify-between sm:px-1 px-3 sm:py-3 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 focus:bg-gray-50 dark:focus:bg-gray-700'
                                 >
-                                    {/* date label */}
+                                                                        {/* date label */}
                                     <span
                                         className={`text-sm ${
-                                            played
-                                                ? 'font-bold text-gray-900 dark:text-white'
-                                                : 'font-medium text-gray-800 dark:text-gray-300'
+                                            isCurrentGame
+                                                ? 'font-bold text-blue-600 dark:text-blue-400' // Current game styling
+                                                : played
+                                                ? 'font-bold text-gray-900 dark:text-white'    // Played days
+                                                : 'font-medium text-gray-800 dark:text-gray-300' // Unplayed days
                                         }`}
                                     >
-                      <span className='inline sm:hidden'>{numericDate}</span>
-                      <span className='hidden sm:inline'>{fullDate}</span>
-                    </span>
+                                        <span className='inline sm:hidden'>{numericDate}</span>
+                                        <span className='hidden sm:inline'>{fullDate}</span>
+                                    </span>
 
                                     {/* guess circles */}
                                     <div className='flex gap-2'>

@@ -358,6 +358,7 @@ export default function App() {
             <HistoryModal
                 open={panel === "history"}
                 onClose={() => setPanel(null)}
+                currentGameDate={GAME_DATE}
             />
 
             <SettingsModal
