@@ -221,7 +221,29 @@ export default function App() {
     };
 
     /* ─── placeholder whilst data loads ─────────────────── */
-    if (!meta || !targetIso) return null;
+    if (!meta || !targetIso) {
+        return (
+            <div className="h-full antialiased flex flex-col items-center justify-center bg-[var(--bg-color)]">
+                <div className="text-center px-4">
+                    {/* Spinner */}
+                    <div className="relative mx-auto mb-6 w-16 h-16">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 dark:border-gray-700"></div>
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-gray-600 dark:border-t-gray-300 absolute top-0 left-0"></div>
+                    </div>
+                    
+                    {/* Loading text */}
+                    <p className="text-lg font-medium text-[var(--text-color)] tracking-wide">
+                        Loading
+                    </p>
+                    
+                    {/* Subtle subtitle */}
+                    <p className="text-sm text-[var(--axis-text-color)] mt-2">
+                        Preparing today's chart
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     /* ─── render ────────────────────────────────────────── */
     return (
