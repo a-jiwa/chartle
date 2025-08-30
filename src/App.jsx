@@ -145,8 +145,9 @@ export default function App() {
     useEffect(() => {
         if (!target) return; // wait until meta fetched
 
+        const currentHistory = loadHistoryLocal();
         saveHistory({
-            ...loadHistory(),
+            ...currentHistory,
             [GAME_DATE]: {
                 target,
                 guesses,
