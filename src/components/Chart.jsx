@@ -268,6 +268,11 @@ export default function Chart({
             };
         });
 
+        // Debug: Log guess lines to help identify color mismatches
+        if (guessLines.length > 0) {
+            console.log('Guess lines data:', guessLines.map(g => ({ country: g.country, color: g.stroke })));
+        }
+
         const lineData = [...baseLines, ...targetLine, ...guessLines];
 
         /* ----- SVG root & main group ----- */
@@ -365,6 +370,9 @@ export default function Chart({
             hoverLayer.select('.hover-year-label').attr('y', innerH)
 
             /* dots for guess lines (enter / exit) */
+            // Remove all existing guess dots to ensure clean recreation
+            hoverLayer.selectAll('circle.guess-dot').remove()
+            
             const guessDots = hoverLayer.selectAll('circle.guess-dot')
                 .data(guessLines, d => d.id)
 
@@ -372,7 +380,9 @@ export default function Chart({
                 .append('circle')
                 .attr('class', 'guess-dot')
                 .attr('r', 4)
-                .attr('fill', d => d.stroke)
+                .attr('fill', d => d.country === target 
+                    ? getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim()
+                    : d.stroke)
                 .attr('stroke', '#ffffff')
                 .attr('stroke-width', 1.5)
                 .style('opacity', 0)
@@ -507,6 +517,12 @@ export default function Chart({
 
                         if (!closeEnough) { d3.select(this).style('opacity', 0) ; return }
 
+                        // Hide label if this guess is the target (since target has its own label)
+                        if (d.country === target) { 
+                            d3.select(this).style('opacity', 0) ; 
+                            return 
+                        }
+
                         const txt = d3
                             .select(this)
                             .style('opacity', 1)
@@ -531,10 +547,18 @@ export default function Chart({
                 hoverLayer.selectAll('circle.guess-dot')
                     .each(function (d) {
                         const yGuess = interp(d.rows, yr)
-                        d3.select(this)
+                        const dot = d3.select(this)
+                        
+                        // Use target red color if this guess is the target, otherwise use guess color
+                        const dotColor = d.country === target 
+                            ? getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim()
+                            : d.stroke;
+                        
+                        dot
                             .style('opacity', yGuess == null ? 0 : 1)
                             .attr('cx', mx)
                             .attr('cy', y(yGuess))
+                            .attr('fill', dotColor) // Use correct color based on whether it's the target
                     })
             }
 
@@ -788,6 +812,8 @@ export default function Chart({
                 // Slight timeout to let DOM update before resolving overlaps
                 setTimeout(() => {
                     avoidLabelOverlap(g.selectAll("text.guess-label, text.target-label"));
+                    // Ensure hover layer stays on top after label positioning
+                    hoverLayer.raise();
                 }, 0);
             };
 
@@ -899,6 +925,8 @@ if (last) {
 
     if (guesses.includes(target)) {
         drawTargetLabel(); // show correct label
+        // Ensure hover layer stays on top after target label is drawn
+        setTimeout(() => hoverLayer.raise(), 0);
     } else {
         const redPath = gTarget.select("path:nth-child(2)");
         const delay = 2500;
@@ -915,6 +943,8 @@ if (last) {
                 clearTimeout(timeoutId); // cancel delayed label if needed
                 g.selectAll("text.target-unknown-label").remove();
                 drawTargetLabel(); // draw actual ISO label
+                // Ensure hover layer stays on top after target label is drawn
+                setTimeout(() => hoverLayer.raise(), 0);
                 observer.disconnect();
             }
         });
@@ -931,6 +961,11 @@ if (last) {
 
             /* keep the hover layer above everything that was just added */
             hoverLayer.raise()
+
+            /* ensure hover layer stays on top after all labels are added */
+            setTimeout(() => {
+                hoverLayer.raise();
+            }, 0);
 
         });
     
