@@ -257,7 +257,10 @@ export default function App() {
                     
                     {/* Subtle subtitle */}
                     <p className="text-sm text-[var(--axis-text-color)] mt-2">
-                        Preparing today's chart
+                        {OVERRIDDEN 
+                            ? `Preparing ${GAME_DATE_LABEL_SHORT}'s chart`
+                            : "Preparing today's chart"
+                        }
                     </p>
                 </div>
             </div>
