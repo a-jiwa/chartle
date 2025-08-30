@@ -66,18 +66,12 @@ export default function LoseModal({
             open={open}
             onClose={onClose}
             footer={
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+                <div className="flex justify-center w-full">
                     <button
                         onClick={handleCopy}
                         className="w-full sm:w-auto rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                     >
                         {copied ? "Copied!" : "Share result"}
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="w-full sm:w-auto rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
-                    >
-                        Close
                     </button>
                 </div>
             }

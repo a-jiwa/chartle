@@ -483,7 +483,7 @@ export default function WinModal({
             onClose={onClose}
             title="You guessed it!"
             footer={
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+                <div className="flex justify-center w-full">
                     <button
                         onClick={async () => {
                             try {
@@ -514,25 +514,9 @@ export default function WinModal({
                                 console.error("Share failed:", err);
                             }
                         }}
-                        className="w-full sm:w-auto rounded-lg [background-color:var(--second-guess)] px-4 py-3 text-sm text-white hover:[background-color:var(--second-guess-dark)] focus:outline-none focus:ring-4 focus:ring-blue-300"
+                        className="w-full sm:w-auto rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
                     >
                         {copied ? 'Copied!' : 'Share result'}
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="
-                            w-full sm:w-auto
-                            rounded-lg 
-                            bg-black 
-                            px-4 py-3
-                            text-sm 
-                            text-white 
-                            focus:outline-none 
-                            focus:ring-4 
-                            focus:ring-emerald-300
-                            "
-                    >
-                        Close
                     </button>
                 </div>
             }
