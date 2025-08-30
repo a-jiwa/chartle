@@ -29,7 +29,6 @@ export default function Header({ onOpen, dateLabel, overridden }) {
     const items = [
         { id: 'help',     label: 'Help' },
         { id: 'history',  label: 'History' },
-        { id: 'settings', label: 'Settings' },
         { id: 'auth',     label: accountLabel },
     ];
 
