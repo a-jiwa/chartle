@@ -66,31 +66,36 @@ export default function LoseModal({
             open={open}
             onClose={onClose}
             footer={
-                <button
-                    onClick={onClose}
-                    className="ms-auto rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
-                >
-                    Close
-                </button>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+                    <button
+                        onClick={handleCopy}
+                        className="w-full sm:w-auto rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                    >
+                        {copied ? "Copied!" : "Share result"}
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="w-full sm:w-auto rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
+                    >
+                        Close
+                    </button>
+                </div>
             }
         >
-            <div className="px-5">
-            <p className="text-center mb-4">
-                The correct answer was <strong>{target}</strong>.
-            </p>
+            <div className="text-center max-h-[60vh] overflow-y-auto">
+                <p className="text-center mb-4 [color:var(--text-color)]">
+                    The correct answer was <strong>{target}</strong>.
+                </p>
 
-            {infoDescription.split("\n").map((line, i) => (
-                <p key={i}>{line}</p>
-            ))}
+                <div className="mb-4 space-y-3 [color:var(--text-color)] text-left">
+                    {infoDescription.split("\n").map((line, i) => (
+                        <p key={i}>{line}</p>
+                    ))}
+                </div>
 
-            <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">Data source: {source}</p>
-
-            <button
-                onClick={handleCopy}
-                className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
-            >
-                {copied ? "Copied!" : "Share result"}
-            </button>
+                <p className="text-sm [color:var(--text-color)] mb-8 text-left">
+                    Data source: {source}
+                </p>
             </div>
         </Modal>
     );

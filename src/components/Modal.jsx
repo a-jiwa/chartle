@@ -24,20 +24,20 @@ export default function Modal({ title, subtitle, open, onClose, children, footer
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[var(--modal-overlay)] p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[var(--modal-overlay)] p-2 sm:p-4"
             role="dialog"
             aria-modal="true"
             tabIndex={-1}
             onClick={onClose}
         >
             <div
-                className="relative w-full max-w-sm md:max-w-lg lg:max-w-xl"
+                className="relative w-full max-w-sm md:max-w-lg lg:max-w-xl max-h-[85vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="relative rounded-lg bg-[var(--modal-bg-color)] shadow-sm ">
+                <div className="relative rounded-lg bg-[var(--modal-bg-color)] shadow-sm flex flex-col max-h-full">
                     {/* header */}
                     {(title || subtitle) && (
-                        <div className="flex flex-col gap-1 rounded-t border-b border-gray-200 p-4 md:p-5 dark:border-gray-600">
+                        <div className="flex flex-col gap-1 rounded-t border-b border-gray-200 p-4 md:p-5 dark:border-gray-600 flex-shrink-0">
                             {title && (
                                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                                     {title}
@@ -59,13 +59,13 @@ export default function Modal({ title, subtitle, open, onClose, children, footer
                     )}
 
                     {/* body */}
-                    <div className="text-left leading-relaxed text-gray-500 dark:text-gray-300 p-4 md:p-5">
+                    <div className="text-left leading-relaxed text-gray-500 dark:text-gray-300 p-4 md:p-5 flex-1 overflow-y-auto min-h-0">
                         {children}
                     </div>
 
                     {/* footer */}
                     {footer && (
-                        <div className="flex items-center rounded-b border-t border-gray-200 p-4 md:p-5 dark:border-gray-600">
+                        <div className="flex items-center rounded-b border-t border-gray-200 p-4 md:p-5 dark:border-gray-600 flex-shrink-0">
                             {footer}
                         </div>
                     )}

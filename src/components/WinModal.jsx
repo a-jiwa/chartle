@@ -478,31 +478,12 @@ export default function WinModal({
     };
 
     return (
-        <Modal open={open} onClose={onClose} >
-            <div className="px-5 text-center">
-                {/* Custom title */}
-                <h2 className="text-2xl font-bold mb-4 [color:var(--text-color)]">You guessed it!</h2>
-
-                {/* description */}
-                <div className="mb-4 space-y-3 [color:var(--text-color)] text-left">
-                    {infoDescription.split('\n').map((line, i) => (
-                        <p key={i}>{line}</p>
-                    ))}
-                </div>
-
-                {/* source */}
-                <p className="text-sm [color:var(--text-color)] mb-8 text-left">
-                    Data source: {source}
-                </p>
-
-                {/* record + chart */}
-                <p className="text-lg font-semibold [color:var(--text-color)] mb-2 mt-6 text-left">
-                    Your track record
-                </p>
-                <svg ref={chartRef} className="w-full h-auto mb-4" />
-
-                {/* buttons */}
-                <div className="mt-4 flex items-center justify-between gap-4">
+        <Modal 
+            open={open} 
+            onClose={onClose}
+            title="You guessed it!"
+            footer={
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
                     <button
                         onClick={async () => {
                             try {
@@ -533,16 +514,17 @@ export default function WinModal({
                                 console.error("Share failed:", err);
                             }
                         }}
-                        className="rounded-lg [background-color:var(--second-guess)] px-4 py-2 text-sm text-white hover:[background-color:var(--second-guess-dark)] focus:outline-none focus:ring-4 focus:ring-blue-300"
+                        className="w-full sm:w-auto rounded-lg [background-color:var(--second-guess)] px-4 py-3 text-sm text-white hover:[background-color:var(--second-guess-dark)] focus:outline-none focus:ring-4 focus:ring-blue-300"
                     >
                         {copied ? 'Copied!' : 'Share result'}
                     </button>
                     <button
                         onClick={onClose}
                         className="
+                            w-full sm:w-auto
                             rounded-lg 
                             bg-black 
-                            px-4 py-2 
+                            px-4 py-3
                             text-sm 
                             text-white 
                             focus:outline-none 
@@ -552,6 +534,28 @@ export default function WinModal({
                     >
                         Close
                     </button>
+                </div>
+            }
+        >
+            <div className="text-center max-h-[60vh] overflow-y-auto">
+                {/* description */}
+                <div className="mb-4 space-y-3 [color:var(--text-color)] text-left">
+                    {infoDescription.split('\n').map((line, i) => (
+                        <p key={i}>{line}</p>
+                    ))}
+                </div>
+
+                {/* source */}
+                <p className="text-sm [color:var(--text-color)] mb-8 text-left">
+                    Data source: {source}
+                </p>
+
+                {/* record + chart */}
+                <p className="text-lg font-semibold [color:var(--text-color)] mb-2 mt-6 text-left">
+                    Your track record
+                </p>
+                <div className="mb-4">
+                    <svg ref={chartRef} className="w-full h-auto" />
                 </div>
             </div>
         </Modal>
