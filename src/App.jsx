@@ -51,6 +51,7 @@ export default function App() {
 
     const [showWinModal,  setShowWinModal]  = useState(false);
     const [showLoseModal, setShowLoseModal] = useState(false);
+    const [modalShown,   setModalShown]     = useState(false);
     const [targetData,    setTargetData]    = useState(null);
     const [availableCountries, setAvailableCountries] = useState([]);
 
@@ -126,7 +127,10 @@ export default function App() {
             });
         }, confettiDelay);
 
-        const modalTimer = setTimeout(() => setShowWinModal(true), modalDelay);
+        const modalTimer = setTimeout(() => {
+            setShowWinModal(true);
+            setModalShown(true);
+        }, modalDelay);
 
         return () => {
             clearTimeout(confettiTimer);
@@ -134,10 +138,15 @@ export default function App() {
         };
     }, [status]);
 
+
+
     /* ─── to delay lose modal only after line is rendered ─────────── */
     useEffect(() => {
         if (status !== "lost") { setShowLoseModal(false); return; }
-        const t = setTimeout(() => setShowLoseModal(true), 3000);
+        const t = setTimeout(() => {
+            setShowLoseModal(true);
+            setModalShown(true);
+        }, 3000);
         return () => clearTimeout(t);
     }, [status]);
 
@@ -179,6 +188,15 @@ export default function App() {
             setStatus("playing");
         }
     }, [meta]);
+
+    /* ─── reopen result modal ─────────────────────────────── */
+    const handleShowResult = () => {
+        if (status === "won") {
+            setShowWinModal(true);
+        } else if (status === "lost") {
+            setShowLoseModal(true);
+        }
+    };
 
     /* ─── add a guess (case‑insensitive, max 5) ─────────── */
     const handleAddGuess = (raw) => {
@@ -289,7 +307,9 @@ export default function App() {
                     <Guesses
                         guesses={guesses}
                         onAddGuess={handleAddGuess}
+                        onShowResult={handleShowResult}
                         status={status}
+                        modalShown={modalShown}
                         max={MAX_GUESSES}
                         guessColours={guessColours}
                         targetData={targetData}
@@ -302,7 +322,7 @@ export default function App() {
 
             <WinModal
                 open={showWinModal}
-                onClose={() => setStatus("done")}
+                onClose={() => setShowWinModal(false)}
                 guesses={guesses}
                 target={target}
                 infoDescription={infoDescription}
@@ -319,7 +339,7 @@ export default function App() {
 
             <LoseModal
                 open={showLoseModal}
-                onClose={() => setStatus("done")}
+                onClose={() => setShowLoseModal(false)}
                 target={target}
                 infoDescription={infoDescription}
                 source={source}

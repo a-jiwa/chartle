@@ -27,7 +27,9 @@ const compassSequence = ["⬆️", "↗️", "➡️", "↘️", "⬇️", "↙�
 export default function Guesses({
                                     guesses,
                                     onAddGuess,
+                                    onShowResult,
                                     status,
+                                    modalShown,
                                     max,
                                     targetData,
                                     countryToIso,
@@ -236,133 +238,151 @@ export default function Guesses({
                     )}
                 </div>
 
-            {/* ─────────── Input form ─────────── */}
-            <form onSubmit={submit} className="w-full px-[50px]">
-                <div className="relative">
-                    {/* ─────────── Input + button ─────────── */}
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg
-                            className="w-4 h-4 text-gray-500"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M19 19l-4-4m0-7a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                        </svg>
+            {/* ─────────── Input form or Show Result button ─────────── */}
+            {(status === "won" || status === "lost") && modalShown ? (
+                <div className="w-full px-[50px] space-y-2">
+                    {/* Game result indicator */}
+                    <div className="text-center">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            {status === "won" ? `${guesses.length}/${max}` : `X/${max}`}
+                        </span>
                     </div>
-
-                    <input
-                        id="guess-input"
-                        type="text"
-                        placeholder="Enter country"
-                        value={value}
-                        disabled={disabled}
-                        onChange={(e) => {
-                            setValue(e.target.value);
-                            setShowSuggestions(true);
-                            setHighlightedIndex(-1);
-                            setError("");
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === "ArrowDown") {
-                                e.preventDefault();
-                                setShowSuggestions(true);
-                                setHighlightedIndex((idx) =>
-                                idx < filtered.length - 1 ? idx + 1 : 0
-                                );
-                            } else if (e.key === "ArrowUp") {
-                                e.preventDefault();
-                                setShowSuggestions(true);
-                                setHighlightedIndex((idx) =>
-                                idx > 0 ? idx - 1 : filtered.length - 1
-                                );
-                            } else if (e.key === "Enter") {
-                                if (highlightedIndex >= 0 && filtered[highlightedIndex]) {
-                                e.preventDefault();
-                                selectSuggestion(filtered[highlightedIndex]);
-                                setHighlightedIndex(-1);
-                                } else if (!isValidCountry && filtered.length) {
-                                e.preventDefault();
-                                selectSuggestion(filtered[filtered.length - 1]);
-                                }
-                            }
-                        }}
-                        onBlur={() =>
-                            setTimeout(() => setShowSuggestions(false), 100)
-                        }
-                        style={{ 
-                            backgroundColor: 'var(--guessed-box)',
-                            color: 'var(--text-color)',
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)' 
-                        }}
-                        className={`block w-full p-4 pl-10 text-sm rounded-lg
-                            focus:ring-emerald-500 focus:border-emerald-500
-                            disabled:bg-gray-100 dark:disabled:bg-gray-600
-                            outline-none
-                            ${
-                                trimmed && !isValidCountry
-                                ? "border border-red-500 dark:border-red-400"
-                                : "border border-gray-300 dark:border-gray-600"
-                        }`}
-                        autoComplete="on"
-                    />
-
+                    
                     <button
-                        type="submit"
-                        disabled={!isValidCountry || disabled || guesses.length >= max}
-                        className={`text-white absolute right-2 bottom-2 font-medium rounded-lg text-sm px-4 py-2 disabled:bg-gray-400 ${
-                            isValidCountry && !disabled && guesses.length < max
-                                ? "bg-emerald-500 hover:bg-emerald-600 focus:ring-4 focus:ring-emerald-300"
-                                : "bg-gray-300 text-gray-700 cursor-not-allowed"
-                        }`}
+                        onClick={onShowResult}
+                        className="w-full p-4 text-center text-white font-medium rounded-lg text-sm bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors cursor-pointer shadow-sm"
                     >
-                        {`Guess ${currentGuess}/${max}`}
+                        Show Result
                     </button>
-
-
-                    {/* ─────────── Suggestions ─────────── */}
-                    {showSuggestions && filtered.length > 0 && (
-                        <ul
-                            ref={suggestionsRef}
-                            onScroll={handleScroll}
-                            className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
-                                    bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 
-                                    rounded-lg shadow-lg overflow-y-auto"
-                        >
-                            {filtered.map((country, idx) => {
-                                const hasData = validCountries.includes(country);
-                                const isInactive = !hasData;
-
-                                return (
-                                    <li
-                                    key={country}
-                                    className={`cursor-pointer py-4 px-4 text-sm flex justify-between items-center
-                                        ${idx === highlightedIndex
-                                            ? "bg-emerald-50 dark:bg-emerald-700 font-semibold text-gray-900 dark:text-white"
-                                            : "hover:bg-gray-100 dark:hover:bg-gray-700"}
-                                        ${isInactive ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"}`}
-                                    onMouseDown={() => {
-                                        if (!isInactive) {
-                                        selectSuggestion(country);
-                                        setHighlightedIndex(-1);
-                                        }
-                                    }}
-                                    onMouseEnter={() => setHighlightedIndex(idx)}
-                                    >
-                                    <span>{country}</span>
-                                    {isInactive && <span className="text-xs ml-2">(no data)</span>}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    )}
                 </div>
-            </form>
+            ) : (
+                <form onSubmit={submit} className="w-full px-[50px]">
+                    <div className="relative">
+                        {/* ─────────── Input + button ─────────── */}
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg
+                                className="w-4 h-4 text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                viewBox="0 0 20 20"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 19l-4-4m0-7a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </div>
+
+                        <input
+                            id="guess-input"
+                            type="text"
+                            placeholder="Enter country"
+                            value={value}
+                            disabled={disabled}
+                            onChange={(e) => {
+                                setValue(e.target.value);
+                                setShowSuggestions(true);
+                                setHighlightedIndex(-1);
+                                setError("");
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === "ArrowDown") {
+                                    e.preventDefault();
+                                    setShowSuggestions(true);
+                                    setHighlightedIndex((idx) =>
+                                    idx < filtered.length - 1 ? idx + 1 : 0
+                                    );
+                                } else if (e.key === "ArrowUp") {
+                                    e.preventDefault();
+                                    setShowSuggestions(true);
+                                    setHighlightedIndex((idx) =>
+                                    idx > 0 ? idx - 1 : filtered.length - 1
+                                    );
+                                } else if (e.key === "Enter") {
+                                    if (highlightedIndex >= 0 && filtered[highlightedIndex]) {
+                                    e.preventDefault();
+                                    selectSuggestion(filtered[highlightedIndex]);
+                                    setHighlightedIndex(-1);
+                                    } else if (!isValidCountry && filtered.length) {
+                                    e.preventDefault();
+                                    selectSuggestion(filtered[filtered.length - 1]);
+                                    }
+                                }
+                            }}
+                            onBlur={() =>
+                                setTimeout(() => setShowSuggestions(false), 100)
+                            }
+                            style={{ 
+                                backgroundColor: 'var(--guessed-box)',
+                                color: 'var(--text-color)',
+                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)' 
+                            }}
+                            className={`block w-full p-4 pl-10 text-sm rounded-lg
+                                focus:ring-emerald-500 focus:border-emerald-500
+                                disabled:bg-gray-100 dark:disabled:bg-gray-600
+                                outline-none
+                                ${
+                                    trimmed && !isValidCountry
+                                    ? "border border-red-500 dark:border-red-400"
+                                    : "border border-gray-300 dark:border-gray-600"
+                            }`}
+                            autoComplete="on"
+                        />
+
+                        <button
+                            type="submit"
+                            disabled={!isValidCountry || disabled || guesses.length >= max}
+                            className={`text-white absolute right-2 bottom-2 font-medium rounded-lg text-sm px-4 py-2 disabled:bg-gray-400 ${
+                                isValidCountry && !disabled && guesses.length < max
+                                    ? "bg-emerald-500 hover:bg-emerald-600 focus:ring-4 focus:ring-emerald-300"
+                                    : "bg-gray-300 text-gray-700 cursor-not-allowed"
+                            }`}
+                        >
+                            {`Guess ${currentGuess}/${max}`}
+                        </button>
+
+
+                        {/* ─────────── Suggestions ─────────── */}
+                        {showSuggestions && filtered.length > 0 && (
+                            <ul
+                                ref={suggestionsRef}
+                                onScroll={handleScroll}
+                                className="absolute left-0 right-0 bottom-full mb-2 z-50 w-full max-h-60
+                                        bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 
+                                        rounded-lg shadow-lg overflow-y-auto"
+                            >
+                                {filtered.map((country, idx) => {
+                                    const hasData = validCountries.includes(country);
+                                    const isInactive = !hasData;
+
+                                    return (
+                                        <li
+                                        key={country}
+                                        className={`cursor-pointer py-4 px-4 text-sm flex justify-between items-center
+                                            ${idx === highlightedIndex
+                                                ? "bg-emerald-50 dark:bg-emerald-700 font-semibold text-gray-900 dark:text-white"
+                                                : "hover:bg-gray-100 dark:hover:bg-gray-700"}
+                                            ${isInactive ? "text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"}`}
+                                        onMouseDown={() => {
+                                            if (!isInactive) {
+                                            selectSuggestion(country);
+                                            setHighlightedIndex(-1);
+                                            }
+                                        }}
+                                        onMouseEnter={() => setHighlightedIndex(idx)}
+                                        >
+                                        <span>{country}</span>
+                                        {isInactive && <span className="text-xs ml-2">(no data)</span>}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
+                    </div>
+                </form>
+            )}
 
             {/* ─────────── Error ─────────── */}
             {error && (
