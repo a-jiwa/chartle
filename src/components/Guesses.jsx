@@ -53,7 +53,8 @@ export default function Guesses({
 
     /* — Valid country? — */
     const isDataCountry = validCountries.includes(trimmed);
-    const isValidCountry = COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed) && isDataCountry;
+    const isTargetCountry = target && trimmed.toLowerCase() === target.toLowerCase();
+    const isValidCountry = (COUNTRIES.some((c) => c.toLowerCase() === lcTrimmed) || isTargetCountry) && isDataCountry;
 
     const suggestionsRef = useRef(null);
     const userHasScrolledRef = useRef(false);
@@ -69,7 +70,13 @@ export default function Guesses({
     }
 
     /* — Ranked suggestions — */
-    const filtered = COUNTRIES.filter(
+    // Include target country in suggestions even if not in standard COUNTRIES list
+    const allCountries = [...COUNTRIES];
+    if (target && !allCountries.includes(target)) {
+        allCountries.push(target);
+    }
+    
+    const filtered = allCountries.filter(
         (c) => c.toLowerCase().includes(lcTrimmed) && lcTrimmed
     )
         .sort((a, b) => {
@@ -167,7 +174,7 @@ export default function Guesses({
             setError("Invalid country. Please select from the list.");
             return;
         }
-        if (!isDataCountry) {
+        if (!isDataCountry && !isTargetCountry) {
             setError("This country has no data available.");
             return;
         }

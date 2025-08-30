@@ -96,13 +96,15 @@ export default function Chart({
 
             const coverageThreshold = 0.6;
             const qualifyingCountries = Array.from(rowsByCountry.entries())
-            .filter(([_, rows]) => {
+            .filter(([country, rows]) => {
+                // Always include the target country regardless of data coverage
+                if (country === target) return true;
+                
                 const uniqueYears = new Set(rows.map(d => d.Year));
                 return uniqueYears.size / yearRange >= coverageThreshold;
             })
             .map(([country]) => country);
 
-            // Filter the dataset
             // Apply population threshold
             const populationThreshold = 300_000;
 
@@ -112,27 +114,34 @@ export default function Chart({
                 .map(([iso, data]) => [data.name || iso, data.population])
             );
 
-            // Filter to keep only countries with sufficient population
+            // Filter to keep only countries with sufficient population, BUT always include target
             const populationFilteredCountries = qualifyingCountries.filter(country => {
-            const pop = popByCountry.get(country);
-            return typeof pop === "number" && pop >= populationThreshold;
+                // Always include the target country regardless of population
+                if (country === target) return true;
+                
+                const pop = popByCountry.get(country);
+                return typeof pop === "number" && pop >= populationThreshold;
             });
 
-            // Filter the dataset
+            // Filter the dataset, ensuring target is always included
             const filteredData = standardized.filter(d =>
-            populationFilteredCountries.includes(d.Country)
+                populationFilteredCountries.includes(d.Country)
             );
-
 
             setData(standardized);         // full data (used to draw guessed lines later)
             setFilteredData(filteredData); // just high-coverage for initial lines
-
 
             const allCountries = Array.from(
                 new Set(standardized.map(d => d.Country))
             );
             
-            setAvailableCountries(populationFilteredCountries);
+            // Ensure target is always available for guessing, even if it doesn't meet filters
+            const availableForGuessing = [...populationFilteredCountries];
+            if (target && !availableForGuessing.includes(target)) {
+                availableForGuessing.push(target);
+            }
+            
+            setAvailableCountries(availableForGuessing);
                     });
     }, [csvUrl]);
 
