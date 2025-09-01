@@ -41,7 +41,13 @@ export default function AuthModal ({ open, onClose }) {
             footer={
                 <button
                     onClick={onClose}
-                    className='ms-auto rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300'
+                    className='ms-auto rounded-lg px-5 py-2.5 text-white font-bold focus:outline-none focus:ring-4'
+                    style={{
+                        backgroundColor: 'var(--first-guess)',
+                        transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--first-guess-dark)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--first-guess)'}
                 >
                     Close
                 </button>

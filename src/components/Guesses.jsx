@@ -263,7 +263,13 @@ export default function Guesses({
                     
                     <button
                         onClick={onShowResult}
-                        className="w-full p-4 text-center text-white font-medium rounded-lg text-sm bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors cursor-pointer shadow-sm"
+                        className="w-full p-4 text-white font-bold rounded-lg text-sm focus:outline-none focus:ring-4"
+                        style={{
+                            backgroundColor: 'var(--first-guess)',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--first-guess-dark)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--first-guess)'}
                     >
                         Show Result
                     </button>

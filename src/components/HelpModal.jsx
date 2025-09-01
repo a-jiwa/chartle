@@ -21,7 +21,13 @@ export default function HelpModal({ open, onClose }) {
                 <div className="flex justify-center">
                     <button
                         onClick={onClose}
-                        className="w-full sm:w-auto rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                        className="w-full sm:w-auto rounded-lg px-4 py-3 text-white font-bold focus:outline-none focus:ring-4"
+                        style={{
+                            backgroundColor: 'var(--first-guess)',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--first-guess-dark)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--first-guess)'}
                     >
                         Got it!
                     </button>
