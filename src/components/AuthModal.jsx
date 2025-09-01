@@ -85,7 +85,13 @@ export default function AuthModal ({ open, onClose }) {
                     {/* sign‑out */}
                     <button
                         onClick={handleLogout}
-                        className='shrink-0 whitespace-nowrap rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 sm:ms-auto'
+                        className='shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-red-300 sm:ms-auto'
+                        style={{
+                            backgroundColor: 'var(--target-red)',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--target-red-dark)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--target-red)'}
                     >
                         Sign out
                     </button>
