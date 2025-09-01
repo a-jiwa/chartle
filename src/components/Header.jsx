@@ -99,7 +99,7 @@ export default function Header({ onOpen, dateLabel, overridden }) {
                                 <li key={id}>
                                     <button
                                         onClick={() => handleClick(id)}
-                                        className="block w-full px-4 py-4 text-left text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 touch-manipulation"
+                                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 touch-manipulation"
                                     >
                                         {id === 'auth' && user
                                             ? 'Account'
