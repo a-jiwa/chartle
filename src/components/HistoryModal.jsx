@@ -125,11 +125,12 @@ export default function HistoryModal ({ open, onClose, currentGameDate }) {
                                     <span
                                         className={`text-sm ${
                                             isCurrentGame
-                                                ? 'font-bold text-blue-600 dark:text-blue-400' // Current game styling
+                                                ? 'font-bold' // Removed text-blue-600
                                                 : played
-                                                ? 'font-bold text-gray-900 dark:text-white'    // Played days
-                                                : 'font-medium text-gray-800 dark:text-gray-300' // Unplayed days
+                                                ? 'font-bold text-gray-900 dark:text-white'
+                                                : 'font-medium text-gray-800 dark:text-gray-300'
                                         }`}
+                                        style={isCurrentGame ? { color: 'var(--second-guess)' } : {}}
                                     >
                                         <span className='inline sm:hidden'>{numericDate}</span>
                                         <span className='hidden sm:inline'>{fullDate}</span>
