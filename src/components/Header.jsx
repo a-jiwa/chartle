@@ -72,8 +72,8 @@ export default function Header({ onOpen, dateLabel, overridden }) {
                 </span>
 
                 {/* Title centered */}
-                <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-semibold tracking-wide text-gray-800 dark:text-white">
-                    📈 chartle
+                <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-l font-semibold tracking-wide text-gray-800 dark:text-white">
+                    📈 CHARTLE
                 </h1>
 
                 {/* Hamburger button (always right) */}
