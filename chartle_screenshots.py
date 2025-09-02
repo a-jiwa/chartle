@@ -5,17 +5,20 @@ import time  # for sleep
 
 # Settings
 start_date = datetime(2025, 7, 2)
-end_date = datetime(2025, 7, 8)  # Adjust as needed
+end_date = datetime(2025, 7, 10)  # Adjust as needed
 output_dir = "screenshots"
-viewport_width = 1920
-viewport_height = 1080
+
+# Settings for mobile look
+viewport_width = 512   # typical mobile width (e.g. iPhone 12/13/14 Pro)
+viewport_height = 932  # typical mobile height
+device_scale_factor = 3  # higher scale for retina screens
 
 # Rectangle area to capture (adjust these numbers)
 clip_area = {
-    "x": 600,
+    "x": 0,
     "y": 60,
-    "width": 720,
-    "height": 740
+    "width": 512,
+    "height": 640
 }
 
 os.makedirs(output_dir, exist_ok=True)
@@ -28,12 +31,13 @@ with sync_playwright() as p:
         date_str = current_date.strftime("%Y-%m-%d")
         filename_2x = os.path.join(output_dir, f"{date_str}@2x.png")
 
-        print(f"Capturing {date_str} -> 2x resolution")
+        print(f"Capturing {date_str} -> mobile view")
 
-        # Open page with 2x resolution
+        # Open page with mobile viewport and user agent
         page = browser.new_page(
             viewport={"width": viewport_width, "height": viewport_height},
-            device_scale_factor=2
+            device_scale_factor=device_scale_factor,
+            user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15A372 Safari/604.1"
         )
         page.goto(f"https://chartle.cc/?d={date_str}", wait_until="networkidle")
 
