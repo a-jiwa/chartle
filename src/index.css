@@ -1,5 +1,202 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap');
+/* Import Tailwind CSS first - this is required for proper functionality */
 @import "tailwindcss";
+
+/* Import Open Sans as backup font */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap');
+
+/* Geograph Font Family */
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebthin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebthinItalic.ttf') format('truetype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographweblight.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographweblightitalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebregular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebregularitalic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebmedium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebmediumitalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebbold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebbolditalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebblack.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geograph';
+  src: url('/fonts/geographwebblackitalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Geograph Edit Font Family - For special editing/display purposes */
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebthin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebthinitalic.ttf') format('truetype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditweblight.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditweblightitalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebregular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebregularitalic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebmedium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebmediumitalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebbold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebbolditalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebblack.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GeographEdit';
+  src: url('/fonts/geographeditwebblackitalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
 
 :root {
   --stroke-outline: #ffffff;
@@ -73,7 +270,7 @@ body,
   overflow: hidden;
   margin: 0;
   padding: 0;
-  font-family: "Open Sans Variable", system-ui, sans-serif;
+  font-family: "Geograph", "Open Sans", system-ui, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   transition:
@@ -96,5 +293,42 @@ body,
 }
 
 svg text {
-  font-family: "Open Sans Variable", system-ui, sans-serif;
+  font-family: "Geograph", "Open Sans", system-ui, sans-serif;
+}
+
+/* Geograph Font Utility Classes */
+@layer utilities {
+  /* Font Family Classes */
+  .font-geograph { font-family: "Geograph", "Open Sans", system-ui, sans-serif; }
+  .font-geograph-edit { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; }
+  
+  /* Font Weight Classes */
+  .font-thin { font-weight: 100; }
+  .font-light { font-weight: 300; }
+  .font-normal { font-weight: 400; }
+  .font-medium { font-weight: 500; }
+  .font-semibold { font-weight: 600; }
+  .font-bold { font-weight: 700; }
+  .font-black { font-weight: 900; }
+  
+  /* Font Style Classes */
+  .italic { font-style: italic; }
+  .not-italic { font-style: normal; }
+  
+  /* Combined Font Classes for Easy Use */
+  .font-geograph-thin { font-family: "Geograph", "Open Sans", system-ui, sans-serif; font-weight: 100; }
+  .font-geograph-light { font-family: "Geograph", "Open Sans", system-ui, sans-serif; font-weight: 300; }
+  .font-geograph-regular { font-family: "Geograph", "Open Sans", system-ui, sans-serif; font-weight: 400; }
+  .font-geograph-medium { font-family: "Geograph", "Open Sans", system-ui, sans-serif; font-weight: 500; }
+  .font-geograph-semibold { font-family: "Geograph", "Open Sans", system-ui, sans-serif; font-weight: 600; }
+  .font-geograph-bold { font-family: "Geograph", "Open Sans", system-ui, sans-serif; font-weight: 700; }
+  .font-geograph-black { font-family: "Geograph", "Open Sans", system-ui, sans-serif; font-weight: 900; }
+  
+  .font-geograph-edit-thin { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; font-weight: 100; }
+  .font-geograph-edit-light { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; font-weight: 300; }
+  .font-geograph-edit-regular { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; font-weight: 400; }
+  .font-geograph-edit-medium { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; font-weight: 500; }
+  .font-geograph-edit-semibold { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; font-weight: 600; }
+  .font-geograph-edit-bold { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; font-weight: 700; }
+  .font-geograph-edit-black { font-family: "GeographEdit", "Open Sans", system-ui, sans-serif; font-weight: 900; }
 }

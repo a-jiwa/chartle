@@ -325,7 +325,7 @@ export default function Chart({
                     .attr('font-size', 16)
                     .attr('font-weight', 500)
                     .attr('fill', getComputedStyle(document.documentElement).getPropertyValue('--axis-text-color').trim())
-                    .attr('font-family', 'Open Sans, sans-serif')
+                    .attr('font-family', 'Geograph, Open Sans, sans-serif')
                     .attr('dy', '1.5em')
                     .style('opacity', 0)
                     .attr('pointer-events', 'none')
@@ -346,7 +346,7 @@ export default function Chart({
                     .attr('font-size', 14)
                     .attr('font-weight', 600)
                     .attr('fill', '#c43333')
-                    .attr('font-family', 'Open Sans, sans-serif')
+                    .attr('font-family', 'Geograph, Open Sans, sans-serif')
                     .style('opacity', 0)
                     .attr('pointer-events', 'none')
 
@@ -411,7 +411,7 @@ export default function Chart({
                 .append('text')
                 .attr('font-size', 14)
                 .attr('font-weight', 600)
-                .attr('font-family', 'OpenSans,sans-serif')
+                .attr('font-family', 'Geograph, Open Sans, sans-serif')
 
             guessPills.exit().remove()
 
@@ -609,7 +609,7 @@ export default function Chart({
             .attr("font-weight", 500)
             .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--axis-text-color').trim())
             .attr("dy", "0.95em") // increased vertical padding for x-axis labels
-            .style("font-family", "Open Sans, sans-serif");
+            .style("font-family", "Geograph, Open Sans, sans-serif");
 
         const formatNumber = (d) => {
             if (typeof d !== "number" || isNaN(d)) return "";
@@ -643,7 +643,7 @@ export default function Chart({
                 .attr("font-size", 16)
                 .attr("font-weight", 500)
                 .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--axis-text-color').trim())
-                .style("font-family", "Open Sans, sans-serif");
+                .style("font-family", "Geograph, Open Sans, sans-serif");
             sel.selectAll(".domain").attr("stroke-opacity", 0);
             sel.selectAll(".tick line")
                 .attr("stroke", getComputedStyle(document.documentElement).getPropertyValue('--axis-lines-color').trim())
@@ -800,7 +800,7 @@ export default function Chart({
                     .attr("font-size", 16)
                     .attr("font-weight", "bold")
                     .attr("text-anchor", "start")
-                    .attr("font-family", "Open Sans, sans-serif")
+                    .attr("font-family", "Geograph, Open Sans, sans-serif")
                     .attr("fill", d.country === target ? getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim() : d.stroke)
                     .attr("stroke", outlineColor)        
                     .attr("stroke-width", 2.5)          
@@ -897,7 +897,7 @@ if (last) {
             .attr("font-size", 16)
             .attr("font-weight", "bold")
             .attr("text-anchor", "start")
-            .attr("font-family", "Open Sans, sans-serif")
+            .attr("font-family", "Geograph, Open Sans, sans-serif")
             .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim())
             .attr("stroke", outlineColor)
             .attr("stroke-width", 2.5)
@@ -913,7 +913,7 @@ if (last) {
             .attr("font-size", 16)
             .attr("font-weight", "bold")
             .attr("text-anchor", "start")
-            .attr("font-family", "Open Sans, sans-serif")
+            .attr("font-family", "Geograph, Open Sans, sans-serif")
             .attr("fill", getComputedStyle(document.documentElement).getPropertyValue('--target-red').trim())
             .attr("stroke", outlineColor)
             .attr("stroke-width", 2.5)

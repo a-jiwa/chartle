@@ -209,7 +209,7 @@ export default function WinModal({
             .attr("font-weight", 400)
             .attr("fill", axisColor)
             .attr("dy", "0.95em")
-            .attr("font-family", "Open Sans, sans-serif"); // <-- use attr, not style
+            .attr("font-family", "Geograph, Open Sans, sans-serif"); // <-- use attr, not style
 
         g.append("g")
             .attr("class", "y-axis")
@@ -223,7 +223,7 @@ export default function WinModal({
             .attr("font-size", axisFontSize)
             .attr("font-weight", 400)
             .attr("fill", axisColor)
-            .attr("font-family", "Open Sans, sans-serif"); // <-- use attr, not style
+            .attr("font-family", "Geograph, Open Sans, sans-serif"); // <-- use attr, not style
 
         // Remove only y-axis domain and tick lines
         g.select(".y-axis .domain").attr("stroke", "none");
@@ -288,7 +288,7 @@ export default function WinModal({
                     .attr("x", labelX)
                     .attr("y", labelY)
                     .attr("font-size", 32)
-                    .attr("font-family", "Open Sans, sans-serif")
+                    .attr("font-family", "Geograph, Open Sans, sans-serif")
                     .attr("font-weight", "bold")
                     .attr("fill", isTarget ? targetColor : guessColours[i % guessColours.length])
                     .attr("stroke", styles.getPropertyValue('--stroke-outline').trim()) // stroke matches background
@@ -322,7 +322,7 @@ export default function WinModal({
             .attr("y", exportHeight - 20)
             .attr("text-anchor", "start")
             .attr("font-size", 30)
-            .attr("font-family", "Open Sans, sans-serif")
+            .attr("font-family", "Geograph, Open Sans, sans-serif")
             .attr("font-weight", "bold")
             .attr("fill", styles.getPropertyValue('--text-color').trim())
             .text("📈 chartle.cc");
@@ -333,7 +333,7 @@ export default function WinModal({
             .attr("y", exportHeight - 20)
             .attr("text-anchor", "end")
             .attr("font-size", 30)
-            .attr("font-family", "Open Sans, sans-serif")
+            .attr("font-family", "Geograph, Open Sans, sans-serif")
             .attr("font-weight", "bold")
             .attr("fill", styles.getPropertyValue('--text-color').trim())
             .text(gameDate || "");
@@ -402,7 +402,7 @@ export default function WinModal({
             .attr('height', height + margin.top  + margin.bottom)
             .append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`)
-            .style('font-family', 'Open Sans');
+            .style('font-family', 'Geograph, Open Sans');
 
         const x = d3.scaleLinear()
             .domain([0, d3.max(data, (d) => d.count) || 1])
@@ -431,14 +431,14 @@ export default function WinModal({
             .attr('y', (d) => y(d.tries) + y.bandwidth() / 2 + 4)
             .attr('text-anchor', 'end')
             .attr('fill', '#ffffff')
-            .style('font-family', "'Open Sans', sans-serif")
+            .style('font-family', "'Geograph, Open Sans', sans-serif")
             .style('font-size', '14px')
             .text((d) => d.count);
 
         chart.append('g')
             .call(d3.axisLeft(y).tickSize(0))
             .selectAll('text')
-            .style('font-family', "'Open Sans', sans-serif")
+            .style('font-family', "'Geograph, Open Sans', sans-serif")
             .style('font-size', '14px')
             .attr('fill', textColor)
             .attr('text-anchor', 'start')

@@ -7,7 +7,9 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ["Open Sans Variable", "system-ui", "sans-serif"]
+                sans: ["Geograph", "Open Sans", "system-ui", "sans-serif"],
+                geograph: ["Geograph", "Open Sans", "system-ui", "sans-serif"],
+                "geograph-edit": ["GeographEdit", "Open Sans", "system-ui", "sans-serif"]
             }
         },
     },
