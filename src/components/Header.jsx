@@ -2,10 +2,25 @@ import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 
+// Detect dark mode using a media query
+function useDarkMode() {
+    const [isDark, setIsDark] = useState(
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+    useEffect(() => {
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        const handler = (e) => setIsDark(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+    return isDark;
+}
+
 export default function Header({ onOpen, dateLabel, overridden }) {
     const { user } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
+    const isDark = useDarkMode();
 
     const accountLabel = user
         ? user.photoURL
@@ -74,7 +89,7 @@ export default function Header({ onOpen, dateLabel, overridden }) {
                 {/* Title centered */}
                 <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                     <img
-                        src="/Chartle_web_header.jpg"
+                        src={isDark ? "/Chartle_web_header_darkmode.jpg" : "/Chartle_web_header.jpg"}
                         alt="Chartle logo"
                         className="h-9 sm:h-10 w-auto"
                         style={{ display: 'inline-block' }}
